@@ -77,7 +77,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
                 href="https://www.youtube.com/watch?v=VIDEO_ID"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#c4302b] text-white font-medium hover:bg-[#a82621] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-white font-medium hover:opacity-90 transition-opacity"
               >
                 <svg
                   className="w-5 h-5"
