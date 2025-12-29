@@ -36,6 +36,8 @@ irm https://plannotator.ai/install.ps1 | iex
 /plugin install plannotator@plannotator
 ```
 
+**Important:** Restart Claude Code after installing the plugin for the hooks to take effect.
+
 See [apps/hook/README.md](apps/hook/README.md) for detailed installation instructions including a `manual hook` approach.
 
 ## How It Works

@@ -36,6 +36,8 @@ In Claude Code:
 /plugin install plannotator@plannotator
 ```
 
+**Important:** Restart Claude Code after installing the plugin for the hooks to take effect.
+
 ## Manual Installation (Hooks)
 
 If you prefer not to use the plugin system, add this to your `~/.claude/settings.json`:
