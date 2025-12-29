@@ -12,6 +12,7 @@ import { TaterSpritePullup } from '@plannotator/ui/components/TaterSpritePullup'
 import { Settings } from '@plannotator/ui/components/Settings';
 import { useSharing } from '@plannotator/ui/hooks/useSharing';
 import { storage } from '@plannotator/ui/utils/storage';
+import { UpdateBanner } from '@plannotator/ui/components/UpdateBanner';
 
 const PLAN_CONTENT = `# Implementation Plan: Real-time Collaboration
 
@@ -542,6 +543,9 @@ const App: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Update notification */}
+        <UpdateBanner />
       </div>
     </ThemeProvider>
   );
