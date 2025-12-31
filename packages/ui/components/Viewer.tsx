@@ -668,7 +668,11 @@ const parseTableContent = (content: string): { headers: string[]; rows: string[]
   return { headers, rows };
 };
 
-const BlockRenderer: React.FC<{ block: Block }> = ({ block }) => {
+const BlockRenderer: React.FC<{
+  block: Block;
+  blocks: Block[];
+  onBlockChange?: (blocks: Block[]) => void;
+}> = ({ block, blocks, onBlockChange }) => {
   switch (block.type) {    case 'frontmatter':
       return (
         <div

@@ -9,7 +9,7 @@ import { ModeToggle } from '@plannotator/ui/components/ModeToggle';
 import { ModeSwitcher } from '@plannotator/ui/components/ModeSwitcher';
 import { Settings } from '@plannotator/ui/components/Settings';
 import { useSharing } from '@plannotator/ui/hooks/useSharing';
-import { storage } from '@plannotator/ui/utils/storage';
+import { storage, getVaultPath, getNotePath, setVaultPath, setNotePath } from '@plannotator/ui/utils/storage';
 import { UpdateBanner } from '@plannotator/ui/components/UpdateBanner';
 
 const PLAN_CONTENT = `# Implementation Plan: Real-time Collaboration
@@ -323,10 +323,72 @@ const App: React.FC = () => {
     if (selectedAnnotationId === id) setSelectedAnnotationId(null);
   };
 
+  const handleVaultPathChange = (vaultPath: string) => {
+    const notePath = getNotePath();
+    if (vaultPath && notePath) {
+      setSavePath(`${vaultPath}/${notePath}`);
+    } else {
+      setSavePath('');
+    }
+  };
+
+  const handleNotePathChange = (notePath: string) => {
+    const vaultPath = getVaultPath();
+    if (vaultPath && notePath) {
+      setSavePath(`${vaultPath}/${notePath}`);
+    } else {
+      setSavePath('');
+    }
+  };
+
   const handleIdentityChange = (oldIdentity: string, newIdentity: string) => {
     setAnnotations(prev => prev.map(ann =>
       ann.author === oldIdentity ? { ...ann, author: newIdentity } : ann
     ));
+  };
+
+
+  const reconstructMarkdownFromBlocks = (blocks: Block[]): string => {
+    return blocks.map(block => {
+      if (block.type === 'frontmatter') {
+        return `---\n${block.content}\n---`;
+      }
+      return block.content;
+    }).join('\n\n');
+  };
+
+  const handleSaveToVault = async () => {
+    if (!savePath.trim()) {
+      setSaveError('Configure o caminho do arquivo nas configurações');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const content = reconstructMarkdownFromBlocks(blocks);
+      const response = await fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          path: savePath
+        })
+      });
+
+      const result = await response.json();
+
+      if (!result.ok) {
+        throw new Error(result.error || 'Erro ao salvar');
+      }
+
+      console.log('Nota salva com sucesso:', savePath);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Erro desconhecido');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const diffOutput = useMemo(() => exportDiff(blocks, annotations), [blocks, annotations]);
@@ -390,7 +452,11 @@ const App: React.FC = () => {
             )}
 
             <ModeToggle />
-            <Settings onIdentityChange={handleIdentityChange} />
+            <Settings
+              onIdentityChange={handleIdentityChange}
+              onVaultPathChange={handleVaultPathChange}
+              onNotePathChange={handleNotePathChange}
+            />
 
             <button
               onClick={() => setIsPanelOpen(!isPanelOpen)}
@@ -437,7 +503,7 @@ const App: React.FC = () => {
                 onSelectAnnotation={setSelectedAnnotationId}
                 selectedAnnotationId={selectedAnnotationId}
                 mode={editorMode}
-               
+                onBlockChange={setBlocks}
               />
             </div>
           </main>
