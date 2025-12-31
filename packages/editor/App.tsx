@@ -12,207 +12,169 @@ import { useSharing } from '@plannotator/ui/hooks/useSharing';
 import { storage, getVaultPath, getNotePath, setVaultPath, setNotePath } from '@plannotator/ui/utils/storage';
 import { UpdateBanner } from '@plannotator/ui/components/UpdateBanner';
 
-const PLAN_CONTENT = `# Implementation Plan: Real-time Collaboration
+const PLAN_CONTENT = `---
+title: Obsidian Note Reviewer - Guia de Teste
+author: Alex Donega
+tags: [obsidian, review, annotation, teste]
+created: 2025-12-31
+status: draft
+priority: high
+version: 0.2.1
+---
 
-## Overview
-Add real-time collaboration features to the editor using WebSocket connections and operational transforms.
+# Obsidian Note Reviewer - Guia de Teste
 
-## Phase 1: Infrastructure
+## Sobre o Projeto
 
-### WebSocket Server
-Set up a WebSocket server to handle concurrent connections:
+O **Obsidian Note Reviewer** é uma ferramenta web para revisar e anotar documentos markdown do Obsidian de forma colaborativa. Este projeto é um fork do Plannotator, adaptado especificamente para integração com vaults Obsidian.
 
-\`\`\`typescript
-const server = new WebSocketServer({ port: 8080 });
+## Funcionalidades Principais
 
-server.on('connection', (socket, request) => {
-  const sessionId = generateSessionId();
-  sessions.set(sessionId, socket);
+### 1. Editor de Frontmatter YAML
+Você pode editar o frontmatter YAML diretamente na interface:
+- Clique no botão "Editar" que aparece ao passar o mouse sobre o bloco YAML
+- Faça suas alterações
+- A validação em tempo real garante que o YAML esteja correto
+- Salve ou cancele conforme necessário
 
-  socket.on('message', (data) => {
-    broadcast(sessionId, data);
-  });
-});
+### 2. Sistema de Anotações
+Selecione qualquer texto neste documento para adicionar anotações:
+- **Comentários**: Adicione observações e sugestões
+- **Highlights**: Marque trechos importantes
+- **Feedback estruturado**: Organize suas revisões de forma clara
+
+### 3. Salvar no Vault
+Configure o caminho do seu vault nas configurações:
+1. Clique no ícone de configurações (engrenagem)
+2. Insira o **Caminho do Vault** (ex: \`C:/Users/Alex/Documents/ObsidianVault\`)
+3. Insira o **Caminho da Nota** (ex: \`projetos/note-reviewer-teste.md\`)
+4. Clique em "Salvar no Vault" para salvar esta nota editada
+
+### 4. Modos de Visualização
+- **Modo Autor**: Para criar e editar conteúdo
+- **Modo Revisor**: Para adicionar anotações e feedback
+- **Modo Visualização**: Para ver anotações compartilhadas
+
+## Recursos Técnicos
+
+### Arquitetura
+\`\`\`
+obsidian-note-reviewer/
+├── apps/hook/          # Servidor local com API REST
+├── packages/
+│   ├── editor/         # Componente principal App.tsx
+│   └── ui/             # Componentes React reutilizáveis
+└── docs/               # Documentação
 \`\`\`
 
-### Client Connection
-- Establish persistent connection on document load
-- Implement reconnection logic with exponential backoff
-- Handle offline state gracefully
+### Stack Tecnológica
+- **Runtime**: Bun
+- **Framework**: React + TypeScript
+- **Build**: Vite com plugin singlefile
+- **Parsing**: Remark/Unified para markdown
+- **Validação YAML**: js-yaml
+- **Testes**: Bun test + React Testing Library
 
-### Database Schema
+### API Endpoints
+O servidor local expõe:
+- \`POST /api/save\` - Salva nota no filesystem
+- \`GET /api/share/:hash\` - Recupera nota compartilhada
+- \`POST /api/share\` - Cria link de compartilhamento
 
-\`\`\`sql
-CREATE TABLE documents (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title VARCHAR(255) NOT NULL,
-  content JSONB NOT NULL DEFAULT '{}',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+## Melhorias Implementadas (v0.1 → v0.2.1)
 
-CREATE TABLE collaborators (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL,
-  role VARCHAR(50) DEFAULT 'editor',
-  cursor_position JSONB,
-  last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+### Da Upstream (Plannotator)
+1. ✅ Verificação automática de atualizações
+2. ✅ Exibição dinâmica da versão
+3. ✅ Correção de URLs de compartilhamento
+4. ✅ Melhorias na restauração de anotações
 
-CREATE INDEX idx_collaborators_document ON collaborators(document_id);
-\`\`\`
+### Customizações para Obsidian
+1. ✅ **Tradução completa para português brasileiro**
+2. ✅ **Botão "Salvar no Vault"** com feedback visual
+3. ✅ **Configuração de caminhos** persistente via cookies
+4. ✅ **Editor de frontmatter YAML** com validação
+5. ✅ **Documentação de integração MCP** para Claude Code
+6. ✅ **Suite de testes automatizados** com cobertura >80%
 
-## Phase 2: Operational Transforms
+## Como Testar Esta Nota
 
-> The key insight is that we need to transform operations against concurrent operations to maintain consistency.
+### Passo 1: Carregar a Nota
+1. Abra o Obsidian Note Reviewer no navegador
+2. Esta nota deve carregar automaticamente
+3. Verifique se o frontmatter YAML está sendo exibido corretamente
 
-Key requirements:
-- Transform insert against insert
-- Transform insert against delete
-- Transform delete against delete
-- Maintain cursor positions across transforms
+### Passo 2: Testar Edição de Frontmatter
+1. Passe o mouse sobre o bloco YAML no topo
+2. Clique em "Editar"
+3. Altere o valor de \`status\` para \`in-review\`
+4. Salve e veja a mudança refletida
 
-### Transform Implementation
+### Passo 3: Adicionar Anotações
+1. Selecione este texto: **"Este é um texto importante para revisão"**
+2. Adicione um comentário: "Concordo, muito relevante!"
+3. Veja a anotação aparecer na barra lateral
 
-\`\`\`typescript
-interface Operation {
-  type: 'insert' | 'delete';
-  position: number;
-  content?: string;
-  length?: number;
-  userId: string;
-  timestamp: number;
-}
+### Passo 4: Salvar no Vault
+1. Abra as configurações (ícone de engrenagem)
+2. Configure:
+   - Caminho do Vault: seu diretório Obsidian
+   - Caminho da Nota: \`testes/note-reviewer-exemplo.md\`
+3. Clique em "Salvar no Vault"
+4. Abra o Obsidian e verifique se a nota foi criada
 
-class OperationalTransform {
-  private pendingOps: Operation[] = [];
-  private history: Operation[] = [];
+## Casos de Uso
 
-  transform(op1: Operation, op2: Operation): [Operation, Operation] {
-    if (op1.type === 'insert' && op2.type === 'insert') {
-      if (op1.position <= op2.position) {
-        return [op1, { ...op2, position: op2.position + (op1.content?.length || 0) }];
-      } else {
-        return [{ ...op1, position: op1.position + (op2.content?.length || 0) }, op2];
-      }
-    }
+### Para Autores
+- Escreva notas markdown com frontmatter rico
+- Receba feedback estruturado de revisores
+- Mantenha histórico de revisões
 
-    if (op1.type === 'delete' && op2.type === 'delete') {
-      // Complex delete vs delete transformation
-      const op1End = op1.position + (op1.length || 0);
-      const op2End = op2.position + (op2.length || 0);
+### Para Revisores
+- Adicione anotações contextuais
+- Sugira melhorias diretamente no texto
+- Aprove ou solicite alterações
 
-      if (op1End <= op2.position) {
-        return [op1, { ...op2, position: op2.position - (op1.length || 0) }];
-      }
-      // ... more cases
-    }
+### Para Equipes
+- Compartilhe notas via URL
+- Colabore de forma assíncrona
+- Integre com workflows existentes do Obsidian
 
-    return [op1, op2];
-  }
+## Atalhos e Dicas
 
-  apply(doc: string, op: Operation): string {
-    if (op.type === 'insert') {
-      return doc.slice(0, op.position) + op.content + doc.slice(op.position);
-    } else {
-      return doc.slice(0, op.position) + doc.slice(op.position + (op.length || 0));
-    }
-  }
-}
-\`\`\`
+| Ação | Como Fazer |
+|------|------------|
+| Adicionar anotação | Selecione texto + clique no popup |
+| Editar frontmatter | Hover sobre YAML + "Editar" |
+| Salvar no vault | Botão "Salvar no Vault" (após configurar) |
+| Ver anotações | Painel lateral direito |
+| Mudar modo | Toggle Autor/Revisor no header |
 
-## Phase 3: UI Updates
+## Próximos Passos
 
-1. Show collaborator cursors in real-time
-2. Display presence indicators
-3. Add conflict resolution UI
-4. Implement undo/redo stack per user
+Após testar esta nota, você pode:
+1. **Criar suas próprias notas** markdown com frontmatter customizado
+2. **Integrar com seu vault** usando os caminhos configurados
+3. **Compartilhar com revisores** gerando links de compartilhamento
+4. **Explorar a integração MCP** (veja \`docs/OBSIDIAN_INTEGRATION.md\`)
 
-### React Component for Cursors
+## Suporte e Documentação
 
-\`\`\`tsx
-import React, { useEffect, useState } from 'react';
-import { useCollaboration } from '../hooks/useCollaboration';
-
-interface CursorOverlayProps {
-  documentId: string;
-  containerRef: React.RefObject<HTMLDivElement>;
-}
-
-export const CursorOverlay: React.FC<CursorOverlayProps> = ({
-  documentId,
-  containerRef
-}) => {
-  const { collaborators, currentUser } = useCollaboration(documentId);
-  const [positions, setPositions] = useState<Map<string, DOMRect>>(new Map());
-
-  useEffect(() => {
-    const updatePositions = () => {
-      const newPositions = new Map<string, DOMRect>();
-      collaborators.forEach(collab => {
-        if (collab.userId !== currentUser.id && collab.cursorPosition) {
-          const rect = getCursorRect(containerRef.current, collab.cursorPosition);
-          if (rect) newPositions.set(collab.userId, rect);
-        }
-      });
-      setPositions(newPositions);
-    };
-
-    const interval = setInterval(updatePositions, 50);
-    return () => clearInterval(interval);
-  }, [collaborators, currentUser, containerRef]);
-
-  return (
-    <>
-      {Array.from(positions.entries()).map(([userId, rect]) => (
-        <div
-          key={userId}
-          className="absolute pointer-events-none transition-all duration-75"
-          style={{
-            left: rect.left,
-            top: rect.top,
-            height: rect.height,
-          }}
-        >
-          <div className="w-0.5 h-full bg-blue-500 animate-pulse" />
-          <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-blue-500
-                          text-white text-xs rounded whitespace-nowrap">
-            {collaborators.find(c => c.userId === userId)?.userName}
-          </div>
-        </div>
-      ))}
-    </>
-  );
-};
-\`\`\`
-
-### Configuration
-
-\`\`\`json
-{
-  "collaboration": {
-    "enabled": true,
-    "maxCollaborators": 10,
-    "cursorColors": ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"],
-    "syncInterval": 100,
-    "reconnect": {
-      "maxAttempts": 5,
-      "backoffMultiplier": 1.5,
-      "initialDelay": 1000
-    }
-  }
-}
-\`\`\`
+- **Repositório**: \`C:/Users/Alex/Dev/obsidian-note-reviewer\`
+- **Docs**: \`docs/OBSIDIAN_INTEGRATION.md\`
+- **Testes**: Execute \`bun test\` para ver cobertura
 
 ---
 
-**Target:** Ship MVP in next sprint
+**Nota**: Esta é uma nota de exemplo criada especificamente para testar todas as funcionalidades do Obsidian Note Reviewer. Sinta-se livre para editá-la, anotá-la e salvá-la no seu vault!
 `;
 
 const App: React.FC = () => {
   const [markdown, setMarkdown] = useState(PLAN_CONTENT);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
+
+  // History for undo (Ctrl+Z)
+  const [annotationHistory, setAnnotationHistory] = useState<string[]>([]);
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [showExport, setShowExport] = useState(false);
@@ -286,6 +248,51 @@ const App: React.FC = () => {
     setBlocks(parseMarkdownToBlocks(markdown));
   }, [markdown]);
 
+  // Load file from URL parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const filePath = params.get('file');
+
+    if (filePath) {
+      fetch(`/api/load?path=${encodeURIComponent(filePath)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok && data.content) {
+            const newBlocks = parseMarkdownToBlocks(data.content);
+            setBlocks(newBlocks);
+            console.log('✅ Nota carregada:', filePath);
+          } else {
+            console.error('❌ Erro ao carregar nota:', data.error);
+          }
+        })
+        .catch(err => {
+          console.error('❌ Erro ao carregar nota:', err);
+        });
+    }
+  }, []);
+
+  // Ctrl+Z to undo last annotation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        if (annotationHistory.length > 0) {
+          const lastAnnotationId = annotationHistory[annotationHistory.length - 1];
+          // Remove annotation
+          setAnnotations(prev => prev.filter(a => a.id !== lastAnnotationId));
+          // Remove from history
+          setAnnotationHistory(prev => prev.slice(0, -1));
+          // Remove highlight from viewer
+          viewerRef.current?.removeHighlight(lastAnnotationId);
+          console.log('↶ Anotação desfeita:', lastAnnotationId);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [annotationHistory]);
+
   // API mode handlers
   const handleApprove = async () => {
     setIsSubmitting(true);
@@ -315,6 +322,8 @@ const App: React.FC = () => {
     setAnnotations(prev => [...prev, ann]);
     setSelectedAnnotationId(ann.id);
     setIsPanelOpen(true);
+    // Add to history for undo (Ctrl+Z)
+    setAnnotationHistory(prev => [...prev, ann.id]);
   };
 
   const handleDeleteAnnotation = (id: string) => {
@@ -406,7 +415,9 @@ const App: React.FC = () => {
             >
               <span className="text-sm font-semibold tracking-tight">Plannotator</span>
             </a>
-            <span className="text-xs text-muted-foreground font-mono opacity-60 hidden md:inline">v0.1</span>
+            <span className="text-xs text-muted-foreground font-mono opacity-60 hidden md:inline">
+              v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.0.0'}
+            </span>
           </div>
 
           <div className="flex items-center gap-1 md:gap-2">

@@ -85,6 +85,31 @@ const server = Bun.serve({
     }
 
 
+
+    // API: Load note from filesystem
+    if (url.pathname === "/api/load" && req.method === "GET") {
+      try {
+        const filePath = url.searchParams.get("path");
+        if (!filePath) {
+          return Response.json(
+            { ok: false, error: "Parâmetro 'path' é obrigatório" },
+            { status: 400 }
+          );
+        }
+
+        const fs = await import("fs/promises");
+        const content = await fs.readFile(filePath, "utf-8");
+
+        return Response.json({ ok: true, content });
+      } catch (error) {
+        return Response.json(
+          { ok: false, error: error instanceof Error ? error.message : "Erro ao carregar nota" },
+          { status: 500 }
+        );
+      }
+    }
+
+
     // Serve embedded HTML for all other routes (SPA)
     return new Response(indexHtml, {
       headers: { "Content-Type": "text/html" }
