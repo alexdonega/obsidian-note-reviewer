@@ -63,12 +63,12 @@ export const DecisionBar: React.FC<DecisionBarProps> = ({
           {/* Message */}
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground">
-              {submitted === 'approved' ? 'Nota Aprovada' : 'Alteracoes Solicitadas'}
+              {submitted === 'approved' ? 'Nota Aprovada' : 'Alterações Solicitadas'}
             </h2>
             <p className="text-muted-foreground">
               {submitted === 'approved'
-                ? 'A nota sera salva no Obsidian.'
-                : 'Claude ira revisar a nota com base nas suas anotacoes.'}
+                ? 'A nota será salva no Obsidian.'
+                : 'Claude irá revisar a nota com base nas suas anotações.'}
             </p>
           </div>
 
@@ -89,7 +89,7 @@ export const DecisionBar: React.FC<DecisionBarProps> = ({
         {/* Status info */}
         <div className="flex-1 text-sm text-muted-foreground">
           {annotationCount > 0 ? (
-            <span>{annotationCount} {annotationCount !== 1 ? 'anotacoes' : 'anotacao'} para enviar como feedback</span>
+            <span>{annotationCount} {annotationCount !== 1 ? 'anotações' : 'anotação'} para enviar como feedback</span>
           ) : (
             <span>Review the plan, then approve or request changes</span>
           )}
@@ -108,7 +108,7 @@ export const DecisionBar: React.FC<DecisionBarProps> = ({
               }
             `}
           >
-            {isSubmitting ? 'Enviando...' : 'Solicitar Alteracoes'}
+            {isSubmitting ? 'Enviando...' : 'Solicitar Alterações'}
           </button>
 
           <button

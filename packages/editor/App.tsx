@@ -364,12 +364,12 @@ const App: React.FC = () => {
                       ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
                       : 'bg-accent/15 text-accent hover:bg-accent/25 border border-accent/30'
                   }`}
-                  title="Solicitar Alteracoes"
+                  title="Solicitar Alterações"
                 >
                   <svg className="w-4 h-4 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  <span className="hidden md:inline">{isSubmitting ? 'Enviando...' : 'Solicitar Alteracoes'}</span>
+                  <span className="hidden md:inline">{isSubmitting ? 'Enviando...' : 'Solicitar Alterações'}</span>
                 </button>
 
                 <button
@@ -475,10 +475,10 @@ const App: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                   </svg>
                 </div>
-                <h3 className="font-semibold">Adicione Anotacoes</h3>
+                <h3 className="font-semibold">Adicione Anotações</h3>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Para solicitar alteracoes, selecione texto na nota e adicione anotacoes.
+                Para solicitar alterações, selecione texto na nota e adicione anotações.
               </p>
               <div className="flex justify-end">
                 <button
@@ -514,12 +514,12 @@ const App: React.FC = () => {
 
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-foreground">
-                  {submitted === 'approved' ? 'Nota Aprovada' : 'Alteracoes Solicitadas'}
+                  {submitted === 'approved' ? 'Nota Aprovada' : 'Alterações Solicitadas'}
                 </h2>
                 <p className="text-muted-foreground">
                   {submitted === 'approved'
-                    ? 'A nota sera salva no Obsidian.'
-                    : 'Claude ira revisar a nota com base nas suas anotacoes.'}
+                    ? 'A nota será salva no Obsidian.'
+                    : 'Claude irá revisar a nota com base nas suas anotações.'}
                 </p>
               </div>
 

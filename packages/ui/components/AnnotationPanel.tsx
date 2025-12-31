@@ -43,7 +43,7 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
       <div className="p-3 border-b border-border/50">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Anotacoes
+            Anotações
           </h2>
           <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
             {annotations.length}
@@ -61,7 +61,7 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
               </svg>
             </div>
             <p className="text-xs text-muted-foreground">
-              Selecione texto para adicionar anotacoes
+              Selecione texto para adicionar anotações
             </p>
           </div>
         ) : (

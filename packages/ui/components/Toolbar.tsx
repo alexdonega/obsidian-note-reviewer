@@ -124,7 +124,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ highlightElement, onAnnotate, 
             ref={inputRef}
             type="text"
             className="bg-transparent border-none outline-none text-sm w-80 placeholder:text-muted-foreground"
-            placeholder="Adicione um comentario..."
+            placeholder="Adicione um comentário..."
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             onKeyDown={e => e.key === 'Escape' && setStep('menu')}
