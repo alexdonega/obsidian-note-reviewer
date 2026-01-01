@@ -76,7 +76,7 @@ export const AnnotationSidebar: React.FC<SidebarProps> = ({
 
               {(ann.text && ann.type !== AnnotationType.DELETION) && (
                 <div className="text-sm text-foreground font-medium pl-3 border-l-2 border-primary">
-                  {ann.type === AnnotationType.REPLACEMENT ? 'â†’ ' : ''}{ann.text}
+                  {ann.type === AnnotationType.REPLACEMENT ? '→ ' : ''}{ann.text}
                 </div>
               )}
             </div>
