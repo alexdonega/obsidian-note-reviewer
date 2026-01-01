@@ -150,6 +150,12 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
   // Check if any annotations are visible after filtering
   const hasVisibleAnnotations = filteredGlobalComments.length > 0 || filteredTextAnnotations.length > 0;
 
+  // Determine if filtering is active (not all types are visible)
+  const isFilterActive = visibleTypes.size < ALL_ANNOTATION_TYPES.size;
+
+  // Calculate total visible count for header badge
+  const totalVisibleCount = filteredGlobalComments.length + filteredTextAnnotations.length;
+
   const handleQuickShare = async () => {
     if (!shareUrl) return;
     try {
@@ -171,8 +177,8 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Anotações
           </h2>
-          <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-            {annotations.length}
+          <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isFilterActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+            {isFilterActive ? `${totalVisibleCount}/${annotations.length}` : annotations.length}
           </span>
         </div>
 
@@ -225,8 +231,8 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
                   <h3 className="text-[10px] font-semibold uppercase tracking-wider text-blue-500">
                     Comentários Globais
                   </h3>
-                  <span className="text-[10px] font-mono bg-blue-500/20 px-1.5 py-0.5 rounded text-blue-600">
-                    {filteredGlobalComments.length}
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isFilterActive ? 'bg-blue-500/30 text-blue-700' : 'bg-blue-500/20 text-blue-600'}`}>
+                    {isFilterActive ? `${filteredGlobalComments.length}/${globalComments.length}` : globalComments.length}
                   </span>
                 </div>
                 {filteredGlobalComments.map(ann => (
@@ -252,8 +258,8 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
                     <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                       Anotações no Texto
                     </h3>
-                    <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-                      {filteredTextAnnotations.length}
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isFilterActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                      {isFilterActive ? `${filteredTextAnnotations.length}/${textAnnotations.length}` : textAnnotations.length}
                     </span>
                   </div>
                 )}
