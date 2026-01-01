@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { storage } from '../utils/storage';
+import { getIdentity } from '../utils/identity';
 
 interface GlobalCommentInputProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
   // Load author from storage on mount
   useEffect(() => {
     if (isOpen) {
-      const identity = storage.get('identity');
+      const identity = getIdentity();
       if (identity) {
         setAuthor(identity);
       }

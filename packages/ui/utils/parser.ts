@@ -223,7 +223,11 @@ export const exportDiff = (blocks: Block[], annotations: any[]): string => {
     return 'Nota aprovada sem alterações';
   }
 
-  const sortedAnns = [...annotations].sort((a, b) => {
+  // Separate global comments from text annotations
+  const globalComments = annotations.filter(ann => ann.isGlobal);
+  const textAnnotations = annotations.filter(ann => !ann.isGlobal);
+
+  const sortedAnns = [...textAnnotations].sort((a, b) => {
     const blockA = blocks.findIndex(blk => blk.id === a.blockId);
     const blockB = blocks.findIndex(blk => blk.id === b.blockId);
     if (blockA !== blockB) return blockA - blockB;
@@ -232,6 +236,21 @@ export const exportDiff = (blocks: Block[], annotations: any[]): string => {
 
   let output = `SOLICITAÇÃO DE ALTERAÇÕES:\n\n`;
 
+  // Global Comments Section
+  if (globalComments.length > 0) {
+    output += `🌐 COMENTÁRIOS GLOBAIS:\n\n`;
+    globalComments.forEach((ann) => {
+      const author = ann.author ? `[${ann.author}]` : '[Anônimo]';
+      output += `${author}: ${ann.text}\n\n`;
+    });
+
+    // Add separator if there are also text annotations
+    if (sortedAnns.length > 0) {
+      output += `---\n\n📝 ANOTAÇÕES NO TEXTO:\n\n`;
+    }
+  }
+
+  // Text Annotations Section
   sortedAnns.forEach((ann) => {
     const blockIndex = blocks.findIndex(b => b.id === ann.blockId);
     const lineNumber = blockIndex >= 0 ? `Linha ${blockIndex + 1}` : "Localização";
@@ -255,6 +274,11 @@ export const exportDiff = (blocks: Block[], annotations: any[]): string => {
       case 'COMMENT':
         output += `💬 COMENTÁRIO sobre: "${ann.originalText}"\n`;
         output += `Sugestão: ${ann.text}\n`;
+        break;
+
+      case 'GLOBAL_COMMENT':
+        // This shouldn't happen as we filtered them out, but just in case
+        output += `🌐 COMENTÁRIO GLOBAL: ${ann.text}\n`;
         break;
     }
 
