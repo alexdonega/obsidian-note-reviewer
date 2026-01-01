@@ -19,6 +19,7 @@ import {
   setNotePath,
   getNoteType
 } from '@obsidian-note-reviewer/ui/utils/storage';
+import { isInputFocused } from '@obsidian-note-reviewer/ui/utils/shortcuts';
 import { type TipoNota } from '@obsidian-note-reviewer/ui/utils/notePaths';
 
 const PLAN_CONTENT = `---
@@ -303,7 +304,6 @@ const App: React.FC = () => {
           setAnnotationHistory(prev => prev.slice(0, -1));
           // Remove highlight from viewer
           viewerRef.current?.removeHighlight(lastAnnotationId);
-          console.log('↶ Anotação desfeita:', lastAnnotationId);
         }
       }
     };
@@ -311,6 +311,24 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [annotationHistory]);
+
+  // '?' key or Cmd/Ctrl+? to open keyboard shortcuts modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger when focused on input/textarea elements
+      if (isInputFocused()) return;
+
+      // Check for '?' key (Shift+/ on most keyboards)
+      // Also support Cmd+? or Ctrl+?
+      if (e.key === '?') {
+        e.preventDefault();
+        setShowKeyboardShortcuts(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // API mode handlers
   const handleApprove = async () => {
