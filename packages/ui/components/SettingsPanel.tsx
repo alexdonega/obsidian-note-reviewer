@@ -7,7 +7,11 @@ import {
   setNoteTypeTemplate,
   getNotePath,
   setNotePath,
-  exportAllSettings
+  exportAllSettings,
+  validateSettingsImport,
+  importAllSettings,
+  getAllNoteTypePaths,
+  getAllNoteTypeTemplates
 } from '../utils/storage';
 import {
   getNoteTypesByCategory,
@@ -129,7 +133,48 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const handleImportSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    // TODO: Implement file reading and import logic in subtask 2.4
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const data = JSON.parse(content);
+
+        // Validate the imported settings
+        const validation = validateSettingsImport(data);
+        if (!validation.valid) {
+          alert(`Erro ao importar configurações: ${validation.error}`);
+          return;
+        }
+
+        // Apply the settings
+        importAllSettings(data);
+
+        // Refresh local state from storage
+        setIdentity(getIdentity());
+        setNotePaths(getAllNoteTypePaths());
+        setNoteTemplates(getAllNoteTypeTemplates());
+
+        // Update general note path with the first path available
+        const paths = getAllNoteTypePaths();
+        const firstPath = Object.values(paths)[0];
+        if (firstPath) {
+          setNotePath(firstPath);
+          onNotePathChange?.(firstPath);
+        }
+
+        alert('Configurações importadas com sucesso!');
+      } catch (err) {
+        alert('Erro ao importar configurações: arquivo JSON inválido');
+      }
+    };
+
+    reader.onerror = () => {
+      alert('Erro ao ler o arquivo');
+    };
+
+    reader.readAsText(file);
+
     // Clear the file input to allow re-selecting the same file
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
