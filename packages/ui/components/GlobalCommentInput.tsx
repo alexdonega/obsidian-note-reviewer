@@ -5,8 +5,9 @@
  * rather than specific text selections.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getIdentity } from '../utils/identity';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface GlobalCommentInputProps {
   isOpen: boolean;
@@ -21,6 +22,14 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
 }) => {
   const [comment, setComment] = useState('');
   const [author, setAuthor] = useState('');
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Set up focus trap for accessibility
+  useFocusTrap({
+    containerRef: modalRef,
+    isOpen,
+    onClose,
+  });
 
   // Load author from storage on mount
   useEffect(() => {
@@ -50,11 +59,7 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
       e.preventDefault();
       handleSubmit();
     }
-    // Escape to close
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      onClose();
-    }
+    // Note: Escape key is handled by useFocusTrap hook for consistency
   };
 
   return (
@@ -63,6 +68,7 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
       onClick={onClose}
     >
       <div
+        ref={modalRef}
         className="bg-card border border-border rounded-xl w-full max-w-lg shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
