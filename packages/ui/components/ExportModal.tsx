@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { Annotation } from '../types';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -14,10 +15,11 @@ interface ExportModalProps {
   shareUrlSize: string;
   diffOutput: string;
   annotationCount: number;
+  annotations: Annotation[];
   taterSprite?: React.ReactNode;
 }
 
-type Tab = 'share' | 'diff';
+type Tab = 'share' | 'diff' | 'json';
 
 export const ExportModal: React.FC<ExportModalProps> = ({
   isOpen,
@@ -26,6 +28,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   shareUrlSize,
   diffOutput,
   annotationCount,
+  annotations,
   taterSprite,
 }) => {
   const [activeTab, setActiveTab] = useState<Tab>('share');
