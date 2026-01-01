@@ -11,6 +11,7 @@ import * as LucideIcons from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
+import DOMPurify from 'dompurify';
 
 interface ViewerProps {
   blocks: Block[];
@@ -696,6 +697,20 @@ function getLucideIcon(iconName: string): React.ComponentType<{ size?: number; c
 }
 
 /**
+ * Security: Sanitize Mermaid SVG output to prevent XSS attacks
+ * Removes dangerous tags and attributes while preserving SVG functionality
+ */
+function sanitizeMermaidSVG(svg: string): string {
+  return DOMPurify.sanitize(svg, {
+    USE_PROFILES: { svg: true },
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
+    ALLOWED_TAGS: ['svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'text', 'tspan', 'defs', 'marker', 'use', 'foreignObject', 'style'],
+    KEEP_CONTENT: false
+  });
+}
+
+/**
  * Custom code renderer for Mermaid diagrams
  */
 const MermaidRenderer: React.FC<any> = (props) => {
@@ -744,7 +759,9 @@ const MermaidRenderer: React.FC<any> = (props) => {
           const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
           const result = await mermaid.render(id, code);
 
-          setSvg(result.svg);
+          // Security: Sanitize SVG before rendering to prevent XSS
+          const cleanSvg = sanitizeMermaidSVG(result.svg);
+          setSvg(cleanSvg);
           setError(null);
         } catch (err) {
           console.error('Mermaid rendering error:', err);

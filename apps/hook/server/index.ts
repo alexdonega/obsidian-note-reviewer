@@ -14,9 +14,77 @@
  */
 
 import { $ } from "bun";
+import path from 'path';
+import os from 'os';
 
 // Embed the built HTML at compile time
 import indexHtml from "../dist/index.html" with { type: "text" };
+
+// Security: Allowed directories for file operations
+const ALLOWED_DIRS = [
+  path.join(os.homedir(), 'Documents'),
+  path.join(os.homedir(), 'Obsidian'),
+  path.join(os.homedir(), 'ObsidianVault'),
+  process.env.VAULT_PATH || path.join(os.homedir(), 'vault')
+].filter(Boolean);
+
+/**
+ * Security check: Prevents path traversal attacks
+ * Only allows writing to specific whitelisted directories
+ */
+function isPathSafe(userPath: string): boolean {
+  try {
+    const resolved = path.resolve(userPath);
+    return ALLOWED_DIRS.some(dir => resolved.startsWith(path.resolve(dir)));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Security: Add comprehensive security headers to responses
+ * Protects against XSS, clickjacking, MIME sniffing, and other attacks
+ */
+function addSecurityHeaders(response: Response): Response {
+  const headers = new Headers(response.headers);
+
+  // Content Security Policy - prevents XSS attacks
+  headers.set('Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " + // Mermaid + React need inline/eval
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: https:; " +
+    "font-src 'self'; " +
+    "connect-src 'self' http://localhost:* ws://localhost:*; " + // Dev + WebSocket
+    "frame-ancestors 'none';"
+  );
+
+  // Prevent clickjacking attacks
+  headers.set('X-Frame-Options', 'DENY');
+
+  // Prevent MIME type sniffing
+  headers.set('X-Content-Type-Options', 'nosniff');
+
+  // Enable XSS filter in older browsers
+  headers.set('X-XSS-Protection', '1; mode=block');
+
+  // Control referrer information
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // Disable dangerous browser features
+  headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
+  // HSTS - Force HTTPS (only in production)
+  if (process.env.NODE_ENV === 'production') {
+    headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  }
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
 
 // Read hook event from stdin
 const eventJson = await Bun.stdin.text();
@@ -51,13 +119,13 @@ const server = Bun.serve({
 
     // API: Get note content
     if (url.pathname === "/api/content" || url.pathname === "/api/plan") {
-      return Response.json({ content: noteContent, plan: noteContent });
+      return addSecurityHeaders(Response.json({ content: noteContent, plan: noteContent }));
     }
 
     // API: Approve note
     if (url.pathname === "/api/approve" && req.method === "POST") {
       resolveDecision({ approved: true });
-      return Response.json({ ok: true });
+      return addSecurityHeaders(Response.json({ ok: true }));
     }
 
     // API: Deny with feedback
@@ -68,13 +136,23 @@ const server = Bun.serve({
       } catch {
         resolveDecision({ approved: false, feedback: "Plan rejected by user" });
       }
-      return Response.json({ ok: true });
+      return addSecurityHeaders(Response.json({ ok: true }));
     }
 
     // API: Save note to vault
     if (url.pathname === "/api/save" && req.method === "POST") {
       try {
         const body = await req.json() as { content: string; path: string };
+
+        // Security: Validate path to prevent path traversal
+        if (!isPathSafe(body.path)) {
+          console.warn(`[Server] 🚨 Path traversal attempt blocked: ${body.path}`);
+          return addSecurityHeaders(Response.json(
+            { ok: false, error: "Invalid path: access denied" },
+            { status: 403 }
+          ));
+        }
+
         const fs = await import("fs/promises");
         const pathModule = await import("path");
 
@@ -86,13 +164,13 @@ const server = Bun.serve({
         await fs.writeFile(body.path, body.content, "utf-8");
 
         console.log(`[Server] ✅ Nota salva: ${body.path}`);
-        return Response.json({ ok: true, message: "Nota salva com sucesso", path: body.path });
+        return addSecurityHeaders(Response.json({ ok: true, message: "Nota salva com sucesso", path: body.path }));
       } catch (error) {
         console.error(`[Server] ❌ Erro ao salvar:`, error);
-        return Response.json(
+        return addSecurityHeaders(Response.json(
           { ok: false, error: error instanceof Error ? error.message : "Erro ao salvar nota" },
           { status: 500 }
-        );
+        ));
       }
     }
 
@@ -251,9 +329,9 @@ const server = Bun.serve({
     }
 
     // Serve embedded HTML for all other routes (SPA)
-    return new Response(indexHtml, {
+    return addSecurityHeaders(new Response(indexHtml, {
       headers: { "Content-Type": "text/html" }
-    });
+    }));
   },
 });
 
