@@ -3,7 +3,7 @@
   "spec": "010-add-keyboard-shortcuts-panel-and-improve-shortcut-",
   "state": "building",
   "subtasks": {
-    "completed": 7,
+    "completed": 8,
     "total": 9,
     "in_progress": 1,
     "failed": 0
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 9,
+    "number": 10,
     "started_at": "2026-01-01T18:52:01.578229"
   },
-  "last_update": "2026-01-01T19:45:04.819150"
+  "last_update": "2026-01-01T19:54:58.112913"
 }
