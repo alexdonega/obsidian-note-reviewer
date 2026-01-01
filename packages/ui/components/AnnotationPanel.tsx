@@ -76,6 +76,37 @@ interface PanelProps {
 // Default set of all annotation types - used to initialize filter state
 const ALL_ANNOTATION_TYPES = new Set<AnnotationType>(Object.values(AnnotationType));
 
+// FilterButton component for toggling annotation type visibility
+interface FilterButtonProps {
+  type: AnnotationType;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+const FilterButton: React.FC<FilterButtonProps> = ({ type, isActive, onClick }) => {
+  const config = typeConfig[type];
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${isActive ? 'Ocultar' : 'Mostrar'} ${config.label}`}
+      aria-pressed={isActive}
+      title={config.label}
+      className={`
+        p-1.5 rounded-md transition-all duration-150 ease-in-out
+        focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1
+        ${isActive
+          ? `${config.bg} ${config.color} hover:opacity-80`
+          : 'bg-muted/30 text-muted-foreground/40 hover:bg-muted/50 hover:text-muted-foreground/60'
+        }
+      `}
+    >
+      {config.icon}
+    </button>
+  );
+};
+
 export const AnnotationPanel: React.FC<PanelProps> = ({
   isOpen,
   annotations,
