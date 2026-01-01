@@ -8,7 +8,7 @@
  * - Restores focus to the previously focused element on close
  */
 
-import { RefObject, useEffect } from 'react';
+import { RefObject, useEffect, useRef } from 'react';
 
 /**
  * Selector for all potentially focusable elements
@@ -111,12 +111,36 @@ interface UseFocusTrapOptions {
 export function useFocusTrap(options: UseFocusTrapOptions): void {
   const { containerRef, isOpen, onClose } = options;
 
+  /**
+   * Ref to store the element that was focused before the modal opened.
+   * This allows us to restore focus when the modal closes.
+   */
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!isOpen || !containerRef.current) {
       return;
     }
 
     const container = containerRef.current;
+
+    // Store the currently focused element before the modal takes over focus
+    // This is captured when the modal opens (isOpen becomes true)
+    previouslyFocusedElement.current = document.activeElement as HTMLElement | null;
+
+    // Auto-focus the first focusable element in the modal
+    // Use requestAnimationFrame to ensure the DOM has rendered
+    requestAnimationFrame(() => {
+      const focusableElements = getFocusableElements(container);
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus();
+      } else {
+        // If no focusable elements, focus the container itself
+        // This ensures focus is trapped in the modal even without interactive elements
+        container.setAttribute('tabindex', '-1');
+        container.focus();
+      }
+    });
 
     const handleKeyDown = (event: KeyboardEvent) => {
       // Handle Tab key for focus cycling
@@ -164,6 +188,18 @@ export function useFocusTrap(options: UseFocusTrapOptions): void {
 
     return () => {
       container.removeEventListener('keydown', handleKeyDown);
+
+      // Restore focus to the previously focused element when the modal closes
+      // Check that the element is still in the document and can receive focus
+      if (
+        previouslyFocusedElement.current &&
+        document.contains(previouslyFocusedElement.current)
+      ) {
+        // Use requestAnimationFrame to ensure cleanup happens after React's commit phase
+        requestAnimationFrame(() => {
+          previouslyFocusedElement.current?.focus();
+        });
+      }
     };
   }, [isOpen, containerRef, onClose]);
 }
