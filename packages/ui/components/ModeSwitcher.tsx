@@ -53,6 +53,7 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
     <button
       onClick={() => setShowHelp(true)}
       className="ml-2 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+      aria-label="Abrir ajuda - como funciona o Obsidian Note Reviewer"
     >
       como funciona?
     </button>
@@ -66,13 +67,17 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
         <div
           className="bg-card border border-border rounded-xl w-full max-w-2xl shadow-2xl relative"
           onClick={e => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="help-dialog-title"
         >
-          
+
           <div className="flex items-center justify-between p-4 border-b border-border">
-            <h3 className="font-semibold text-sm">Como o Obsidian Note Reviewer Funciona</h3>
+            <h3 id="help-dialog-title" className="font-semibold text-sm">Como o Obsidian Note Reviewer Funciona</h3>
             <button
               onClick={() => setShowHelp(false)}
               className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Fechar ajuda"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -106,6 +111,7 @@ const ModeButton: React.FC<{
 }> = ({ active, onClick, icon, label, destructive }) => (
   <button
     onClick={onClick}
+    aria-pressed={active}
     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
       active
         ? destructive
