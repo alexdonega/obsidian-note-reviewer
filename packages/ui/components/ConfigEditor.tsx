@@ -158,12 +158,17 @@ export const ConfigEditor: React.FC = () => {
             <h4 className="text-sm font-semibold text-foreground">📝 Arquivos de Configuração</h4>
             <p className="text-xs text-muted-foreground mt-1">Clique para editar</p>
           </div>
-          <div className="p-2">
+          <div className="p-2" role="tablist" aria-label="Arquivos de configuração disponíveis">
             {files.map((file) => (
               <button
                 key={file.name}
                 onClick={() => setSelectedFile(file.name)}
                 className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors mb-1 ${selectedFile === file.name ? 'bg-primary/20 text-primary font-medium' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}`}
+                role="tab"
+                aria-selected={selectedFile === file.name}
+                aria-controls="config-editor-panel"
+                id={`config-tab-${file.name}`}
+                aria-label={`Editar arquivo ${file.displayName}`}
               >
                 {file.displayName}
               </button>
@@ -174,7 +179,12 @@ export const ConfigEditor: React.FC = () => {
         {/* Editor Area */}
         <div className="flex-1 flex flex-col">
           {selectedFile ? (
-            <div className="flex-1 flex flex-col">
+            <div
+              className="flex-1 flex flex-col"
+              role="tabpanel"
+              id="config-editor-panel"
+              aria-labelledby={`config-tab-${selectedFile}`}
+            >
               {/* Editor Header */}
               <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-background">
                 <div>
@@ -190,6 +200,8 @@ export const ConfigEditor: React.FC = () => {
                     onClick={() => setShowPreview(!showPreview)}
                     className="px-3 py-1.5 text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-muted rounded-md transition-colors flex items-center gap-1.5"
                     title={showPreview ? "Esconder Preview" : "Mostrar Preview"}
+                    aria-label={showPreview ? "Esconder preview do markdown" : "Mostrar preview do markdown"}
+                    aria-pressed={showPreview}
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       {showPreview ? (
@@ -204,6 +216,7 @@ export const ConfigEditor: React.FC = () => {
                     onClick={handleSave}
                     disabled={!hasChanges || saving}
                     className={`px-4 py-2 text-xs font-medium rounded-md transition-colors flex items-center gap-2 ${hasChanges && !saving ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}
+                    aria-label="Salvar alterações no arquivo de configuração"
                   >
                     {saving ? (
                       <>
@@ -247,6 +260,7 @@ export const ConfigEditor: React.FC = () => {
                         className="flex-1 w-full px-4 py-3 bg-background border border-border rounded-lg font-mono text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         placeholder="Edite o conteúdo do arquivo aqui..."
                         spellCheck={false}
+                        aria-label="Editor de conteúdo do arquivo de configuração"
                       />
                     </div>
 
