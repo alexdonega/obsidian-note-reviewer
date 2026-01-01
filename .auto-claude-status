@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "015-missing-content-security-policy-headers",
+  "state": "building",
+  "subtasks": {
+    "completed": 8,
+    "total": 14,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "HTML Meta Tag Fallback",
+    "id": null,
+    "total": 3
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 10,
+    "started_at": "2026-01-01T18:52:35.167673"
+  },
+  "last_update": "2026-01-01T19:57:20.308925"
+}
