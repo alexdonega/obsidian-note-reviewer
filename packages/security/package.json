@@ -1,0 +1,8 @@
+{
+  "name": "@obsidian-note-reviewer/security",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./csp": "./csp.ts"
+  }
+}
