@@ -5,7 +5,8 @@
  * Raw Diff tab: Shows human-readable diff output with copy/download
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -30,6 +31,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<Tab>('share');
   const [copied, setCopied] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Set up focus trap for accessibility
+  useFocusTrap({
+    containerRef: modalRef,
+    isOpen,
+    onClose,
+  });
 
   if (!isOpen) return null;
 
@@ -66,6 +75,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
       <div
+        ref={modalRef}
         className="bg-card border border-border rounded-xl w-full max-w-2xl flex flex-col max-h-[80vh] shadow-2xl relative"
         onClick={e => e.stopPropagation()}
       >
