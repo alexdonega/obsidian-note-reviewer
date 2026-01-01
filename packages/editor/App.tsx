@@ -312,6 +312,12 @@ const App: React.FC = () => {
           handleSaveToVault();
         }
       }
+
+      // Ctrl+E: Open Export Modal
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        setShowExport(true);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
