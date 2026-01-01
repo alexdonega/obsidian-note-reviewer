@@ -3,23 +3,23 @@
   "spec": "006-add-comprehensive-aria-labels-and-roles-for-access",
   "state": "building",
   "subtasks": {
-    "completed": 6,
+    "completed": 12,
     "total": 17,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Modal & Dialog Components",
+    "current": "Theme & Navigation Components",
     "id": null,
-    "total": 3
+    "total": 1
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 8,
+    "number": 14,
     "started_at": "2026-01-01T18:51:34.387182"
   },
-  "last_update": "2026-01-01T19:48:28.327965"
+  "last_update": "2026-01-01T20:14:13.799217"
 }
