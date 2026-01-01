@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "004-add-more-keyboard-shortcuts-save-export-global-com",
+  "state": "building",
+  "subtasks": {
+    "completed": 0,
+    "total": 0,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Add Keyboard Shortcuts to handleKeyDown",
+    "id": null,
+    "total": 4
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 2,
+    "started_at": "2026-01-01T18:51:31.222958"
+  },
+  "last_update": "2026-01-01T18:57:57.522779"
+}

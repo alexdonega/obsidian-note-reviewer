@@ -288,9 +288,10 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Ctrl+Z to undo last annotation
+  // Keyboard shortcuts: Ctrl+Z (undo), Ctrl+S (save)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Z: Undo last annotation
       if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
         e.preventDefault();
         if (annotationHistory.length > 0) {
@@ -301,14 +302,21 @@ const App: React.FC = () => {
           setAnnotationHistory(prev => prev.slice(0, -1));
           // Remove highlight from viewer
           viewerRef.current?.removeHighlight(lastAnnotationId);
-          console.log('↶ Anotação desfeita:', lastAnnotationId);
+        }
+      }
+
+      // Ctrl+S: Save to Vault
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (savePath && !isSaving) {
+          handleSaveToVault();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [annotationHistory]);
+  }, [annotationHistory, savePath, isSaving]);
 
   // API mode handlers
   const handleApprove = async () => {
