@@ -76,6 +76,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
       <div
         ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="export-modal-title"
         className="bg-card border border-border rounded-xl w-full max-w-2xl flex flex-col max-h-[80vh] shadow-2xl relative"
         onClick={e => e.stopPropagation()}
       >
@@ -84,7 +87,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         {/* Header */}
         <div className="p-4 border-b border-border">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-sm">Export</h3>
+            <h3 id="export-modal-title" className="font-semibold text-sm">Export</h3>
             <div className="flex items-center gap-3">
               <span className="text-xs text-muted-foreground">
                 {annotationCount} annotation{annotationCount !== 1 ? 's' : ''}
