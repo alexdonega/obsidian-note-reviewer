@@ -163,7 +163,7 @@ export const Settings: React.FC<SettingsProps> = ({
     <>
       <button
         onClick={() => setShowDialog(true)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-muted rounded-md transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-foreground/80 hover:text-foreground hover:bg-muted rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         title="Configurações"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -184,7 +184,7 @@ export const Settings: React.FC<SettingsProps> = ({
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleLoadDefaults}
-                  className="px-3 py-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors flex items-center gap-2"
+                  className="px-3 py-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                   title="Carregar valores padrão"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -194,7 +194,7 @@ export const Settings: React.FC<SettingsProps> = ({
                 </button>
                 <button
                   onClick={() => setShowDialog(false)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1"
                   aria-label="Fechar"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -212,7 +212,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     key={id}
                     onClick={() => setActiveTab(id)}
                     className={`
-                      flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all relative
+                      flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all relative focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md
                       ${activeTab === id
                         ? 'text-primary border-b-2 border-primary'
                         : 'text-muted-foreground hover:text-foreground'
@@ -253,7 +253,7 @@ export const Settings: React.FC<SettingsProps> = ({
                   </div>
                   <button
                     onClick={handleRegenerateIdentity}
-                    className="w-full px-3 py-2 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
+                    className="w-full px-3 py-2 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                   >
                     Gerar Nova Identidade
                   </button>
@@ -276,7 +276,7 @@ export const Settings: React.FC<SettingsProps> = ({
             <div className="px-6 py-4 border-t border-border flex justify-end">
               <button
                 onClick={() => setShowDialog(false)}
-                className="px-4 py-2 text-xs font-medium text-foreground bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
+                className="px-4 py-2 text-xs font-medium text-foreground bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
                 Fechar
               </button>
