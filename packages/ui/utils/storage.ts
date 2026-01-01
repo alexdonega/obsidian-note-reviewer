@@ -254,6 +254,69 @@ export interface SettingsExport {
 const SETTINGS_EXPORT_VERSION = 1;
 
 /**
+ * Result of settings validation
+ */
+export interface SettingsValidationResult {
+  /** Whether the settings object is valid */
+  valid: boolean;
+  /** Error message if validation failed */
+  error?: string;
+}
+
+/**
+ * Validate an imported settings object
+ *
+ * Checks that the object has the correct structure and types
+ * before applying it via importAllSettings.
+ *
+ * @param data - The parsed JSON data to validate
+ * @returns Validation result with valid flag and optional error message
+ */
+export function validateSettingsImport(data: unknown): SettingsValidationResult {
+  // Check that data is an object
+  if (typeof data !== 'object' || data === null) {
+    return { valid: false, error: 'Settings must be a valid JSON object' };
+  }
+
+  const obj = data as Record<string, unknown>;
+
+  // Check required top-level fields
+  if (typeof obj.version !== 'number') {
+    return { valid: false, error: 'Missing or invalid "version" field (must be a number)' };
+  }
+
+  if (typeof obj.identity !== 'string') {
+    return { valid: false, error: 'Missing or invalid "identity" field (must be a string)' };
+  }
+
+  if (typeof obj.notePaths !== 'object' || obj.notePaths === null || Array.isArray(obj.notePaths)) {
+    return { valid: false, error: 'Missing or invalid "notePaths" field (must be an object)' };
+  }
+
+  if (typeof obj.noteTemplates !== 'object' || obj.noteTemplates === null || Array.isArray(obj.noteTemplates)) {
+    return { valid: false, error: 'Missing or invalid "noteTemplates" field (must be an object)' };
+  }
+
+  // Validate notePaths entries are all strings
+  const notePaths = obj.notePaths as Record<string, unknown>;
+  for (const [key, value] of Object.entries(notePaths)) {
+    if (typeof value !== 'string') {
+      return { valid: false, error: `Invalid notePaths entry "${key}" (value must be a string)` };
+    }
+  }
+
+  // Validate noteTemplates entries are all strings
+  const noteTemplates = obj.noteTemplates as Record<string, unknown>;
+  for (const [key, value] of Object.entries(noteTemplates)) {
+    if (typeof value !== 'string') {
+      return { valid: false, error: `Invalid noteTemplates entry "${key}" (value must be a string)` };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
  * Export all settings as a SettingsExport object
  *
  * Gathers all note type paths, note type templates, and identity
