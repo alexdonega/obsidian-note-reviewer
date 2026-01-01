@@ -69,6 +69,9 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
     >
       <div
         ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="global-comment-modal-title"
         className="bg-card border border-border rounded-xl w-full max-w-lg shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
@@ -81,7 +84,7 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-sm">Comentário Global</h3>
+              <h3 id="global-comment-modal-title" className="font-semibold text-sm">Comentário Global</h3>
             </div>
             <button
               onClick={onClose}
