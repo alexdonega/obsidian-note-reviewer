@@ -151,7 +151,8 @@ export function useFocusTrap(options: UseFocusTrapOptions): void {
         return;
       }
 
-      // Will be refined in subtask 1.4
+      // Handle Escape key to close the modal
+      // Prevent propagation to avoid triggering parent handlers
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
