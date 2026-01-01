@@ -14,6 +14,7 @@
  */
 
 import { $ } from "bun";
+import { validatePath } from "./pathValidation";
 
 // Embed the built HTML at compile time
 import indexHtml from "../dist/index.html" with { type: "text" };
@@ -75,18 +76,32 @@ const server = Bun.serve({
     if (url.pathname === "/api/save" && req.method === "POST") {
       try {
         const body = await req.json() as { content: string; path: string };
+
+        // Security: Validate path to prevent path traversal attacks (CWE-22)
+        const pathValidation = validatePath(body.path);
+        if (!pathValidation.valid) {
+          console.error(`[Server] [SECURITY] Path validation failed for path: ${pathValidation.error}`);
+          return Response.json(
+            { ok: false, error: pathValidation.error || "Invalid path" },
+            { status: 400 }
+          );
+        }
+
         const fs = await import("fs/promises");
         const pathModule = await import("path");
 
+        // Use the normalized path for file operations
+        const safePath = pathValidation.normalizedPath!;
+
         // Ensure directory exists
-        const dir = pathModule.dirname(body.path);
+        const dir = pathModule.dirname(safePath);
         await fs.mkdir(dir, { recursive: true });
 
         // Save file
-        await fs.writeFile(body.path, body.content, "utf-8");
+        await fs.writeFile(safePath, body.content, "utf-8");
 
-        console.log(`[Server] ✅ Nota salva: ${body.path}`);
-        return Response.json({ ok: true, message: "Nota salva com sucesso", path: body.path });
+        console.log(`[Server] ✅ Nota salva: ${safePath}`);
+        return Response.json({ ok: true, message: "Nota salva com sucesso", path: safePath });
       } catch (error) {
         console.error(`[Server] ❌ Erro ao salvar:`, error);
         return Response.json(
