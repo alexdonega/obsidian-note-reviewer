@@ -35,7 +35,7 @@ export const AnnotationSidebar: React.FC<SidebarProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {sortedAnnotations.length === 0 ? (
           <div className="text-center text-muted-foreground mt-10 text-sm">
-            <p>Nenhuma anotaÃ§Ã£o ainda.</p>
+            <p>Nenhuma anotação ainda.</p>
             <p className="mt-2 text-xs">Selecione texto no documento para adicionar comentÃ¡rios ou sugerir alteraÃ§Ãµes.</p>
           </div>
         ) : (

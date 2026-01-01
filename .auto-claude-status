@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "008-fix-character-encoding-issues-in-portuguese-ui-tex",
+  "state": "building",
+  "subtasks": {
+    "completed": 1,
+    "total": 9,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Fix AnnotationSidebar.tsx encoding issues",
+    "id": null,
+    "total": 5
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 3,
+    "started_at": "2026-01-01T18:51:41.123654"
+  },
+  "last_update": "2026-01-01T18:58:33.680441"
+}
