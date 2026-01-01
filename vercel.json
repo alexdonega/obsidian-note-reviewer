@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "bun install && bun run --cwd apps/portal build",
+  "buildCommand": "npm install && npm run build:portal",
   "outputDirectory": "apps/portal/dist",
-  "installCommand": "bun install",
+  "installCommand": "npm install",
   "framework": null,
   "rewrites": [
     {
