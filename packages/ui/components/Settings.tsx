@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { getIdentity, regenerateIdentity } from '../utils/identity';
 import {
   getNoteTypePath,
@@ -34,6 +35,14 @@ export const Settings: React.FC<SettingsProps> = ({
   const [notePaths, setNotePaths] = useState<Record<string, string>>({});
   const [noteTemplates, setNoteTemplates] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<CategoryTab>('regras');
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Set up focus trap for accessibility
+  useFocusTrap({
+    containerRef: dialogRef,
+    isOpen: showDialog,
+    onClose: () => setShowDialog(false),
+  });
 
   // Load saved configuration on dialog open
   useEffect(() => {
@@ -174,7 +183,10 @@ export const Settings: React.FC<SettingsProps> = ({
       </button>
 
       {showDialog && createPortal(
-        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+        <div
+          ref={dialogRef}
+          className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden"
+        >
             {/* Header */}
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <div className="flex-1">
