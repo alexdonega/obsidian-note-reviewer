@@ -290,10 +290,26 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Ctrl+Z to undo last annotation
+  // Ctrl+Z to undo, Ctrl+Shift+Z to redo annotation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      // Ctrl+Shift+Z: Redo (must check before Ctrl+Z)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        if (redoStack.length > 0) {
+          // Pop the last undone annotation from redo stack
+          const annotationToRedo = redoStack[redoStack.length - 1];
+          setRedoStack(prev => prev.slice(0, -1));
+          // Add annotation back to annotations array
+          setAnnotations(prev => [...prev, annotationToRedo]);
+          // Add ID back to annotation history
+          setAnnotationHistory(prev => [...prev, annotationToRedo.id]);
+          // Re-apply highlight to viewer
+          viewerRef.current?.applySharedAnnotations([annotationToRedo]);
+        }
+      }
+      // Ctrl+Z: Undo
+      else if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
         e.preventDefault();
         if (annotationHistory.length > 0) {
           const lastAnnotationId = annotationHistory[annotationHistory.length - 1];
@@ -316,7 +332,7 @@ const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [annotationHistory]);
+  }, [annotationHistory, redoStack]);
 
   // API mode handlers
   const handleApprove = async () => {
