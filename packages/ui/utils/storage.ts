@@ -7,6 +7,8 @@
  * localhost:54322 share the same cookies.
  */
 
+import { getIdentity } from './identity';
+
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 
 /**
@@ -246,4 +248,22 @@ export interface SettingsExport {
   notePaths: Record<string, string>;
   /** Note type templates mapping (tipo -> template path) */
   noteTemplates: Record<string, string>;
+}
+
+/** Current settings export schema version */
+const SETTINGS_EXPORT_VERSION = 1;
+
+/**
+ * Export all settings as a SettingsExport object
+ *
+ * Gathers all note type paths, note type templates, and identity
+ * into a single exportable object for backup and sharing.
+ */
+export function exportAllSettings(): SettingsExport {
+  return {
+    version: SETTINGS_EXPORT_VERSION,
+    identity: getIdentity(),
+    notePaths: getAllNoteTypePaths(),
+    noteTemplates: getAllNoteTypeTemplates(),
+  };
 }
