@@ -2,6 +2,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { viteCSPPortal } from '@obsidian-note-reviewer/security/vite-plugin-csp';
 import pkg from '../../package.json';
 
 export default defineConfig({
@@ -18,7 +19,7 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), viteCSPPortal()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
