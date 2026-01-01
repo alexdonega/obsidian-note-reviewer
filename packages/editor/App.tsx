@@ -489,8 +489,21 @@ const App: React.FC = () => {
           />
         ) : (
           <>
+        {/* Status message region for screen reader announcements */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {saveError && `Erro: ${saveError}`}
+          {isSaving && 'Salvando nota...'}
+          {submitted === 'approved' && 'Nota aprovada com sucesso'}
+          {submitted === 'denied' && 'Alterações solicitadas com sucesso'}
+        </div>
+
         {/* Minimal Header */}
-        <header className="h-12 flex items-center justify-between px-2 md:px-4 border-b border-border/50 bg-card/50 backdrop-blur-xl z-50">
+        <header role="banner" className="h-12 flex items-center justify-between px-2 md:px-4 border-b border-border/50 bg-card/50 backdrop-blur-xl z-50">
           <div className="flex items-center gap-2 md:gap-3">
             <a
               href="https://plannotator.ai"
@@ -657,7 +670,7 @@ const App: React.FC = () => {
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Document Area */}
-          <main className="flex-1 overflow-y-auto bg-grid">
+          <main role="main" aria-label="Área principal do documento" className="flex-1 overflow-y-auto bg-grid">
             <div className="min-h-full flex flex-col items-center p-3 md:p-8">
               {/* Mode Switcher */}
               <div className="w-full max-w-3xl mb-3 md:mb-4 flex justify-start">
@@ -743,7 +756,13 @@ const App: React.FC = () => {
 
         {/* Completion overlay - shown after approve/deny */}
         {submitted && (
-          <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center">
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="completion-overlay-title"
+            aria-describedby="completion-overlay-description"
+            className="fixed inset-0 z-[100] bg-background flex items-center justify-center"
+          >
             <div className="text-center space-y-6 max-w-md px-8">
               <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center ${
                 submitted === 'approved'
@@ -751,21 +770,21 @@ const App: React.FC = () => {
                   : 'bg-accent/20 text-accent'
               }`}>
                 {submitted === 'approved' ? (
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 ) : (
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 )}
               </div>
 
               <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-foreground">
+                <h2 id="completion-overlay-title" className="text-xl font-semibold text-foreground">
                   {submitted === 'approved' ? 'Nota Aprovada' : 'Alterações Solicitadas'}
                 </h2>
-                <p className="text-muted-foreground">
+                <p id="completion-overlay-description" className="text-muted-foreground">
                   {submitted === 'approved'
                     ? 'A nota será salva no Obsidian.'
                     : 'Claude irá revisar a nota com base nas suas anotações.'}
