@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm install && npm run build:portal",
+  "buildCommand": "pnpm install && pnpm run build:portal",
   "outputDirectory": "apps/portal/dist",
-  "installCommand": "npm install",
+  "installCommand": "pnpm install",
   "framework": null,
   "rewrites": [
     {
