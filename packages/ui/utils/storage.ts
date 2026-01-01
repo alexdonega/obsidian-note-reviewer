@@ -52,6 +52,54 @@ function escapeRegex(str: string): string {
 }
 
 /**
+ * Check if the current context is secure (HTTPS or localhost)
+ *
+ * Browsers treat the following as secure contexts:
+ * - HTTPS connections
+ * - localhost (127.0.0.1, ::1, or localhost hostname)
+ * - file:// URLs
+ *
+ * Uses the modern window.isSecureContext API when available,
+ * with fallback logic for older browsers.
+ *
+ * @returns true if running in a secure context, false otherwise
+ */
+export function isSecureContext(): boolean {
+  try {
+    // Modern API - available in all modern browsers
+    if (typeof window !== 'undefined' && typeof window.isSecureContext === 'boolean') {
+      return window.isSecureContext;
+    }
+
+    // Fallback for older browsers or non-browser environments
+    if (typeof window !== 'undefined' && typeof window.location !== 'undefined') {
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+
+      // HTTPS is always secure
+      if (protocol === 'https:') {
+        return true;
+      }
+
+      // Localhost is considered secure (allows Secure cookies in development)
+      if (protocol === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1')) {
+        return true;
+      }
+
+      // file:// URLs are considered secure contexts
+      if (protocol === 'file:') {
+        return true;
+      }
+    }
+
+    return false;
+  } catch {
+    // If we can't determine security context, assume insecure
+    return false;
+  }
+}
+
+/**
  * Storage object with localStorage-like API
  */
 export const storage = {
