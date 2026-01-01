@@ -360,6 +360,8 @@ const App: React.FC = () => {
   };
 
   const handleAddAnnotation = (ann: Annotation) => {
+    // Clear redo stack when new annotation is added (standard undo/redo behavior)
+    setRedoStack([]);
     setAnnotations(prev => [...prev, ann]);
     setSelectedAnnotationId(ann.id);
     setIsPanelOpen(true);
