@@ -318,6 +318,12 @@ const App: React.FC = () => {
         e.preventDefault();
         setShowExport(true);
       }
+
+      // Ctrl+G: Open Global Comment Modal
+      if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+        e.preventDefault();
+        setShowGlobalCommentModal(true);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
