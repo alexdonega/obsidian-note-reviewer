@@ -27,6 +27,12 @@ interface AnnotationState {
   undo: () => void;
   clear: () => void;
   setAnnotations: (annotations: Annotation[]) => void;
+
+  // Bulk selection actions
+  toggleSelection: (id: string) => void;
+  selectAll: () => void;
+  clearSelection: () => void;
+  getSelectedCount: () => number;
 }
 
 export const useAnnotationStore = create<AnnotationState>()(
@@ -67,7 +73,22 @@ export const useAnnotationStore = create<AnnotationState>()(
 
         clear: () => set({ annotations: [], selectedId: null, selectedIds: [], history: [] }),
 
-        setAnnotations: (annotations) => set({ annotations, selectedIds: [], history: annotations.map(a => a.id) })
+        setAnnotations: (annotations) => set({ annotations, selectedIds: [], history: annotations.map(a => a.id) }),
+
+        // Bulk selection actions
+        toggleSelection: (id) => set((state) => ({
+          selectedIds: state.selectedIds.includes(id)
+            ? state.selectedIds.filter(sid => sid !== id)
+            : [...state.selectedIds, id]
+        })),
+
+        selectAll: () => set((state) => ({
+          selectedIds: state.annotations.map(a => a.id)
+        })),
+
+        clearSelection: () => set({ selectedIds: [] }),
+
+        getSelectedCount: () => get().selectedIds.length
       }),
       { name: 'annotation-store' }
     )
