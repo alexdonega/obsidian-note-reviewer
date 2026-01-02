@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { useCopyFeedback } from '../hooks/useCopyFeedback';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -29,29 +30,25 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   taterSprite,
 }) => {
   const [activeTab, setActiveTab] = useState<Tab>('share');
-  const [copied, setCopied] = useState(false);
+
+  // Copy URL feedback (share tab)
+  const {
+    copied: urlCopied,
+    handleCopy: handleCopyUrl,
+    animationClass: urlAnimationClass,
+    buttonClass: urlButtonClass,
+    iconClass: urlIconClass,
+  } = useCopyFeedback();
+
+  // Copy diff feedback (diff tab)
+  const {
+    copied: diffCopied,
+    handleCopy: handleCopyDiff,
+    animationClass: diffAnimationClass,
+    buttonClass: diffButtonClass,
+  } = useCopyFeedback();
 
   if (!isOpen) return null;
-
-  const handleCopyUrl = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
-      console.error('Failed to copy:', e);
-    }
-  };
-
-  const handleCopyDiff = async () => {
-    try {
-      await navigator.clipboard.writeText(diffOutput);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
-      console.error('Failed to copy:', e);
-    }
-  };
 
   const handleDownloadDiff = () => {
     const blob = new Blob([diffOutput], { type: 'text/plain' });
@@ -132,12 +129,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     onClick={e => (e.target as HTMLTextAreaElement).select()}
                   />
                   <button
-                    onClick={handleCopyUrl}
-                    className="absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium bg-background/80 hover:bg-background border border-border/50 transition-colors flex items-center gap-1"
+                    onClick={() => handleCopyUrl(shareUrl)}
+                    className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium bg-background/80 hover:bg-background border border-border/50 transition-colors flex items-center gap-1 ${urlAnimationClass} ${urlButtonClass}`}
                   >
-                    {copied ? (
+                    {urlCopied ? (
                       <>
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className={`w-3 h-3 copy-check-animated ${urlIconClass}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                         Copiado
@@ -172,10 +169,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         {activeTab === 'diff' && (
           <div className="p-4 border-t border-border flex justify-end gap-2">
             <button
-              onClick={handleCopyDiff}
-              className="px-3 py-1.5 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
+              onClick={() => handleCopyDiff(diffOutput)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors ${diffAnimationClass} ${diffButtonClass}`}
             >
-              {copied ? 'Copiado!' : 'Copiar'}
+              {diffCopied ? 'Copiado!' : 'Copiar'}
             </button>
             <button
               onClick={handleDownloadDiff}
