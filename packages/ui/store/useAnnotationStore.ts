@@ -18,6 +18,7 @@ export interface Annotation {
 interface AnnotationState {
   annotations: Annotation[];
   selectedId: string | null;
+  selectedIds: string[]; // For bulk selection operations
   history: string[];
 
   addAnnotation: (annotation: Annotation) => void;
@@ -34,6 +35,7 @@ export const useAnnotationStore = create<AnnotationState>()(
       (set, get) => ({
         annotations: [],
         selectedId: null,
+        selectedIds: [],
         history: [],
 
         addAnnotation: (annotation) => set((state) => ({
@@ -44,26 +46,28 @@ export const useAnnotationStore = create<AnnotationState>()(
 
         deleteAnnotation: (id) => set((state) => ({
           annotations: state.annotations.filter(a => a.id !== id),
-          selectedId: state.selectedId === id ? null : state.selectedId
+          selectedId: state.selectedId === id ? null : state.selectedId,
+          selectedIds: state.selectedIds.filter(sid => sid !== id)
         })),
 
         selectAnnotation: (id) => set({ selectedId: id }),
 
         undo: () => {
-          const { history, annotations } = get();
+          const { history, annotations, selectedIds } = get();
           if (history.length === 0) return;
 
           const lastId = history[history.length - 1];
           set({
             annotations: annotations.filter(a => a.id !== lastId),
             history: history.slice(0, -1),
-            selectedId: null
+            selectedId: null,
+            selectedIds: selectedIds.filter(id => id !== lastId)
           });
         },
 
-        clear: () => set({ annotations: [], selectedId: null, history: [] }),
+        clear: () => set({ annotations: [], selectedId: null, selectedIds: [], history: [] }),
 
-        setAnnotations: (annotations) => set({ annotations, history: annotations.map(a => a.id) })
+        setAnnotations: (annotations) => set({ annotations, selectedIds: [], history: annotations.map(a => a.id) })
       }),
       { name: 'annotation-store' }
     )
