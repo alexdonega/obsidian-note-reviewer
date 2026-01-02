@@ -396,3 +396,36 @@ pre code.hljs {
 :root[data-theme="dark"] .callout.is-collapsible .callout-title:hover {
   background-color: rgba(var(--callout-color-rgb, 100, 116, 139), 0.2);
 }
+
+/* ============================================
+   COLLAPSIBLE SECTION
+   ============================================ */
+
+.collapsible-section {
+  @apply rounded-lg border border-border/50 overflow-hidden;
+  background-color: var(--muted);
+}
+
+.collapsible-section-header {
+  @apply flex items-center justify-between w-full px-3 py-2 cursor-pointer select-none;
+  @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+  @apply hover:bg-muted/80 transition-colors;
+}
+
+.collapsible-section-title {
+  @apply flex-grow text-left;
+}
+
+.collapsible-section-chevron {
+  @apply flex-shrink-0 transition-transform duration-200;
+  color: var(--muted-foreground);
+}
+
+.collapsible-section-chevron.is-collapsed {
+  transform: rotate(-90deg);
+}
+
+.collapsible-section-content {
+  @apply px-3 py-2 border-t border-border/30;
+  background-color: var(--card);
+}
