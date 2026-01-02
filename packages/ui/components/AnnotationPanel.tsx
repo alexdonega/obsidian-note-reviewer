@@ -180,6 +180,20 @@ const AnnotationCard: React.FC<{
 }> = ({ annotation, isSelected, onSelect, onDelete }) => {
   const [copied, setCopied] = useState(false);
 
+  const handleCopy = async () => {
+    // Copy comment/replacement text if available, otherwise copy highlighted text
+    const textToCopy = annotation.text || annotation.originalText;
+    if (!textToCopy) return;
+
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      // Clipboard access may fail in some contexts
+    }
+  };
+
   const typeConfig = {
     [AnnotationType.DELETION]: {
       label: 'Excluir',
