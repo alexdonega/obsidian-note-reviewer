@@ -15,6 +15,52 @@ interface BatchRequest {
   data?: Record<string, any>;
 }
 
+/**
+ * Fields that can be safely updated via the batch update operation.
+ * This whitelist prevents mass assignment vulnerabilities by explicitly
+ * defining which fields clients are allowed to modify.
+ */
+const ALLOWED_UPDATE_FIELDS = ['title', 'content', 'markdown', 'slug', 'is_public'] as const;
+
+/**
+ * Fields that should never be modifiable by clients.
+ * Attempts to modify these fields are logged for security auditing
+ * as they may indicate an attack attempt.
+ *
+ * - id: Primary key, immutable
+ * - org_id: Organization ownership, prevents cross-org data access
+ * - created_by: Original author, audit trail integrity
+ * - created_at: Creation timestamp, audit trail integrity
+ * - updated_at: System-managed, set automatically
+ * - updated_by: System-managed, set automatically
+ * - share_hash: Security-sensitive, used for sharing access control
+ */
+const PROTECTED_FIELDS = [
+  'id',
+  'org_id',
+  'created_by',
+  'created_at',
+  'updated_at',
+  'updated_by',
+  'share_hash',
+] as const;
+
+/**
+ * Type representing the allowed fields for note updates.
+ * Used for type-safe field filtering.
+ */
+type AllowedUpdateField = typeof ALLOWED_UPDATE_FIELDS[number];
+
+/**
+ * Type representing protected fields that cannot be modified by clients.
+ */
+type ProtectedField = typeof PROTECTED_FIELDS[number];
+
+/**
+ * Type for a validated note update object containing only allowed fields.
+ */
+type ValidatedNoteUpdate = Partial<Record<AllowedUpdateField, unknown>>;
+
 const MAX_BATCH_SIZE = 100;
 const BATCH_CHUNK_SIZE = 10;
 
