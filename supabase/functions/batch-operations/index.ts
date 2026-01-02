@@ -89,6 +89,93 @@ function filterAllowedFields<T extends readonly string[]>(
   return result;
 }
 
+/**
+ * Result of validating batch operation data.
+ */
+interface ValidationResult {
+  /** The filtered data containing only allowed fields */
+  validatedData: ValidatedNoteUpdate;
+  /** Fields that were filtered out (non-allowed and non-protected) */
+  filteredFields: string[];
+  /** Protected fields that were attempted to be modified (security concern) */
+  protectedFieldsAttempted: string[];
+  /** Whether any protected fields were in the request (indicates potential attack) */
+  hasSecurityConcern: boolean;
+}
+
+/**
+ * Validates and sanitizes batch update data to prevent mass assignment attacks.
+ *
+ * This function:
+ * 1. Filters the input data to only include allowed fields
+ * 2. Detects attempts to modify protected fields (potential attack indicator)
+ * 3. Logs security warnings when protected fields are detected
+ * 4. Returns detailed information about what was filtered for auditing
+ *
+ * @param data - The raw data object from the client request
+ * @param userId - The user ID making the request (for security logging)
+ * @param noteIds - The note IDs being affected (for security logging)
+ * @returns ValidationResult with filtered data and audit information
+ *
+ * @example
+ * const input = { title: 'New Title', org_id: 'malicious-org' };
+ * const result = validateBatchData(input, 'user-123', ['note-1', 'note-2']);
+ * // result.validatedData: { title: 'New Title' }
+ * // result.protectedFieldsAttempted: ['org_id']
+ * // result.hasSecurityConcern: true
+ */
+function validateBatchData(
+  data: Record<string, unknown>,
+  userId: string,
+  noteIds: string[]
+): ValidationResult {
+  // Get all input field names
+  const inputFields = Object.keys(data);
+
+  // Filter to allowed fields only
+  const validatedData = filterAllowedFields(data, ALLOWED_UPDATE_FIELDS);
+
+  // Detect protected fields that were attempted to be modified
+  const protectedFieldsAttempted = inputFields.filter((field) =>
+    PROTECTED_FIELDS.includes(field as ProtectedField)
+  );
+
+  // Detect other filtered fields (not allowed and not protected)
+  const allowedSet = new Set<string>(ALLOWED_UPDATE_FIELDS);
+  const protectedSet = new Set<string>(PROTECTED_FIELDS);
+  const filteredFields = inputFields.filter(
+    (field) => !allowedSet.has(field) && !protectedSet.has(field)
+  );
+
+  const hasSecurityConcern = protectedFieldsAttempted.length > 0;
+
+  // Log security warning if protected fields were attempted
+  if (hasSecurityConcern) {
+    console.warn(
+      `[SECURITY] Mass assignment attempt detected. ` +
+        `User: ${userId}, ` +
+        `Protected fields attempted: [${protectedFieldsAttempted.join(', ')}], ` +
+        `Affected note IDs: [${noteIds.slice(0, 5).join(', ')}${noteIds.length > 5 ? '...' : ''}], ` +
+        `Total notes: ${noteIds.length}`
+    );
+  }
+
+  // Log filtered fields for debugging (at info level, not warning)
+  if (filteredFields.length > 0) {
+    console.info(
+      `[VALIDATION] Unknown fields filtered from batch update: [${filteredFields.join(', ')}]. ` +
+        `User: ${userId}`
+    );
+  }
+
+  return {
+    validatedData,
+    filteredFields,
+    protectedFieldsAttempted,
+    hasSecurityConcern,
+  };
+}
+
 const MAX_BATCH_SIZE = 100;
 const BATCH_CHUNK_SIZE = 10;
 
