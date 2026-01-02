@@ -276,7 +276,7 @@ const AnnotationCard: React.FC<{
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+          className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 touch-visible p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
         >
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
