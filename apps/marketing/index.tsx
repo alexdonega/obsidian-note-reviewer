@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Landing } from '@obsidian-note-reviewer/ui/components/Landing';
+import { LandingPlannotatorPtBr } from '@obsidian-note-reviewer/ui/components/LandingPlannotatorPtBr';
 import { ThemeProvider } from '@obsidian-note-reviewer/ui/components/ThemeProvider';
 import '@obsidian-note-reviewer/editor/styles';
 
@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="dark">
-      <Landing />
+      <LandingPlannotatorPtBr />
     </ThemeProvider>
   </React.StrictMode>
 );
