@@ -1,0 +1,644 @@
+openapi: 3.0.3
+info:
+  title: Obsidian Note Reviewer API
+  description: |
+    Complete API documentation for Obsidian Note Reviewer.
+
+    ## Authentication
+    All endpoints require JWT authentication via Bearer token in the Authorization header.
+
+    ## Rate Limiting
+    - Free: 60 requests/minute
+    - Pro: 300 requests/minute
+    - Enterprise: 1000 requests/minute
+
+    ## Webhooks
+    Subscribe to real-time events via webhooks. See `/webhooks` endpoints.
+
+    ## Support
+    - Email: support@notereviewer.com
+    - Docs: https://docs.notereviewer.com
+    - Status: https://status.notereviewer.com
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api@notereviewer.com
+    url: https://notereviewer.com/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.notereviewer.com/v1
+    description: Production
+  - url: https://staging-api.notereviewer.com/v1
+    description: Staging
+  - url: http://localhost:3001/api
+    description: Development
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Notes
+    description: Note CRUD operations
+  - name: Annotations
+    description: Note annotations and highlights
+  - name: Organizations
+    description: Organization management
+  - name: Users
+    description: User profile and settings
+  - name: Subscriptions
+    description: Subscription and billing management
+  - name: Webhooks
+    description: Webhook configuration and events
+  - name: Search
+    description: Full-text search across notes
+  - name: Analytics
+    description: Usage analytics and reports
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ============================================================================
+  # AUTHENTICATION
+  # ============================================================================
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      description: Create a new user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: SecurePass123!
+                name:
+                  type: string
+                  example: John Doe
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email already exists
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login user
+      description: Authenticate and receive JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================================
+  # NOTES
+  # ============================================================================
+  /notes:
+    get:
+      tags: [Notes]
+      summary: List notes
+      description: Get paginated list of notes
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published, archived]
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: List of notes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Note'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Notes]
+      summary: Create note
+      description: Create a new note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteCreate'
+      responses:
+        '201':
+          description: Note created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '402':
+          description: Payment required (quota exceeded)
+
+  /notes/{noteId}:
+    get:
+      tags: [Notes]
+      summary: Get note
+      description: Get single note by ID
+      parameters:
+        - $ref: '#/components/parameters/NoteId'
+      responses:
+        '200':
+          description: Note details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Notes]
+      summary: Update note
+      description: Update existing note
+      parameters:
+        - $ref: '#/components/parameters/NoteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteUpdate'
+      responses:
+        '200':
+          description: Note updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Notes]
+      summary: Delete note
+      description: Soft delete a note
+      parameters:
+        - $ref: '#/components/parameters/NoteId'
+      responses:
+        '204':
+          description: Note deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /notes/search:
+    get:
+      tags: [Search]
+      summary: Search notes
+      description: Full-text search across notes
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Note'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  query:
+                    type: string
+
+  # ============================================================================
+  # SUBSCRIPTIONS
+  # ============================================================================
+  /subscriptions/current:
+    get:
+      tags: [Subscriptions]
+      summary: Get current subscription
+      description: Get user's active subscription details
+      responses:
+        '200':
+          description: Subscription details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+
+  /subscriptions/checkout:
+    post:
+      tags: [Subscriptions]
+      summary: Create checkout session
+      description: Start subscription checkout flow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [planTier, interval, successUrl, cancelUrl]
+              properties:
+                planTier:
+                  type: string
+                  enum: [free, pro, enterprise]
+                interval:
+                  type: string
+                  enum: [month, year]
+                successUrl:
+                  type: string
+                  format: uri
+                cancelUrl:
+                  type: string
+                  format: uri
+      responses:
+        '200':
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+
+  /subscriptions/portal:
+    post:
+      tags: [Subscriptions]
+      summary: Create billing portal session
+      description: Open Stripe billing portal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [returnUrl]
+              properties:
+                returnUrl:
+                  type: string
+                  format: uri
+      responses:
+        '200':
+          description: Portal session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+
+  /subscriptions/cancel:
+    post:
+      tags: [Subscriptions]
+      summary: Cancel subscription
+      description: Cancel active subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                immediately:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Subscription cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  canceledAt:
+                    type: string
+                    format: date-time
+
+# ============================================================================
+# COMPONENTS
+# ============================================================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    NoteId:
+      name: noteId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Note ID
+
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of items to return
+
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Number of items to skip
+
+  schemas:
+    # Auth
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    # User
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+
+    # Note
+    Note:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        markdown:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+        tags:
+          type: array
+          items:
+            type: string
+        user_id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    NoteCreate:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 500
+        content:
+          type: string
+        markdown:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+          default: draft
+        tags:
+          type: array
+          items:
+            type: string
+
+    NoteUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        markdown:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+        tags:
+          type: array
+          items:
+            type: string
+
+    # Subscription
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        plan_tier:
+          type: string
+          enum: [free, pro, enterprise]
+        billing_interval:
+          type: string
+          enum: [month, year]
+        status:
+          type: string
+          enum: [trialing, active, past_due, canceled]
+        trial_end:
+          type: string
+          format: date-time
+        current_period_end:
+          type: string
+          format: date-time
+        cancel_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    # Pagination
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        hasMore:
+          type: boolean
+
+    # Error
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer

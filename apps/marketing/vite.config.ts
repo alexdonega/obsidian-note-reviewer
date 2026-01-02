@@ -10,6 +10,7 @@ export default defineConfig({
   },
   plugins: [react(), tailwindcss()],
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': path.resolve(__dirname, '.'),
       '@obsidian-note-reviewer/ui': path.resolve(__dirname, '../../packages/ui'),
@@ -19,5 +20,11 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        ptbr: path.resolve(__dirname, 'index.pt-br.html'),
+      },
+    },
   },
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import logoImage from "../plannotator.webp";
+// import logoImage from "../plannotator.webp"; // Temporarily disabled - image not found
 import { ModeToggle } from "./ModeToggle";
 
 interface LandingProps {
@@ -58,11 +58,12 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
                   Not in the terminal.
                 </span>
               </h1>
-              <img
+              {/* Logo temporarily disabled - image not found */}
+              {/* <img
                 src={logoImage}
                 alt="Plannotator logo"
                 className="w-20 h-20 md:w-24 md:h-24 object-contain shrink-0 -scale-x-100"
-              />
+              /> */}
             </div>
 
             <p className="text-lg text-muted-foreground mb-8 max-w-lg">

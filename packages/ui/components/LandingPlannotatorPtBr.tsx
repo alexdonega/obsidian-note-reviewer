@@ -13,13 +13,13 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
       <nav className="fixed top-0 left-0 right-0 h-12 flex items-center justify-between px-6 bg-background/80 backdrop-blur-sm border-b border-border/30 z-50">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold tracking-tight">
-            Plannotator
+            Note Reviewer
           </span>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs">
             <a
-              href="https://github.com/backnotprop/plannotator"
+              href="https://github.com/alexdonega/obsidian-note-reviewer"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -28,7 +28,7 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
             </a>
             <span className="text-muted-foreground/50">|</span>
             <a
-              href="https://github.com/backnotprop/plannotator/blob/main/apps/hook/README.md"
+              href="https://github.com/alexdonega/obsidian-note-reviewer#instalacao"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -52,7 +52,7 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
 
             <div className="flex items-center gap-6 mb-4">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.1]">
-                Anote planos.
+                Revise notas.
                 <br />
                 <span className="text-muted-foreground">
                   Não no terminal.
@@ -61,14 +61,14 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
               {/* Logo temporarily disabled - image not found */}
               {/* <img
                 src={logoImage}
-                alt="Plannotator logo"
+                alt="Note Reviewer logo"
                 className="w-20 h-20 md:w-24 md:h-24 object-contain shrink-0 -scale-x-100"
               /> */}
             </div>
 
             <p className="text-lg text-muted-foreground mb-8 max-w-lg">
-              Revisão Interativa de Planos para agentes de código. Marque e refine planos visualmente,
-              compartilhe para colaboração em equipe. Funciona com Claude Code e OpenCode.
+              Interface visual que renderiza markdown perfeitamente, integra com AI agents automaticamente,
+              e salva no Obsidian sem fricção. Do terminal para a interface em 30 segundos.
             </p>
 
             <div className="flex flex-col gap-3">
@@ -155,9 +155,9 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
                 O Problema
               </h3>
               <p className="text-foreground/90">
-                Agentes de código mostram planos no terminal. Você aprova ou recusa, mas
-                dar feedback específico significa digitar tudo. Difícil
-                referenciar seções exatas. Zero recursos de colaboração.
+                Claude Code gera notas no terminal. Você copia e cola no Obsidian,
+                perde formatação, callouts quebram, Mermaid vira texto.
+                Workflow de 10 minutos que deveria ser instantâneo.
               </p>
             </div>
             <div>
@@ -165,9 +165,9 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
                 A Solução
               </h3>
               <p className="text-foreground/90">
-                Selecione as partes exatas do plano que você quer mudar. Marque para
-                deletar, adicione um comentário, ou sugira uma substituição. Compartilhe planos
-                com sua equipe. Feedback retorna ao seu agente automaticamente.
+                Renderização perfeita de markdown, callouts e Mermaid. Revise visualmente,
+                use templates inteligentes, salve direto no Obsidian.
+                Do terminal para sua vault em 30 segundos.
               </p>
             </div>
           </div>
@@ -195,8 +195,8 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
               <div>
                 <h3 className="font-semibold mb-1">Roda localmente.</h3>
                 <p className="text-muted-foreground text-sm">
-                  Plugin local. Sem requisições de rede. Plannotator roda inteiramente
-                  no seu navegador. Planos nunca saem da sua máquina.
+                  Aplicação local. Sem requisições de rede. Note Reviewer roda inteiramente
+                  na sua máquina. Suas notas nunca saem do seu computador.
                 </p>
               </div>
             </div>
@@ -217,20 +217,11 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Compartilhe privativamente.</h3>
+                <h3 className="font-semibold mb-1">Salva no Obsidian.</h3>
                 <p className="text-muted-foreground text-sm">
-                  Colabore sem um backend. Planos e anotações comprimem
-                  na própria URL — compartilhe um link. Sem contas, sem banco de dados,
-                  sem terceiros. Inspirado por{" "}
-                  <a
-                    href="https://github.com/antonmedv/textarea"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    textarea.my
-                  </a>
-                  .
+                  Integração nativa com sua vault. Escolha templates, customize frontmatter,
+                  salve com um clique. Suporta todos os recursos do Obsidian:
+                  callouts, Mermaid, syntax highlighting.
                 </p>
               </div>
             </div>
@@ -255,7 +246,7 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
               <div className="flex-1 flex justify-center">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <div className="w-4 h-4 rounded bg-primary/20" />
-                  <span>Plannotator</span>
+                  <span>Note Reviewer</span>
                 </div>
               </div>
               <div className="w-16" />
@@ -345,7 +336,7 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Selecione texto → anote → exporte feedback
+            Visualize → revise → salve no Obsidian
           </p>
         </section>
 
@@ -354,21 +345,21 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
           <h2 className="text-xl font-semibold mb-8">Como funciona</h2>
 
           <div className="space-y-6 max-w-2xl">
-            <Step num={1} title="Agente dispara Plannotator">
+            <Step num={1} title="Agente gera nota no terminal">
               <span className="text-xs">
-                <strong>Claude Code:</strong> Hook ExitPlanMode abre a interface<br />
-                <strong>OpenCode:</strong> Agente chama a ferramenta submit_plan
+                <strong>Claude Code:</strong> Skill /nota gera markdown formatado<br />
+                <strong>OpenCode:</strong> Comando note_review inicia revisão
               </span>
             </Step>
 
-            <Step num={2} title="Anote visualmente">
-              Selecione texto → escolha ação (deletar, comentar, substituir) → anotações aparecem
-              na barra lateral
+            <Step num={2} title="Revise visualmente na interface">
+              Markdown renderizado perfeitamente. Callouts coloridos, Mermaid interativo,
+              syntax highlighting. Escolha template e customize frontmatter.
             </Step>
 
-            <Step num={3} title="Aprove ou solicite mudanças">
-              Clique em aprovar para prosseguir, ou forneça feedback com anotações.
-              Feedback retorna ao seu agente automaticamente.
+            <Step num={3} title="Salve direto no Obsidian">
+              Um clique salva na sua vault. Sem copiar/colar. Sem perder formatação.
+              Workflow de 10 minutos vira 30 segundos.
             </Step>
           </div>
         </section>
@@ -379,24 +370,24 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
           <ul className="space-y-2 text-sm text-muted-foreground max-w-2xl mb-6">
             <li className="flex items-center gap-2">
               <span className="text-primary">•</span>
-              Build em arquivo HTML único — roda de servidor Bun em porta aleatória
+              Aplicação web local — roda em servidor Bun na porta 3001
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">•</span>
-              <strong>Claude Code:</strong> Binário + plugin com hook PermissionRequest
+              <strong>Claude Code:</strong> Skill /nota com hook que abre interface
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">•</span>
-              <strong>OpenCode:</strong> Pacote npm com ferramenta submit_plan
+              <strong>OpenCode:</strong> Comando note_review integrado
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">•</span>
-              Compartilhamento por URL via compressão deflate — sem backend necessário
+              12 templates prontos + renderização de callouts e Mermaid
             </li>
           </ul>
 
           <a
-            href="https://github.com/backnotprop/plannotator"
+            href="https://github.com/alexdonega/obsidian-note-reviewer"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -423,7 +414,7 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
         <footer className="py-8 px-8 border-t border-border/30 text-center">
           <p className="text-xs text-muted-foreground inline-flex items-center justify-center gap-1">
             <a
-              href="https://github.com/backnotprop"
+              href="https://github.com/alexdonega"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-foreground hover:text-primary transition-colors"
@@ -431,20 +422,20 @@ export const LandingPlannotatorPtBr: React.FC<LandingProps> = ({ onEnter }) => {
               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
-              backnotprop
+              alexdonega
             </a>{" "}
             ·{" "}
             <a
-              href="https://x.com/backnotprop"
+              href="https://x.com/alexdonega"
               target="_blank"
               rel="noopener noreferrer"
               className="text-foreground hover:text-primary transition-colors"
             >
-              @backnotprop
+              @alexdonega
             </a>
           </p>
           <p className="text-xs text-muted-foreground/60 mt-2">
-            &copy; 2025 backnotprop. Todos os direitos reservados.
+            &copy; 2025 Alex Donega. Todos os direitos reservados.
           </p>
         </footer>
       </div>
