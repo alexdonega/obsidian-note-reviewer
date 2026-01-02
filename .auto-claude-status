@@ -3,23 +3,23 @@
   "spec": "024-add-confirmation-dialog-for-annotation-deletion",
   "state": "building",
   "subtasks": {
-    "completed": 3,
+    "completed": 6,
     "total": 8,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Integrate Dialog with AnnotationPanel",
+    "current": "Testing and Verification",
     "id": null,
-    "total": 2
+    "total": 3
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 5,
+    "number": 8,
     "started_at": "2026-01-02T13:14:10.628961"
   },
-  "last_update": "2026-01-02T13:33:16.331329"
+  "last_update": "2026-01-02T13:45:50.301249"
 }
