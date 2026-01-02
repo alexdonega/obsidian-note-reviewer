@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { Annotation, AnnotationType, Block } from '../types';
 import { isCurrentUser } from '../utils/identity';
+import { ConfirmationDialog } from './ConfirmationDialog';
 
 interface PanelProps {
   isOpen: boolean;
@@ -22,11 +23,32 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
   shareUrl
 }) => {
   const [copied, setCopied] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const sortedAnnotations = [...annotations].sort((a, b) => a.createdA - b.createdA);
 
   // Separate global comments from text annotations
   const globalComments = sortedAnnotations.filter(ann => ann.isGlobal);
   const textAnnotations = sortedAnnotations.filter(ann => !ann.isGlobal);
+
+  // Get the annotation pending deletion (for dialog display)
+  const pendingDeleteAnnotation = pendingDeleteId
+    ? annotations.find(ann => ann.id === pendingDeleteId) ?? null
+    : null;
+
+  const handleDeleteClick = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (pendingDeleteId) {
+      onDelete(pendingDeleteId);
+      setPendingDeleteId(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDeleteId(null);
+  };
 
   const handleQuickShare = async () => {
     if (!shareUrl) return;
@@ -90,7 +112,7 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
                     annotation={ann}
                     isSelected={selectedId === ann.id}
                     onSelect={() => onSelect(ann.id)}
-                    onDelete={() => onDelete(ann.id)}
+                    onDelete={() => handleDeleteClick(ann.id)}
                   />
                 ))}
               </div>
@@ -118,7 +140,7 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
                     annotation={ann}
                     isSelected={selectedId === ann.id}
                     onSelect={() => onSelect(ann.id)}
-                    onDelete={() => onDelete(ann.id)}
+                    onDelete={() => handleDeleteClick(ann.id)}
                   />
                 ))}
               </div>
@@ -152,6 +174,17 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
           </button>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={pendingDeleteId !== null}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Excluir anotação"
+        message="Tem certeza que deseja excluir esta anotação? Esta ação não pode ser desfeita."
+        confirmLabel="Excluir"
+        destructive
+      />
     </aside>
   );
 };
