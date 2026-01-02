@@ -23,6 +23,13 @@ interface BatchRequest {
 const ALLOWED_UPDATE_FIELDS = ['title', 'content', 'markdown', 'slug', 'is_public'] as const;
 
 /**
+ * The only field allowed in the tag operation data payload.
+ * This explicit constant ensures the tag operation cannot be exploited
+ * for mass assignment attacks.
+ */
+const ALLOWED_TAG_FIELD = 'tags' as const;
+
+/**
  * Fields that should never be modifiable by clients.
  * Attempts to modify these fields are logged for security auditing
  * as they may indicate an attack attempt.
@@ -176,6 +183,113 @@ function validateBatchData(
   };
 }
 
+/**
+ * Result of validating tag operation data.
+ */
+interface TagValidationResult {
+  /** The validated tags array, or null if invalid */
+  tags: string[] | null;
+  /** Whether the tags field is valid (exists and is an array) */
+  isValid: boolean;
+  /** Error message if validation failed */
+  error: string | null;
+  /** Extra fields that were present but ignored */
+  ignoredFields: string[];
+  /** Whether protected fields were attempted (security concern) */
+  hasSecurityConcern: boolean;
+}
+
+/**
+ * Validates and sanitizes tag operation data to prevent mass assignment attacks.
+ *
+ * This function explicitly extracts ONLY the 'tags' field from the data payload,
+ * ignoring all other fields. It logs warnings when extra fields are present,
+ * especially protected fields which may indicate an attack attempt.
+ *
+ * @param data - The raw data object from the client request
+ * @param userId - The user ID making the request (for security logging)
+ * @param noteIds - The note IDs being affected (for security logging)
+ * @returns TagValidationResult with validated tags and audit information
+ *
+ * @example
+ * const input = { tags: ['urgent'], org_id: 'malicious-org' };
+ * const result = validateTagData(input, 'user-123', ['note-1']);
+ * // result.tags: ['urgent']
+ * // result.ignoredFields: ['org_id']
+ * // result.hasSecurityConcern: true
+ */
+function validateTagData(
+  data: Record<string, unknown> | undefined,
+  userId: string,
+  noteIds: string[]
+): TagValidationResult {
+  // Handle missing data
+  if (!data) {
+    return {
+      tags: null,
+      isValid: false,
+      error: 'Data payload required for tag operation',
+      ignoredFields: [],
+      hasSecurityConcern: false,
+    };
+  }
+
+  // Explicitly extract only the tags field
+  const tags = data[ALLOWED_TAG_FIELD];
+
+  // Validate tags is an array
+  if (!tags || !Array.isArray(tags)) {
+    return {
+      tags: null,
+      isValid: false,
+      error: 'Tags array required for tag operation',
+      ignoredFields: [],
+      hasSecurityConcern: false,
+    };
+  }
+
+  // Get all input field names except 'tags'
+  const inputFields = Object.keys(data);
+  const extraFields = inputFields.filter((field) => field !== ALLOWED_TAG_FIELD);
+
+  // Detect protected fields that were attempted to be passed
+  const protectedFieldsAttempted = extraFields.filter((field) =>
+    PROTECTED_FIELDS.includes(field as ProtectedField)
+  );
+
+  const hasSecurityConcern = protectedFieldsAttempted.length > 0;
+
+  // Log security warning if protected fields were attempted
+  if (hasSecurityConcern) {
+    console.warn(
+      `[SECURITY] Mass assignment attempt in tag operation. ` +
+        `User: ${userId}, ` +
+        `Protected fields attempted: [${protectedFieldsAttempted.join(', ')}], ` +
+        `Affected note IDs: [${noteIds.slice(0, 5).join(', ')}${noteIds.length > 5 ? '...' : ''}], ` +
+        `Total notes: ${noteIds.length}`
+    );
+  }
+
+  // Log info about other ignored fields (non-protected)
+  const otherIgnoredFields = extraFields.filter(
+    (field) => !PROTECTED_FIELDS.includes(field as ProtectedField)
+  );
+  if (otherIgnoredFields.length > 0) {
+    console.info(
+      `[VALIDATION] Extra fields ignored in tag operation: [${otherIgnoredFields.join(', ')}]. ` +
+        `User: ${userId}`
+    );
+  }
+
+  return {
+    tags: tags as string[],
+    isValid: true,
+    error: null,
+    ignoredFields: extraFields,
+    hasSecurityConcern,
+  };
+}
+
 const MAX_BATCH_SIZE = 100;
 const BATCH_CHUNK_SIZE = 10;
 
@@ -266,6 +380,20 @@ serve(async (req) => {
       validatedUpdateData = validation.validatedData;
     }
 
+    // SECURITY: Validate data for tag operation to prevent mass assignment attacks.
+    // Only the 'tags' field is extracted; all other fields are ignored and logged.
+    let validatedTags: string[] | null = null;
+    if (operation === 'tag') {
+      const tagValidation = validateTagData(data as Record<string, unknown> | undefined, user.id, noteIds);
+      if (!tagValidation.isValid) {
+        return new Response(
+          JSON.stringify({ error: tagValidation.error }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      validatedTags = tagValidation.tags;
+    }
+
     for (const chunk of chunks) {
       try {
         switch (operation) {
@@ -309,14 +437,13 @@ serve(async (req) => {
             break;
 
           case 'tag':
-            if (!data?.tags || !Array.isArray(data.tags)) {
-              throw new Error('Tags array required for tag operation');
-            }
-
+            // SECURITY: Use validatedTags instead of raw data.tags to prevent
+            // injection of any fields other than 'tags'. Validation already
+            // performed before the loop; validatedTags is guaranteed non-null here.
             await supabase
               .from('notes')
               .update({
-                tags: data.tags,
+                tags: validatedTags!,
                 updated_at: new Date().toISOString(),
               })
               .in('id', chunk);
