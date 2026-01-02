@@ -5,7 +5,7 @@
  * Follows the modal pattern established in GlobalCommentInput.tsx and ExportModal.tsx.
  */
 
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 export interface ConfirmationDialogProps {
   /** Whether the dialog is currently visible */
@@ -36,6 +36,27 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   cancelLabel = 'Cancelar',
   destructive = false,
 }) => {
+  // Handle keyboard events: Escape to close, Enter to confirm
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      onClose();
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onConfirm();
+    }
+  }, [onClose, onConfirm]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isOpen, handleKeyDown]);
+
   if (!isOpen) return null;
 
   return (
