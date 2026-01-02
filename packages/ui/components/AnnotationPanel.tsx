@@ -1,6 +1,8 @@
 ﻿import React, { useState } from 'react';
-import { Annotation, AnnotationType, Block } from '../types';
+import { Annotation, AnnotationType, Block, SortOption } from '../types';
 import { isCurrentUser } from '../utils/identity';
+import { sortAnnotations } from '../utils/annotationSort';
+import { SortSelector } from './SortSelector';
 
 interface PanelProps {
   isOpen: boolean;
@@ -22,7 +24,8 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
   shareUrl
 }) => {
   const [copied, setCopied] = useState(false);
-  const sortedAnnotations = [...annotations].sort((a, b) => a.createdA - b.createdA);
+  const [sortOption, setSortOption] = useState<SortOption>('oldest');
+  const sortedAnnotations = sortAnnotations(annotations, sortOption);
 
   // Separate global comments from text annotations
   const globalComments = sortedAnnotations.filter(ann => ann.isGlobal);
