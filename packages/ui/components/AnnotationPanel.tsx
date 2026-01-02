@@ -12,6 +12,52 @@ interface PanelProps {
   shareUrl?: string;
 }
 
+/**
+ * Filter annotations by search query
+ * Matches against originalText, text (comment), author, or type label (case-insensitive)
+ */
+function filterAnnotations(annotations: Annotation[], query: string): Annotation[] {
+  const trimmedQuery = query.trim().toLowerCase();
+
+  // Return all if empty query
+  if (!trimmedQuery) {
+    return annotations;
+  }
+
+  // Type label mapping (Portuguese labels matching typeConfig in AnnotationCard)
+  const typeLabels: Record<AnnotationType, string> = {
+    [AnnotationType.DELETION]: 'excluir',
+    [AnnotationType.INSERTION]: 'inserir',
+    [AnnotationType.REPLACEMENT]: 'substituir',
+    [AnnotationType.COMMENT]: 'comentario',
+    [AnnotationType.GLOBAL_COMMENT]: 'global',
+  };
+
+  return annotations.filter(annotation => {
+    // Check originalText
+    if (annotation.originalText?.toLowerCase().includes(trimmedQuery)) {
+      return true;
+    }
+
+    // Check text/comment
+    if (annotation.text?.toLowerCase().includes(trimmedQuery)) {
+      return true;
+    }
+
+    // Check author
+    if (annotation.author?.toLowerCase().includes(trimmedQuery)) {
+      return true;
+    }
+
+    // Check type label
+    if (typeLabels[annotation.type]?.includes(trimmedQuery)) {
+      return true;
+    }
+
+    return false;
+  });
+}
+
 export const AnnotationPanel: React.FC<PanelProps> = ({
   isOpen,
   annotations,
