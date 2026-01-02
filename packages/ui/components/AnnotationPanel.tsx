@@ -48,11 +48,15 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
     <aside className="w-72 border-l border-border/50 bg-card/30 backdrop-blur-sm flex flex-col">
       {/* Header */}
       <div className="p-3 border-b border-border/50">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex-shrink-0">
             Anotações
           </h2>
-          <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+          <SortSelector
+            currentSort={sortOption}
+            onSortChange={setSortOption}
+          />
+          <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground ml-auto flex-shrink-0">
             {annotations.length}
           </span>
         </div>

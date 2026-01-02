@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "018-add-annotation-sorting-options",
+  "state": "building",
+  "subtasks": {
+    "completed": 5,
+    "total": 10,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Integrate into AnnotationPanel",
+    "id": 3,
+    "total": 2
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 7,
+    "started_at": "2026-01-02T13:13:51.919687"
+  },
+  "last_update": "2026-01-02T13:37:42.268078"
+}
