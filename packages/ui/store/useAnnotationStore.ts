@@ -33,6 +33,7 @@ interface AnnotationState {
   selectAll: () => void;
   clearSelection: () => void;
   getSelectedCount: () => number;
+  deleteSelected: () => void;
 }
 
 export const useAnnotationStore = create<AnnotationState>()(
@@ -88,7 +89,16 @@ export const useAnnotationStore = create<AnnotationState>()(
 
         clearSelection: () => set({ selectedIds: [] }),
 
-        getSelectedCount: () => get().selectedIds.length
+        getSelectedCount: () => get().selectedIds.length,
+
+        deleteSelected: () => set((state) => {
+          const selectedSet = new Set(state.selectedIds);
+          return {
+            annotations: state.annotations.filter(a => !selectedSet.has(a.id)),
+            selectedIds: [],
+            selectedId: selectedSet.has(state.selectedId ?? '') ? null : state.selectedId
+          };
+        })
       }),
       { name: 'annotation-store' }
     )
