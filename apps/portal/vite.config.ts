@@ -143,27 +143,11 @@ export default defineConfig({
           // Vendor chunks
           'react-vendor': ['react', 'react-dom'],
           'router': ['react-router-dom'],
-          'supabase': ['@supabase/supabase-js'],
 
           // UI library chunks
           'ui-vendor': [
             'lucide-react',
-            'react-markdown',
-            'remark-gfm',
           ],
-
-          // Editor chunks
-          'editor': [
-            'mermaid',
-            'highlight.js',
-            'web-highlighter',
-          ],
-
-          // State management
-          'state': ['zustand'],
-
-          // Monitoring
-          'monitoring': ['@sentry/react', 'pino'],
         },
 
         // File naming strategy
@@ -200,8 +184,7 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-router-dom',
-      '@supabase/supabase-js',
-      'zustand',
+      'lucide-react',
     ],
     exclude: ['@obsidian-note-reviewer/ui'],
   },

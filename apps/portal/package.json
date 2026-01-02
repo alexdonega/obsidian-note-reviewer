@@ -16,7 +16,8 @@
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.11.0",
     "tailwindcss": "^4.1.18",
-    "@tailwindcss/vite": "^4.1.18"
+    "@tailwindcss/vite": "^4.1.18",
+    "lucide-react": "^0.460.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",
