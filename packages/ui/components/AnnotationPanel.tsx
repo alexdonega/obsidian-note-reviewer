@@ -235,12 +235,19 @@ const AnnotationCard: React.FC<{
 
   const config = typeConfig[annotation.type];
   const isGlobal = annotation.isGlobal;
+  const showCheckbox = onCheckToggle !== undefined;
+
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onCheckToggle?.();
+  };
 
   return (
     <div
       onClick={onSelect}
       className={`
-        group relative p-2.5 rounded-lg border cursor-pointer transition-all
+        group relative rounded-lg border cursor-pointer transition-all flex
+        ${showCheckbox ? 'pl-1' : 'pl-2.5'} pr-2.5 py-2.5
         ${isGlobal
           ? isSelected
             ? 'bg-blue-500/10 border-blue-500/40 shadow-sm'
@@ -251,6 +258,24 @@ const AnnotationCard: React.FC<{
         }
       `}
     >
+      {/* Checkbox for bulk selection */}
+      {showCheckbox && (
+        <div
+          onClick={handleCheckboxClick}
+          className="flex-shrink-0 flex items-start pt-0.5 pr-2"
+        >
+          <input
+            type="checkbox"
+            checked={isChecked ?? false}
+            onChange={() => {}} // Controlled by onClick handler
+            aria-label={`Select annotation: ${config.label}`}
+            className="w-3.5 h-3.5 rounded border-border/50 text-primary focus:ring-primary/30 focus:ring-offset-0 cursor-pointer"
+          />
+        </div>
+      )}
+
+      {/* Card content */}
+      <div className="flex-1 min-w-0">
       {/* Author */}
       {annotation.author && (
         <div className={`flex items-center gap-1.5 text-[10px] font-mono truncate mb-1.5 ${isCurrentUser(annotation.author) ? 'text-muted-foreground/60' : 'text-muted-foreground'}`}>
@@ -299,6 +324,7 @@ const AnnotationCard: React.FC<{
           {annotation.text}
         </div>
       )}
+      </div>
     </div>
   );
 };
