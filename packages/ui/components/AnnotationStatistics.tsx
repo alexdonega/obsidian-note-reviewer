@@ -11,6 +11,7 @@ import {
   TimingDistribution as TimingDistributionData,
 } from '../utils/annotationStats';
 import { annotationTypeConfig } from '../utils/annotationTypeConfig';
+import { isCurrentUser } from '../utils/identity';
 
 export interface AnnotationStatisticsProps {
   /**
@@ -113,6 +114,7 @@ const StatsByType: React.FC<StatsByTypeProps> = ({ stats }) => {
 /**
  * Displays annotation counts per author.
  * Sorted by count descending.
+ * Highlights the current user's contributions.
  */
 interface StatsByAuthorProps {
   stats: StatsByAuthorData;
@@ -129,12 +131,22 @@ const StatsByAuthor: React.FC<StatsByAuthorProps> = ({ stats }) => {
     <div className="stats-section stats-by-author">
       <h4 className="stats-section-title">Por Autor</h4>
       <div className="stats-author-list">
-        {sortedAuthors.map(([author, count]) => (
-          <div key={author} className="stats-author-item">
-            <span className="stats-author-name">{author}</span>
-            <span className="stats-author-count">{count}</span>
-          </div>
-        ))}
+        {sortedAuthors.map(([author, count]) => {
+          const isMe = isCurrentUser(author);
+          return (
+            <div
+              key={author}
+              className={`stats-author-item ${isMe ? 'stats-author-current' : ''}`}
+            >
+              <span className={`stats-author-name ${isMe ? 'stats-author-name-current' : ''}`}>
+                {author}{isMe && ' (eu)'}
+              </span>
+              <span className={`stats-author-count ${isMe ? 'stats-author-count-current' : ''}`}>
+                {count}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

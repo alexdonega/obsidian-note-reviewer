@@ -480,12 +480,24 @@ pre code.hljs {
   @apply flex items-center justify-between text-[11px];
 }
 
+.stats-author-current {
+  @apply bg-primary/5 rounded px-1.5 py-0.5 -mx-1.5;
+}
+
 .stats-author-name {
   @apply truncate text-foreground/80;
 }
 
+.stats-author-name-current {
+  @apply text-primary font-medium;
+}
+
 .stats-author-count {
   @apply font-mono text-muted-foreground;
+}
+
+.stats-author-count-current {
+  @apply text-primary/80;
 }
 
 /* Timing Distribution */
