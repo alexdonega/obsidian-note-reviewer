@@ -24,6 +24,88 @@ export interface SharePayload {
 }
 
 /**
+ * Validate that a parsed object is a valid ShareableAnnotation
+ * Checks type, required fields, and field types
+ */
+function isValidShareableAnnotation(item: unknown): item is ShareableAnnotation {
+  if (!Array.isArray(item) || item.length < 3) {
+    return false;
+  }
+
+  const type = item[0];
+  const originalText = item[1];
+
+  // Type must be one of the valid annotation types
+  if (!['D', 'R', 'C', 'I'].includes(type as string)) {
+    return false;
+  }
+
+  // Original text must be a string
+  if (typeof originalText !== 'string') {
+    return false;
+  }
+
+  // For Deletion: [type, originalText, author]
+  if (type === 'D') {
+    const author = item[2];
+    // Author must be string or null
+    return author === null || typeof author === 'string';
+  }
+
+  // For R, C, I: [type, originalText, text, author]
+  if (item.length < 4) {
+    return false;
+  }
+
+  const text = item[2];
+  const author = item[3];
+
+  // Text must be a string
+  if (typeof text !== 'string') {
+    return false;
+  }
+
+  // Author must be string or null
+  return author === null || typeof author === 'string';
+}
+
+/**
+ * Validate that a parsed object is a valid SharePayload
+ * Returns true if the object has required fields with correct types
+ *
+ * Validates:
+ * - p (plan): must be a string
+ * - a (annotations): must be an array of valid ShareableAnnotation
+ */
+export function validateSharePayload(data: unknown): data is SharePayload {
+  // Must be a non-null object
+  if (data === null || typeof data !== 'object') {
+    return false;
+  }
+
+  const obj = data as Record<string, unknown>;
+
+  // Check required 'p' field is a string
+  if (!('p' in obj) || typeof obj.p !== 'string') {
+    return false;
+  }
+
+  // Check required 'a' field is an array
+  if (!('a' in obj) || !Array.isArray(obj.a)) {
+    return false;
+  }
+
+  // Validate each annotation in the array
+  for (const annotation of obj.a) {
+    if (!isValidShareableAnnotation(annotation)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
  * Compress a SharePayload to a base64url string
  */
 export async function compress(payload: SharePayload): Promise<string> {
@@ -66,7 +148,7 @@ export async function decompress(b64: string): Promise<SharePayload> {
   const buffer = await new Response(stream.readable).arrayBuffer();
   const json = new TextDecoder().decode(buffer);
 
-  const result = safeJsonParse<SharePayload>(json);
+  const result = safeJsonParse<SharePayload>(json, validateSharePayload);
   if (!result.success) {
     throw new Error(`Failed to parse share payload: ${result.error}`);
   }
