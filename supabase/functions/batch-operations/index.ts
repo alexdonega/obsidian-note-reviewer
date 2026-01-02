@@ -3,11 +3,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 interface BatchRequest {
   operation: 'update' | 'delete' | 'archive' | 'tag';
@@ -19,9 +15,13 @@ const MAX_BATCH_SIZE = 100;
 const BATCH_CHUNK_SIZE = 10;
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return handleCorsPreflightRequest(req);
   }
+
+  // Get validated CORS headers for this request
+  const corsHeaders = getCorsHeaders(req);
 
   try {
     const supabase = createClient(
