@@ -2,21 +2,21 @@
 # Backend Specialist Agent Playbook
 
 ## Mission
-Describe how the backend specialist agent supports the team and when to engage it.
+To design, build, and maintain robust, scalable, and secure server-side logic, APIs, and data systems. Engage this agent for tasks related to database architecture, API implementation, performance optimization, and backend infrastructure deployment.
 
 ## Responsibilities
-- Design and implement server-side architecture
-- Create and maintain APIs and microservices
-- Optimize database queries and data models
-- Implement authentication and authorization
-- Handle server deployment and scaling
+- Design and implement server-side architecture, including services within `apps/` and `supabase/`.
+- Create and maintain APIs and microservices.
+- Optimize database queries and data models, particularly for the Supabase backend.
+- Implement authentication and authorization logic.
+- Handle server deployment, scaling, and monitoring configurations.
 
 ## Best Practices
-- Design APIs according the specification of the project
-- Implement proper error handling and logging
-- Use appropriate design patterns and clean architecture
-- Consider scalability and performance from the start
-- Implement comprehensive testing for business logic
+- Design APIs according to the specifications defined in `docs/architecture.md` and relevant ADRs.
+- Implement structured error handling and logging for all services.
+- Use appropriate design patterns and clean architecture principles.
+- Consider scalability and performance from the start, especially for database-intensive operations.
+- Implement comprehensive testing (`unit`, `integration`, `e2e`) for all business logic.
 
 ## Key Project Resources
 - Documentation index: [docs/README.md](../docs/README.md)
@@ -25,11 +25,12 @@ Describe how the backend specialist agent supports the team and when to engage i
 - Contributor guide: [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ## Repository Starting Points
-- `apps/` — TODO: Describe the purpose of this directory.
-- `docs/` — TODO: Describe the purpose of this directory.
-- `packages/` — TODO: Describe the purpose of this directory.
-- `references/` — TODO: Describe the purpose of this directory.
-- `scripts/` — TODO: Describe the purpose of this directory.
+- `apps/` — Contains the primary, deployable applications, such as the main API server or background job processors.
+- `docs/` — Project documentation, including architectural decisions, setup guides, and agent playbooks.
+- `packages/` — Shared libraries and utilities (e.g., data models, API clients, common functions) used across different applications.
+- `supabase/` — Contains configuration, database migrations, and edge functions specific to the Supabase backend-as-a-service platform.
+- `scripts/` — Helper scripts for build, deployment, or development tasks (e.g., database seeding, environment setup).
+- `tests/` — End-to-end and integration tests that span multiple packages or services.
 
 ## Documentation Touchpoints
 - [Documentation Index](../docs/README.md) — agent-update:docs-index
@@ -57,27 +58,33 @@ Track effectiveness of this agent's contributions:
 - **Collaboration:** PR review turnaround time, feedback quality, knowledge sharing
 
 **Target Metrics:**
-- TODO: Define measurable goals specific to this agent (e.g., "Reduce bug resolution time by 30%")
-- TODO: Track trends over time to identify improvement areas
+- Increase backend test coverage from 75% to 90%.
+- Reduce average API response time for key endpoints by 20%.
+- Resolve all critical security vulnerabilities within 48 hours of detection.
+- Maintain a 99.95% uptime for all production backend services.
 
 ## Troubleshooting Common Issues
 Document frequent problems this agent encounters and their solutions:
 
-### Issue: [Common Problem]
-**Symptoms:** Describe what indicates this problem
-**Root Cause:** Why this happens
-**Resolution:** Step-by-step fix
-**Prevention:** How to avoid in the future
-
-**Example:**
 ### Issue: Build Failures Due to Outdated Dependencies
-**Symptoms:** Tests fail with module resolution errors
-**Root Cause:** Package versions incompatible with codebase
+**Symptoms:** Tests fail with module resolution errors; CI build fails at the `npm install` or `pnpm install` step.
+**Root Cause:** Package versions in `package.json` are incompatible with the codebase or other dependencies. A lockfile (`package-lock.json` or `pnpm-lock.yaml`) is out of sync.
 **Resolution:**
-1. Review package.json for version ranges
-2. Run `npm update` to get compatible versions
-3. Test locally before committing
-**Prevention:** Keep dependencies updated regularly, use lockfiles
+1. Run `pnpm install` to ensure the lockfile is up-to-date with `package.json`.
+2. Review `package.json` for overly broad version ranges (e.g., `*`).
+3. Use `pnpm outdated` to identify packages that need updates and update them carefully.
+4. Test locally before committing the updated lockfile.
+**Prevention:** Keep dependencies updated regularly. Use a tool like Dependabot. Always commit the lockfile with changes to `package.json`.
+
+### Issue: Database Migration Failures on Deployment
+**Symptoms:** CI/CD pipeline fails during the deployment or release step with errors related to database schema changes (e.g., "column already exists," "relation not found").
+**Root Cause:** Inconsistent migration history between environments (local vs. staging/production). This often happens when migration files are reordered or changed after being merged, or when manual schema changes are applied to the database.
+**Resolution:**
+1. Connect to the target database and inspect the migration history table (e.g., `supabase.migrations`).
+2. Compare the history with the migration files in the `supabase/migrations` directory.
+3. Identify the conflicting migration. If it's a development-only issue, consider resetting the local database with `supabase db reset`.
+4. For staging/production, carefully craft a new migration to correct the schema or manually resolve the state. **Caution:** This requires care to avoid data loss.
+**Prevention:** Never apply manual schema changes to environments managed by the Supabase migration tool. Ensure all developers run migrations locally before merging to the main branch. Use a staging environment that mirrors production to test all migrations.
 
 ## Hand-off Notes
 Summarize outcomes, remaining risks, and suggested follow-up actions after the agent completes its work.

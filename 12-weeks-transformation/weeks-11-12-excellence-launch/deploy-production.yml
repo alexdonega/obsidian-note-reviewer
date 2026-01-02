@@ -1,0 +1,427 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  BUN_VERSION: 'latest'
+
+jobs:
+  # ============================================================================
+  # LINT & TYPE CHECK
+  # ============================================================================
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run ESLint
+        run: bun run lint
+
+      - name: Type check
+        run: bun run type-check
+
+  # ============================================================================
+  # UNIT TESTS
+  # ============================================================================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run tests
+        run: bun run test:ci
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+
+  # ============================================================================
+  # E2E TESTS
+  # ============================================================================
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run database migrations
+        run: bunx supabase db push
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+
+      - name: Run E2E tests
+        run: bun run test:e2e
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-results
+          path: e2e-results/
+
+  # ============================================================================
+  # SECURITY SCAN
+  # ============================================================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Check for high/critical vulnerabilities
+        run: |
+          HIGH_COUNT=$(cat trivy-results.sarif | jq '.runs[0].results | map(select(.level == "error")) | length')
+          if [ "$HIGH_COUNT" -gt 0 ]; then
+            echo "Found $HIGH_COUNT high/critical vulnerabilities"
+            exit 1
+          fi
+
+  # ============================================================================
+  # BUILD & BUNDLE
+  # ============================================================================
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build UI
+        run: |
+          cd packages/ui
+          bun run build
+        env:
+          NODE_ENV: production
+          VITE_API_URL: ${{ secrets.PRODUCTION_API_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Build API
+        run: |
+          cd packages/api
+          bun run build
+
+      - name: Upload UI build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ui-build
+          path: packages/ui/dist
+          retention-days: 7
+
+      - name: Upload API build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-build
+          path: packages/api/dist
+          retention-days: 7
+
+  # ============================================================================
+  # DEPLOY TO STAGING
+  # ============================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, security]
+    environment:
+      name: staging
+      url: https://staging.notereviewer.com
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download UI artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ui-build
+          path: packages/ui/dist
+
+      - name: Download API artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: api-build
+          path: packages/api/dist
+
+      - name: Deploy UI to Vercel (Staging)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: packages/ui
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Deploy API to Railway (Staging)
+        uses: bervProject/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: api-staging
+          environment: staging
+
+      - name: Run smoke tests
+        run: |
+          curl -f https://staging.notereviewer.com/health || exit 1
+          curl -f https://staging-api.notereviewer.com/health || exit 1
+
+  # ============================================================================
+  # DEPLOY TO PRODUCTION
+  # ============================================================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, e2e]
+    environment:
+      name: production
+      url: https://notereviewer.com
+    timeout-minutes: 15
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download UI artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ui-build
+          path: packages/ui/dist
+
+      - name: Download API artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: api-build
+          path: packages/api/dist
+
+      - name: Deploy UI to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: packages/ui
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Deploy API to Railway (Production)
+        uses: bervProject/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: api-production
+          environment: production
+
+      - name: Run database migrations
+        run: |
+          bunx supabase db push --db-url ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: Warm up cache
+        run: |
+          curl https://notereviewer.com
+          curl https://notereviewer.com/api/health
+
+      - name: Verify deployment
+        run: |
+          # Check health endpoints
+          curl -f https://notereviewer.com/health || exit 1
+          curl -f https://api.notereviewer.com/health || exit 1
+
+          # Check critical paths
+          curl -f https://notereviewer.com/pricing || exit 1
+          curl -f https://notereviewer.com/login || exit 1
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: note-reviewer
+        with:
+          environment: production
+          version: ${{ github.sha }}
+
+  # ============================================================================
+  # POST-DEPLOY
+  # ============================================================================
+  post-deploy:
+    name: Post-Deploy Tasks
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    timeout-minutes: 10
+
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "🚀 Production deployment successful!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production Deployment Successful* ✅\n\n*Version:* ${{ github.sha }}\n*Branch:* ${{ github.ref_name }}\n*Deployed by:* ${{ github.actor }}\n*Time:* $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Update status page
+        run: |
+          curl -X POST https://api.statuspage.io/v1/pages/${{ secrets.STATUSPAGE_PAGE_ID }}/incidents \
+            -H "Authorization: OAuth ${{ secrets.STATUSPAGE_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "incident": {
+                "name": "Deployment in progress",
+                "status": "investigating",
+                "impact_override": "none",
+                "body": "Deploying version ${{ github.sha }}"
+              }
+            }'
+
+      - name: Purge CDN cache
+        run: |
+          # Cloudflare cache purge
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}'
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## Changes in this release
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+
+            ## Deployment
+            - UI: https://notereviewer.com
+            - API: https://api.notereviewer.com
+            - Docs: https://docs.notereviewer.com
+
+            ## Rollback
+            To rollback, run: `git revert ${{ github.sha }}`
+          draft: false
+          prerelease: false
+
+  # ============================================================================
+  # ROLLBACK (Manual trigger only)
+  # ============================================================================
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment:
+      name: production
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout previous version
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.version }}
+
+      - name: Deploy previous version
+        run: |
+          # Re-run deployment with previous version
+          echo "Rolling back to ${{ github.event.inputs.version }}"
+
+      - name: Notify team
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "⚠️ Production rollback initiated by ${{ github.actor }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

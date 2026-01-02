@@ -1,0 +1,450 @@
+# Production Monitoring & Alerting Configuration
+# For use with Prometheus, Grafana, and PagerDuty
+
+# ============================================================================
+# PROMETHEUS ALERTING RULES
+# ============================================================================
+
+groups:
+  # API Health & Availability
+  - name: api_health
+    interval: 30s
+    rules:
+      - alert: APIDown
+        expr: up{job="api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "API is down"
+          description: "API instance {{ $labels.instance }} has been down for more than 2 minutes"
+          runbook: "https://docs.notereviewer.com/runbooks/api-down"
+
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+          runbook: "https://docs.notereviewer.com/runbooks/high-error-rate"
+
+      - alert: SlowAPIResponses
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "API responses are slow"
+          description: "95th percentile response time is {{ $value }}s (threshold: 1s)"
+          runbook: "https://docs.notereviewer.com/runbooks/slow-responses"
+
+  # Database Health
+  - name: database_health
+    interval: 1m
+    rules:
+      - alert: DatabaseDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL database is unreachable"
+          runbook: "https://docs.notereviewer.com/runbooks/database-down"
+
+      - alert: HighDatabaseConnections
+        expr: |
+          (
+            sum(pg_stat_database_numbackends)
+            /
+            pg_settings_max_connections
+          ) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High database connection usage"
+          description: "Database connection usage is {{ $value | humanizePercentage }}"
+          runbook: "https://docs.notereviewer.com/runbooks/high-db-connections"
+
+      - alert: SlowQueries
+        expr: |
+          pg_stat_statements_mean_exec_time_seconds > 1
+        for: 10m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Average query time is {{ $value }}s"
+          runbook: "https://docs.notereviewer.com/runbooks/slow-queries"
+
+      - alert: DatabaseDiskSpaceHigh
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/var/lib/postgresql"}
+            /
+            node_filesystem_size_bytes{mountpoint="/var/lib/postgresql"}
+          ) < 0.2
+        for: 10m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database disk space running low"
+          description: "Only {{ $value | humanizePercentage }} disk space available"
+          runbook: "https://docs.notereviewer.com/runbooks/disk-space-low"
+
+  # Application Performance
+  - name: application_performance
+    interval: 1m
+    rules:
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            process_resident_memory_bytes
+            /
+            node_memory_MemTotal_bytes
+          ) > 0.85
+        for: 15m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+          runbook: "https://docs.notereviewer.com/runbooks/high-memory"
+
+      - alert: HighCPUUsage
+        expr: |
+          rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 15m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value | humanizePercentage }}"
+          runbook: "https://docs.notereviewer.com/runbooks/high-cpu"
+
+      - alert: CacheMissRatioHigh
+        expr: |
+          (
+            rate(cache_misses_total[5m])
+            /
+            (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m]))
+          ) > 0.3
+        for: 10m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "High cache miss ratio"
+          description: "Cache miss ratio is {{ $value | humanizePercentage }}"
+          runbook: "https://docs.notereviewer.com/runbooks/cache-miss"
+
+  # Business Metrics
+  - name: business_metrics
+    interval: 5m
+    rules:
+      - alert: DropInSignups
+        expr: |
+          (
+            rate(user_signups_total[1h])
+            /
+            rate(user_signups_total[1h] offset 24h)
+          ) < 0.5
+        for: 1h
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Significant drop in signups"
+          description: "Signups are down {{ $value | humanizePercentage }} compared to 24h ago"
+          runbook: "https://docs.notereviewer.com/runbooks/signup-drop"
+
+      - alert: PaymentFailureRateHigh
+        expr: |
+          (
+            rate(stripe_payment_failed_total[1h])
+            /
+            rate(stripe_payment_attempts_total[1h])
+          ) > 0.1
+        for: 30m
+        labels:
+          severity: critical
+          component: payments
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is {{ $value | humanizePercentage }}"
+          runbook: "https://docs.notereviewer.com/runbooks/payment-failures"
+
+      - alert: ChurnRateIncreasing
+        expr: |
+          rate(subscription_cancellations_total[24h]) > 0.05
+        for: 4h
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Churn rate increasing"
+          description: "Churn rate is {{ $value | humanizePercentage }}"
+          runbook: "https://docs.notereviewer.com/runbooks/high-churn"
+
+  # Stripe & Payments
+  - name: payments
+    interval: 1m
+    rules:
+      - alert: StripeWebhookDown
+        expr: |
+          rate(stripe_webhook_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          component: payments
+        annotations:
+          summary: "Stripe webhook failures"
+          description: "Webhook error rate: {{ $value }}/s"
+          runbook: "https://docs.notereviewer.com/runbooks/stripe-webhook"
+
+      - alert: SubscriptionSyncLag
+        expr: |
+          time() - stripe_last_subscription_sync_timestamp > 300
+        for: 5m
+        labels:
+          severity: warning
+          component: payments
+        annotations:
+          summary: "Subscription sync lagging"
+          description: "Last sync was {{ $value }}s ago"
+          runbook: "https://docs.notereviewer.com/runbooks/sync-lag"
+
+  # Security
+  - name: security
+    interval: 1m
+    rules:
+      - alert: TooManyFailedLogins
+        expr: |
+          rate(auth_failed_login_attempts_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Unusually high failed login attempts"
+          description: "{{ $value }} failed logins/s from {{ $labels.ip }}"
+          runbook: "https://docs.notereviewer.com/runbooks/failed-logins"
+
+      - alert: SSLCertificateExpiringSoon
+        expr: |
+          (ssl_certificate_expiry_seconds - time()) / 86400 < 7
+        for: 1h
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "Certificate expires in {{ $value }} days"
+          runbook: "https://docs.notereviewer.com/runbooks/ssl-expiry"
+
+      - alert: RateLimitExceeded
+        expr: |
+          rate(http_requests_rate_limited_total[1m]) > 100
+        for: 5m
+        labels:
+          severity: info
+          component: api
+        annotations:
+          summary: "Rate limit frequently exceeded"
+          description: "{{ $value }} requests/s being rate limited"
+
+# ============================================================================
+# GRAFANA DASHBOARD CONFIGURATION
+# ============================================================================
+
+dashboards:
+  - name: "API Overview"
+    panels:
+      - title: "Request Rate"
+        query: "rate(http_requests_total[5m])"
+        type: graph
+
+      - title: "Error Rate"
+        query: "rate(http_requests_total{status=~'5..'}[5m])"
+        type: graph
+
+      - title: "Response Time (P95)"
+        query: "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
+        type: graph
+
+      - title: "Active Users"
+        query: "active_users"
+        type: singlestat
+
+  - name: "Database Performance"
+    panels:
+      - title: "Connection Pool Usage"
+        query: "pg_stat_database_numbackends / pg_settings_max_connections"
+        type: graph
+
+      - title: "Query Duration (P95)"
+        query: "histogram_quantile(0.95, rate(pg_stat_statements_exec_time_bucket[5m]))"
+        type: graph
+
+      - title: "Cache Hit Ratio"
+        query: "pg_stat_database_blks_hit / (pg_stat_database_blks_hit + pg_stat_database_blks_read)"
+        type: singlestat
+
+  - name: "Business Metrics"
+    panels:
+      - title: "Daily Signups"
+        query: "increase(user_signups_total[24h])"
+        type: graph
+
+      - title: "MRR"
+        query: "sum(subscription_mrr_dollars)"
+        type: singlestat
+
+      - title: "Active Subscriptions"
+        query: "count(subscription_status{status='active'})"
+        type: singlestat
+
+      - title: "Trial Conversion Rate"
+        query: "(sum(rate(trial_conversions_total[7d])) / sum(rate(trial_starts_total[7d]))) * 100"
+        type: singlestat
+
+# ============================================================================
+# PAGERDUTY CONFIGURATION
+# ============================================================================
+
+pagerduty:
+  routing_keys:
+    critical: $PAGERDUTY_CRITICAL_KEY
+    warning: $PAGERDUTY_WARNING_KEY
+    info: $PAGERDUTY_INFO_KEY
+
+  escalation_policies:
+    - name: "On-Call Engineer"
+      escalation_rules:
+        - escalation_delay_in_minutes: 0
+          targets:
+            - type: user
+              id: on_call_primary
+        - escalation_delay_in_minutes: 15
+          targets:
+            - type: user
+              id: on_call_backup
+        - escalation_delay_in_minutes: 30
+          targets:
+            - type: schedule
+              id: engineering_team
+
+  notification_channels:
+    - type: slack
+      channel: "#alerts-production"
+      severity: [critical, warning]
+
+    - type: email
+      recipients: ["oncall@notereviewer.com"]
+      severity: [critical]
+
+    - type: sms
+      recipients: ["+1234567890"]
+      severity: [critical]
+
+# ============================================================================
+# UPTIME MONITORING (UptimeRobot / Pingdom)
+# ============================================================================
+
+uptime_checks:
+  - name: "Homepage"
+    url: "https://notereviewer.com"
+    interval: 60
+    timeout: 30
+    expected_status: 200
+
+  - name: "API Health"
+    url: "https://api.notereviewer.com/health"
+    interval: 60
+    timeout: 10
+    expected_status: 200
+    expected_body: '{"status":"ok"}'
+
+  - name: "Login Page"
+    url: "https://notereviewer.com/login"
+    interval: 300
+    timeout: 30
+    expected_status: 200
+
+  - name: "Stripe Webhook"
+    url: "https://api.notereviewer.com/webhooks/stripe"
+    interval: 300
+    timeout: 10
+    method: POST
+    expected_status: 400  # Should reject unsigned requests
+
+# ============================================================================
+# LOG AGGREGATION (DataDog / LogDNA)
+# ============================================================================
+
+log_alerts:
+  - name: "Error Spike"
+    query: 'level:error'
+    threshold: 100
+    window: "5m"
+    severity: warning
+
+  - name: "Critical Errors"
+    query: 'level:critical'
+    threshold: 1
+    window: "1m"
+    severity: critical
+
+  - name: "Payment Failures"
+    query: 'stripe payment_failed'
+    threshold: 10
+    window: "10m"
+    severity: critical
+
+# ============================================================================
+# SYNTHETIC MONITORING
+# ============================================================================
+
+synthetic_tests:
+  - name: "User Signup Flow"
+    steps:
+      - visit: "https://notereviewer.com/signup"
+      - fill: { email: "test@example.com", password: "Test123!" }
+      - click: "Sign Up"
+      - assert: { url_contains: "/dashboard" }
+    interval: 15m
+
+  - name: "Subscription Checkout"
+    steps:
+      - login_as: "test_user"
+      - visit: "https://notereviewer.com/pricing"
+      - click: "Start Trial"
+      - assert: { url_contains: "checkout.stripe.com" }
+    interval: 1h
+
+  - name: "API Authentication"
+    steps:
+      - request: POST https://api.notereviewer.com/auth/login
+      - body: { email: "test@example.com", password: "Test123!" }
+      - assert: { status: 200, json_path: "$.accessToken" }
+    interval: 5m

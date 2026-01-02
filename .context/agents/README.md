@@ -1,30 +1,34 @@
-# Agent Handbook
+# Agent Playbook Handbook
 
-This directory contains ready-to-customize playbooks for AI agents collaborating on the repository.
+This directory contains ready-to-customize playbooks for AI agents collaborating on the repository. These playbooks define roles, responsibilities, and best practices to ensure consistent and high-quality contributions.
 
 ## Available Agents
-- [Code Reviewer](./code-reviewer.md) — Review code changes for quality, style, and best practices
-- [Bug Fixer](./bug-fixer.md) — Analyze bug reports and error messages
-- [Feature Developer](./feature-developer.md) — Implement new features according to specifications
-- [Refactoring Specialist](./refactoring-specialist.md) — Identify code smells and improvement opportunities
-- [Test Writer](./test-writer.md) — Write comprehensive unit and integration tests
-- [Documentation Writer](./documentation-writer.md) — Create clear, comprehensive documentation
-- [Performance Optimizer](./performance-optimizer.md) — Identify performance bottlenecks
-- [Security Auditor](./security-auditor.md) — Identify security vulnerabilities
-- [Backend Specialist](./backend-specialist.md) — Design and implement server-side architecture
-- [Frontend Specialist](./frontend-specialist.md) — Design and implement user interfaces
-- [Architect Specialist](./architect-specialist.md) — Design overall system architecture and patterns
-- [Devops Specialist](./devops-specialist.md) — Design and maintain CI/CD pipelines
-- [Database Specialist](./database-specialist.md) — Design and optimize database schemas
-- [Mobile Specialist](./mobile-specialist.md) — Develop native and cross-platform mobile applications
+
+The following agent playbooks are available. They are ordered alphabetically.
+
+-   [Architect Specialist](./architect-specialist.md) — Designs high-level system architecture, data models, and integration patterns.
+-   [Backend & Supabase Specialist](./backend-specialist.md) — Implements server-side logic, manages database schemas, and configures Supabase services.
+-   [Bug Fixer](./bug-fixer.md) — Analyzes bug reports, debugs code, and implements corrective patches.
+-   [Code Reviewer](./code-reviewer.md) — Reviews pull requests for quality, adherence to coding standards, and potential issues.
+-   [DevOps Specialist](./devops-specialist.md) — Manages CI/CD pipelines, deployment scripts, and infrastructure monitoring.
+-   [Documentation Writer](./documentation-writer.md) — Creates and updates technical documentation, guides, and agent playbooks.
+-   [Feature Developer](./feature-developer.md) — Implements new features based on requirements and design specifications.
+-   [Frontend Specialist](./frontend-specialist.md) — Develops user interfaces and client-side logic for web applications.
+-   [Performance Optimizer](./performance-optimizer.md) — Identifies and resolves performance bottlenecks in the backend and frontend.
+-   [Refactoring Specialist](./refactoring-specialist.md) — Improves code structure and maintainability without changing external behavior.
+-   [Security Auditor](./security-auditor.md) — Scans for security vulnerabilities and recommends mitigation strategies.
+-   [Test Writer](./test-writer.md) — Writes unit, integration, and end-to-end tests to ensure code quality and stability.
 
 ## How To Use These Playbooks
-1. Pick the agent that matches your task.
-2. Enrich the template with project-specific context or links.
-3. Share the final prompt with your AI assistant.
-4. Capture learnings in the relevant documentation file so future runs improve.
+
+1.  **Consult Documentation**: Before starting, review the [Documentation Index](../docs/README.md) to gather necessary context about the architecture, workflows, and standards.
+2.  **Pick the Agent**: Select the agent playbook that best matches the task you need to perform.
+3.  **Enrich the Prompt**: Copy the playbook content and enrich the prompt with specific details, requirements, and links to relevant files or issues.
+4.  **Execute and Collaborate**: Share the final prompt with your AI assistant and work with it to complete the task.
+5.  **Capture Learnings**: If you discover new patterns or improve a process, update the relevant documentation file so future runs are more effective.
 
 ## Related Resources
-- [Documentation Index](../docs/README.md)
-- [Agent Knowledge Base](../../AGENTS.md)
-- [Contributor Guidelines](../../CONTRIBUTING.md)
+
+-   [Documentation Index](../docs/README.md)
+-   [Agent Knowledge Base](../../AGENTS.md)
+-   [Contributor Guidelines](../../CONTRIBUTING.md)

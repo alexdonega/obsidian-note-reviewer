@@ -1,34 +1,52 @@
 <!-- agent-update:start:tooling -->
 # Tooling & Productivity Guide
 
-Collect the scripts, automation, and editor settings that keep contributors efficient.
+This guide collects the scripts, automation, and editor settings that keep contributors efficient and the codebase consistent.
 
 ## Required Tooling
-- **Node.js** — Install via [nvm](https://github.com/nvm-sh/nvm) (recommended for version management). Requires version 18.x or higher. Powers the runtime for all apps, packages, and scripts in the monorepo.
-- **Yarn** — Install via `npm install -g yarn` or through nvm. Requires version 3.x (Berry) for workspace support. Manages dependencies across packages and apps; run `yarn install` at the root.
-- **Git** — Standard installation (e.g., via Homebrew on macOS: `brew install git`). Requires version 2.30 or higher. Essential for version control; configure with `git config --global user.name` and `user.email`.
-- **Docker** — Install from [official docs](https://docs.docker.com/get-docker/). Version 20+ recommended. Used for containerized environments in local development and CI/CD pipelines.
+- **Node.js** — Install via [nvm](https://github.com/nvm-sh/nvm) (recommended for version management). The repository's `.nvmrc` file specifies the correct version. Powers the runtime for all apps, packages, and scripts.
+- **Yarn** — Install via `npm install -g yarn`. Requires version 3.x (Berry) for workspace support. Manages dependencies across the monorepo; run `yarn install` at the root to get started.
+- **Git** — Standard installation (e.g., via Homebrew on macOS: `brew install git`). Essential for version control; configure with your `user.name` and `user.email`.
+- **Docker** — Install from [official docs](https://docs.docker.com/get-docker/). Required for running the local development environment via the Supabase CLI.
+- **Supabase CLI** — Install via `npm install -g supabase`. Manages the local Supabase stack (Postgres database, Auth, Storage, etc.). Key commands are `supabase start` and `supabase stop`. See the `supabase/` directory for configuration.
 
 ## Recommended Automation
-- **Pre-commit hooks**: Use Husky and lint-staged (configured in `package.json`). Install with `yarn install` to enable. Runs ESLint, Prettier formatting, and type checks before commits to maintain code quality.
-- **Linting and formatting**: `yarn lint` (ESLint for JS/TS) and `yarn format` (Prettier). Integrate with VS Code for auto-formatting on save.
-- **Code generators and scaffolding**: Leverage scripts in the `scripts/` directory, such as `yarn scaffold agent` for generating new agent playbooks. Use `tsc --watch` for TypeScript compilation during development.
-- **Build and test automation**: `yarn build` for full monorepo builds (via Turborepo if configured) and `yarn test` for Jest/Vitest suites. Watch mode: `yarn dev` for hot-reloading in apps.
+- **Pre-commit hooks**: Husky and lint-staged are configured in `package.json`. Hooks are installed automatically after `yarn install` and run ESLint, Prettier, and type checks before each commit to maintain code quality.
+- **Linting and formatting**: Run `yarn lint` for static analysis (ESLint) and `yarn format` to apply Prettier styles. Integrating these with your IDE is highly recommended for real-time feedback and auto-formatting on save.
+- **Code generators and scaffolding**: The `scripts/` directory contains helpers for common tasks. For example, use `yarn scaffold agent` to generate a new agent playbook from a template.
+- **Build and test automation**: Turborepo orchestrates tasks across the monorepo.
+  - `yarn build`: Builds all packages and apps.
+  - `yarn test`: Runs all unit and integration tests (using Jest/Vitest).
+  - `yarn dev`: Starts all apps in development mode with hot-reloading.
 
 ## IDE / Editor Setup
+We strongly recommend VS Code for a streamlined development experience.
 - **VS Code extensions**:
-  - ESLint (dbaeumer.vscode-eslint) — Catches linting errors in real-time.
-  - Prettier - Code formatter (esbenp.prettier-vscode) — Ensures consistent styling; enable "Format on Save".
-  - TypeScript Importer (pmneo.tsimporter) — Quick imports for TS/JS modules.
-  - GitLens (eamodio.gitlens) — Enhanced Git blame and history views.
-- **Workspace settings**: Copy `.vscode/settings.json` from the repo root to your project for shared configurations like TypeScript paths and editor formatting rules.
-- **Snippets**: Use built-in VS Code snippets for React/TS components, or install "Thunder Client" for API testing directly in the editor.
+  - **ESLint** (`dbaeumer.vscode-eslint`) — Catches linting errors in real-time.
+  - **Prettier - Code formatter** (`esbenp.prettier-vscode`) — Ensures consistent styling; enable "Format on Save".
+  - **GitLens** (`eamodio.gitlens`) — Supercharges the built-in Git capabilities.
+  - **Supabase** (`supabase.supabase-vscode`) — Connects to your local database, manages types, and provides helpful snippets.
+- **Workspace settings**: The repository includes a `.vscode/settings.json` file. VS Code will automatically use these settings, which configure the editor to use the workspace's version of TypeScript and enable format-on-save for supported files.
+- **API Testing**: Use an API client like "Thunder Client" (VS Code extension) or Postman for testing endpoints.
 
 ## Productivity Tips
-- **Terminal aliases**: Add to `~/.zshrc` or `~/.bashrc`: `alias yi='yarn install'`, `alias yb='yarn build'`, `alias yt='yarn test'`. For monorepo navigation: `alias apps='cd apps && ls'`.
-- **Container workflows**: Use `docker-compose up` (from `docker-compose.yml` in root) to spin up local services mirroring production, including databases for app testing.
-- **Local emulators**: For AI-related tooling, run `yarn start:context` to emulate the ai-context scaffolding server. Share dotfiles via the `references/dotfiles/` directory for team consistency.
-- **Shortcuts for loops**: Use `yarn turbo run dev --filter=apps/*` for parallel development across apps. Integrate with tmux for multi-pane terminal sessions during reviews.
+- **Terminal aliases**: Add shortcuts to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.) to speed up common commands:
+  ```bash
+  alias yi='yarn install'
+  alias yb='yarn build'
+  alias yt='yarn test'
+  alias yd='yarn dev'
+  alias ss='supabase start'
+  ```
+- **Local Supabase Stack**: The entire local backend (database, auth, etc.) is managed by the Supabase CLI.
+  - Run `supabase start` from the root to spin up all services in Docker.
+  - Once started, you can access the local Supabase Studio GUI at `http://localhost:54323` to manage your database, inspect tables, and view logs.
+  - Run `supabase stop` to shut down the services.
+- **Parallel Development**: Use Turborepo's filtering capabilities to work on a subset of the monorepo. For example, to run `dev` only for apps:
+  ```bash
+  yarn turbo run dev --filter=./apps/*
+  ```
+- **Local AI Emulators**: For development on AI-related features, run `yarn start:context` to emulate the `ai-context` scaffolding server locally.
 
 <!-- agent-readonly:guidance -->
 ## AI Update Checklist

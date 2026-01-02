@@ -2,21 +2,21 @@
 # Database Specialist Agent Playbook
 
 ## Mission
-Describe how the database specialist agent supports the team and when to engage it.
+To be the primary AI expert for all database-related tasks, from initial schema design and migration management to ongoing performance tuning and data integrity enforcement. This agent ensures the project's Supabase database is robust, scalable, and efficient.
 
 ## Responsibilities
-- Design and optimize database schemas
-- Create and manage database migrations
-- Optimize query performance and indexing
-- Ensure data integrity and consistency
-- Implement backup and recovery strategies
+- Design and optimize database schemas in Supabase.
+- Create, manage, and troubleshoot database migrations.
+- Optimize query performance, indexing strategies, and RLS policies.
+- Ensure data integrity, consistency, and security.
+- Advise on and implement backup and recovery strategies.
 
 ## Best Practices
-- Always benchmark queries before and after optimization
-- Plan migrations with rollback strategies
-- Use appropriate indexing strategies for workloads
-- Maintain data consistency across transactions
-- Document schema changes and their business impact
+- Always benchmark queries before and after optimization.
+- Plan migrations with rollback strategies and test them in a staging environment.
+- Use appropriate indexing strategies for expected query patterns.
+- Maintain data consistency across transactions and functions.
+- Document schema changes, RLS policies, and their business impact in the relevant `docs/` files.
 
 ## Key Project Resources
 - Documentation index: [docs/README.md](../docs/README.md)
@@ -25,11 +25,12 @@ Describe how the database specialist agent supports the team and when to engage 
 - Contributor guide: [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ## Repository Starting Points
-- `apps/` — TODO: Describe the purpose of this directory.
-- `docs/` — TODO: Describe the purpose of this directory.
-- `packages/` — TODO: Describe the purpose of this directory.
-- `references/` — TODO: Describe the purpose of this directory.
-- `scripts/` — TODO: Describe the purpose of this directory.
+- `supabase/` — The core directory for all Supabase assets, including database migrations, schema definitions, functions, and seeding scripts. This is the primary area of focus.
+- `apps/` — Contains the user-facing applications (e.g., web, mobile) that consume the database APIs. Review this to understand query patterns.
+- `docs/` — Contains all project documentation, including architecture notes, data flow diagrams, and schema glossaries.
+- `packages/` — Contains shared libraries and utilities, which may include database clients or data models.
+- `scripts/` — Contains utility and automation scripts for tasks like database seeding, deployments, or CI/CD processes.
+- `tests/` — Contains the project's test suites, including integration and end-to-end tests that interact with the database.
 
 ## Documentation Touchpoints
 - [Documentation Index](../docs/README.md) — agent-update:docs-index
@@ -57,19 +58,23 @@ Track effectiveness of this agent's contributions:
 - **Collaboration:** PR review turnaround time, feedback quality, knowledge sharing
 
 **Target Metrics:**
-- TODO: Define measurable goals specific to this agent (e.g., "Reduce bug resolution time by 30%")
-- TODO: Track trends over time to identify improvement areas
+- Reduce average query response time for the top 5 slowest queries by 20%.
+- Ensure 100% of new tables have corresponding migration scripts and schema documentation.
+- Achieve zero data-loss incidents during schema migrations.
 
 ## Troubleshooting Common Issues
 Document frequent problems this agent encounters and their solutions:
 
-### Issue: [Common Problem]
-**Symptoms:** Describe what indicates this problem
-**Root Cause:** Why this happens
-**Resolution:** Step-by-step fix
-**Prevention:** How to avoid in the future
+### Issue: Supabase Migration Conflicts
+**Symptoms:** `supabase db push` or `supabase migration up` fails with errors about conflicting changes or already applied migrations.
+**Root Cause:** Multiple developers creating migrations simultaneously without pulling the latest changes, or manually editing the `supabase/migrations` folder incorrectly.
+**Resolution:**
+1. Reset the local database: `supabase db reset`.
+2. Pull the latest changes from the main branch: `git pull origin main`.
+3. Apply all migrations from the main branch: `supabase migration up`.
+4. Re-create your new migration on top of the latest schema: `supabase migration new <your_migration_name>`.
+**Prevention:** Always pull the latest changes from the main branch before creating a new migration. Communicate with the team when planning schema changes.
 
-**Example:**
 ### Issue: Build Failures Due to Outdated Dependencies
 **Symptoms:** Tests fail with module resolution errors
 **Root Cause:** Package versions incompatible with codebase

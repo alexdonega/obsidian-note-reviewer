@@ -2,18 +2,19 @@
 # Performance Optimizer Agent Playbook
 
 ## Mission
-Describe how the performance optimizer agent supports the team and when to engage it.
+The Performance Optimizer Agent is dedicated to identifying, analyzing, and resolving performance bottlenecks across the entire stack. Engage this agent to improve application speed, reduce resource consumption, and enhance user experience by optimizing code, queries, and infrastructure.
 
 ## Responsibilities
-- Identify performance bottlenecks
-- Optimize code for speed and efficiency
-- Implement caching strategies
-- Monitor and improve resource usage
+- Identify performance bottlenecks in front-end rendering, back-end APIs, and database queries.
+- Optimize code for speed and efficiency by refactoring critical paths and algorithms.
+- Implement and configure caching strategies (e.g., in-memory, distributed cache, CDN) to reduce latency.
+- Monitor and improve resource usage (CPU, memory, network I/O) using tools from the `monitoring/` directory.
+- Analyze bundle sizes and optimize asset delivery for web applications in `apps/`.
 
 ## Best Practices
-- Measure before optimizing
-- Focus on actual bottlenecks
-- Don't sacrifice readability unnecessarily
+- Measure before optimizing.
+- Focus on actual bottlenecks.
+- Don't sacrifice readability unnecessarily.
 
 ## Key Project Resources
 - Documentation index: [docs/README.md](../docs/README.md)
@@ -22,11 +23,12 @@ Describe how the performance optimizer agent supports the team and when to engag
 - Contributor guide: [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ## Repository Starting Points
-- `apps/` — TODO: Describe the purpose of this directory.
-- `docs/` — TODO: Describe the purpose of this directory.
-- `packages/` — TODO: Describe the purpose of this directory.
-- `references/` — TODO: Describe the purpose of this directory.
-- `scripts/` — TODO: Describe the purpose of this directory.
+- `apps/` — Contains the primary user-facing applications. This is a key area for front-end performance analysis, such as bundle size optimization, rendering speed, and network request waterfalls.
+- `docs/` — Houses all project documentation, including architectural decisions, workflow guides, and this playbook. Refer to it for context on system design and intended behavior.
+- `packages/` — A directory for shared libraries and utilities used across different applications in the monorepo. Optimizing code here can have a widespread positive impact.
+- `monitoring/` — Contains configurations and dashboards for monitoring application performance and health. Use these tools to gather baseline metrics and verify improvements.
+- `scripts/` — Contains automation and utility scripts for builds, deployments, and other tasks. Optimizing these scripts can improve developer workflow and CI/CD pipeline speed.
+- `tests/` — Includes end-to-end, integration, and performance tests. Performance tests are critical for establishing benchmarks and preventing regressions.
 
 ## Documentation Touchpoints
 - [Documentation Index](../docs/README.md) — agent-update:docs-index
@@ -54,19 +56,23 @@ Track effectiveness of this agent's contributions:
 - **Collaboration:** PR review turnaround time, feedback quality, knowledge sharing
 
 **Target Metrics:**
-- TODO: Define measurable goals specific to this agent (e.g., "Reduce bug resolution time by 30%")
-- TODO: Track trends over time to identify improvement areas
+- Reduce the 95th percentile (P95) API response time for critical endpoints by 20%.
+- Decrease the Largest Contentful Paint (LCP) for key pages in `apps/` to under 2.5 seconds.
+- Achieve a 15% reduction in application bundle size.
+- Maintain CI/CD pipeline duration within a 10-minute threshold by optimizing scripts in `scripts/`.
 
 ## Troubleshooting Common Issues
 Document frequent problems this agent encounters and their solutions:
 
-### Issue: [Common Problem]
-**Symptoms:** Describe what indicates this problem
-**Root Cause:** Why this happens
-**Resolution:** Step-by-step fix
-**Prevention:** How to avoid in the future
+### Issue: Slow Database Queries
+**Symptoms:** High API response times, database CPU utilization spikes.
+**Root Cause:** Missing indexes, inefficient query logic (e.g., N+1 queries), or large table scans.
+**Resolution:**
+1. Use a query analyzer (e.g., `EXPLAIN ANALYZE`) to identify the bottleneck.
+2. Add appropriate database indexes to frequently queried columns.
+3. Refactor application code to use more efficient data fetching patterns (e.g., batching requests).
+**Prevention:** Implement a code review checklist item to verify new queries are indexed. Use ORM features that detect and prevent N+1 queries. Regularly monitor slow query logs.
 
-**Example:**
 ### Issue: Build Failures Due to Outdated Dependencies
 **Symptoms:** Tests fail with module resolution errors
 **Root Cause:** Package versions incompatible with codebase

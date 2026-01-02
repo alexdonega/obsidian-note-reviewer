@@ -2,18 +2,21 @@
 # Feature Developer Agent Playbook
 
 ## Mission
-Describe how the feature developer agent supports the team and when to engage it.
+To autonomously implement, test, and integrate new features based on approved specifications, accelerating the development lifecycle from issue to pull request. Engage this agent for well-defined feature tickets that require coding, unit/integration testing, and documentation updates.
 
 ## Responsibilities
-- Implement new features according to specifications
-- Design clean, maintainable code architecture
-- Integrate features with existing codebase
-- Write comprehensive tests for new functionality
+- Implement new features according to specifications provided in issues or design documents.
+- Design clean, maintainable, and scalable code architecture that aligns with existing patterns.
+- Integrate new features with the existing codebase, ensuring seamless functionality.
+- Write comprehensive unit, integration, and end-to-end tests for all new functionality.
+- Update relevant documentation to reflect the new feature's behavior and usage.
 
 ## Best Practices
-- Follow existing patterns and conventions
-- Consider edge cases and error handling
-- Write tests alongside implementation
+- Follow existing coding patterns, style guides, and conventions found in the repository.
+- Consider all edge cases, potential failure modes, and implement robust error handling.
+- Write tests alongside implementation (Test-Driven Development is encouraged).
+- Understand monorepo structure and how changes in `packages/` can affect multiple `apps/`.
+- Keep pull requests small, focused, and tied to a single issue or feature.
 
 ## Key Project Resources
 - Documentation index: [docs/README.md](../docs/README.md)
@@ -22,11 +25,11 @@ Describe how the feature developer agent supports the team and when to engage it
 - Contributor guide: [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ## Repository Starting Points
-- `apps/` — TODO: Describe the purpose of this directory.
-- `docs/` — TODO: Describe the purpose of this directory.
-- `packages/` — TODO: Describe the purpose of this directory.
-- `references/` — TODO: Describe the purpose of this directory.
-- `scripts/` — TODO: Describe the purpose of this directory.
+- `apps/` — Contains the primary, deployable applications of the project (e.g., web frontends, API servers).
+- `docs/` — Houses all project documentation, including architectural diagrams, development guides, and agent playbooks like this one.
+- `packages/` — A directory for shared libraries, UI components, and utilities used across different applications in the monorepo.
+- `scripts/` — Holds utility and automation scripts for tasks like building, testing, deploying, or database migrations.
+- `tests/` — Contains repository-wide end-to-end and integration tests that span multiple packages or apps.
 
 ## Documentation Touchpoints
 - [Documentation Index](../docs/README.md) — agent-update:docs-index
@@ -54,8 +57,9 @@ Track effectiveness of this agent's contributions:
 - **Collaboration:** PR review turnaround time, feedback quality, knowledge sharing
 
 **Target Metrics:**
-- TODO: Define measurable goals specific to this agent (e.g., "Reduce bug resolution time by 30%")
-- TODO: Track trends over time to identify improvement areas
+- Reduce time-to-merge for feature PRs by 15% quarter-over-quarter.
+- Maintain >90% unit test coverage for all new code contributions.
+- Ensure all authored PRs pass CI checks on the first attempt with a 95% success rate.
 
 ## Troubleshooting Common Issues
 Document frequent problems this agent encounters and their solutions:
@@ -68,13 +72,13 @@ Document frequent problems this agent encounters and their solutions:
 
 **Example:**
 ### Issue: Build Failures Due to Outdated Dependencies
-**Symptoms:** Tests fail with module resolution errors
-**Root Cause:** Package versions incompatible with codebase
+**Symptoms:** CI builds or local tests fail with module resolution errors or type mismatches.
+**Root Cause:** Package versions in `package.json` are incompatible with the codebase after a recent update to another package.
 **Resolution:**
-1. Review package.json for version ranges
-2. Run `npm update` to get compatible versions
-3. Test locally before committing
-**Prevention:** Keep dependencies updated regularly, use lockfiles
+1. Review `package.json` for version ranges (`^`, `~`).
+2. Run `npm install` or `pnpm install` to ensure lockfiles are synchronized.
+3. Run local tests to confirm the fix before committing.
+**Prevention:** Keep dependencies updated regularly, use and commit lockfiles (`package-lock.json`, `pnpm-lock.yaml`), and run integration tests in CI.
 
 ## Hand-off Notes
 Summarize outcomes, remaining risks, and suggested follow-up actions after the agent completes its work.

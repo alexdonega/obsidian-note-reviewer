@@ -14,27 +14,21 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - [Tooling & Productivity Guide](./tooling.md)
 
 ## Repository Snapshot
-- Approximate size: 244.33 MB
-- Total files scanned: 96
+- Approximate size: 243.81 MB
+- Total files scanned: 233
 
 Top-level files and directories:
-- `apps/`
-- `bun.lock/`
-- `bunfig.toml/`
-- `CONFIGURACAO.md/`
-- `CONTRIBUTING.md/`
+- `12-weeks-transformation/` — Project plan and transformation resources.
+- `apps/` — Contains deployable applications.
 - `docs/` — Living documentation produced by this tool.
-- `LICENSE/`
-- `LICENSE_PT_BR/`
-- `obsidian-note-reviewer.exe/`
-- `obsreview.exe/`
-- `package.json/`
+- `monitoring/` — Infrastructure for monitoring and observability.
 - `packages/` — Workspace packages or modules.
-- `README.md/`
-- `references/`
-- `scripts/`
-- `test-setup.ts/`
-- `vercel.json/`
+- `scripts/` — Helper scripts for development and CI/CD.
+- `supabase/` — Supabase-specific configurations and migrations.
+- `tests/` — End-to-end and integration tests.
+- `package.json` — Project dependencies and scripts.
+- `README.md` — Top-level project README.
+- `bun.lockb` — Bun lockfile for deterministic installs.
 
 ## Document Map
 | Guide | File | AI Marker | Primary Inputs |

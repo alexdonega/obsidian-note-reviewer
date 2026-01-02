@@ -2,7 +2,7 @@
 # Devops Specialist Agent Playbook
 
 ## Mission
-Describe how the devops specialist agent supports the team and when to engage it.
+To ensure the reliable, efficient, and secure delivery and operation of the project's software by automating infrastructure, streamlining CI/CD pipelines, and implementing robust monitoring.
 
 ## Responsibilities
 - Design and maintain CI/CD pipelines
@@ -25,11 +25,11 @@ Describe how the devops specialist agent supports the team and when to engage it
 - Contributor guide: [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ## Repository Starting Points
-- `apps/` — TODO: Describe the purpose of this directory.
-- `docs/` — TODO: Describe the purpose of this directory.
-- `packages/` — TODO: Describe the purpose of this directory.
-- `references/` — TODO: Describe the purpose of this directory.
-- `scripts/` — TODO: Describe the purpose of this directory.
+- `apps/` — Contains the primary applications and user-facing services. The DevOps agent is responsible for their build, deployment, and runtime environment.
+- `docs/` — Contains all project documentation, including architecture, workflows, and these agent playbooks. The agent helps keep this documentation aligned with infrastructure and process changes.
+- `packages/` — Contains shared libraries and utilities consumed by the applications in the `apps/` directory. The agent ensures these are versioned and published correctly.
+- `references/` — Contains supporting materials, external documentation, or design files that provide context but are not part of the core codebase.
+- `scripts/` — Contains automation scripts for builds, deployments, testing, and other operational tasks. This is a primary area of ownership for the DevOps agent.
 
 ## Documentation Touchpoints
 - [Documentation Index](../docs/README.md) — agent-update:docs-index
@@ -57,27 +57,33 @@ Track effectiveness of this agent's contributions:
 - **Collaboration:** PR review turnaround time, feedback quality, knowledge sharing
 
 **Target Metrics:**
-- TODO: Define measurable goals specific to this agent (e.g., "Reduce bug resolution time by 30%")
-- TODO: Track trends over time to identify improvement areas
+- Reduce CI pipeline duration by 25% over the next quarter.
+- Increase deployment frequency from weekly to on-demand (at least daily).
+- Achieve and maintain 99.95% uptime for production services.
+- Reduce mean time to recovery (MTTR) for production incidents to under 15 minutes.
 
 ## Troubleshooting Common Issues
 Document frequent problems this agent encounters and their solutions:
 
-### Issue: [Common Problem]
-**Symptoms:** Describe what indicates this problem
-**Root Cause:** Why this happens
-**Resolution:** Step-by-step fix
-**Prevention:** How to avoid in the future
-
-**Example:**
 ### Issue: Build Failures Due to Outdated Dependencies
-**Symptoms:** Tests fail with module resolution errors
-**Root Cause:** Package versions incompatible with codebase
+**Symptoms:** CI/CD pipeline fails during the `npm install` or build step; tests fail with module resolution errors.
+**Root Cause:** Package versions specified in `package.json` are incompatible with the codebase or other dependencies. A lockfile (`package-lock.json`) may be out of sync.
 **Resolution:**
-1. Review package.json for version ranges
-2. Run `npm update` to get compatible versions
-3. Test locally before committing
-**Prevention:** Keep dependencies updated regularly, use lockfiles
+1. Review `package.json` for suspect version ranges (e.g., `^1.2.3` or `~4.5.6`).
+2. Run `npm install` or `npm update` locally to attempt to resolve compatible versions.
+3. If errors persist, identify the problematic package and check its changelog for breaking changes.
+4. Test locally to confirm the fix before committing the updated `package.json` and `package-lock.json`.
+**Prevention:** Use lockfiles to ensure reproducible builds. Schedule regular dependency update reviews. Use tools like Dependabot to automate pull requests for new versions.
+
+### Issue: Deployment Rollback Due to Failing Health Checks
+**Symptoms:** A new deployment is triggered, but the new version fails to become healthy. Monitoring systems fire alerts for high error rates or service unavailability.
+**Root Cause:** A critical bug was introduced in the new release that was not caught in pre-production environments.
+**Resolution:**
+1. Trigger the automated rollback process in the CI/CD pipeline to redeploy the last known stable version.
+2. Verify that the previous stable version is running and all health checks are passing.
+3. Create a post-mortem incident in the issue tracker to analyze the failure, linking the faulty commit and deployment logs.
+4. Disable automatic deployments to the affected environment until a fix is merged.
+**Prevention:** Improve pre-production testing coverage (e.g., canary deployments, more comprehensive end-to-end tests). Ensure health checks are robust and accurately reflect service health.
 
 ## Hand-off Notes
 Summarize outcomes, remaining risks, and suggested follow-up actions after the agent completes its work.

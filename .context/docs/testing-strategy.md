@@ -1,29 +1,40 @@
 <!-- agent-update:start:testing-strategy -->
 # Testing Strategy
 
-Document how quality is maintained across the codebase.
+This document outlines the testing strategy for the monorepo, ensuring code quality, stability, and correctness across all applications and packages. Our approach is layered to catch issues at the most appropriate and efficient stage of development.
 
 ## Test Types
-- **Unit**: Unit tests focus on individual functions, components, and modules in isolation. We use Jest as the primary framework, configured via `packages/*/jest.config.js` for monorepo support. Tests are colocated with source files (e.g., `component.test.ts` next to `component.ts`) or in `__tests__` directories. Mocking is handled with Jest's built-in utilities or libraries like `msw` for API simulations.
-- **Integration**: Integration tests verify interactions between modules, such as API endpoints with database mocks or component integrations in React apps. Scenarios include service layer tests with in-memory databases (e.g., SQLite via `jest-mock-extended`). Tooling includes Jest with Supertest for HTTP integrations and Vitest for faster package-specific runs where applicable.
-- **End-to-end**: E2E tests simulate real user workflows across the full stack, using Playwright for browser automation. Harnesses are set up in `apps/*/e2e/` with dedicated environments (e.g., local Docker Compose for backend services). Tests run against staging-like setups, covering critical paths like user authentication and data flows.
+- **Unit**: Unit tests focus on individual functions, components, and modules in isolation. We use **Jest** as the primary framework, configured for monorepo support in the root `jest.config.js`. Tests are colocated with source files (e.g., `component.test.ts` next to `component.ts`). Mocking is handled with Jest's built-in utilities and **`msw`** for simulating third-party API responses.
+- **Integration**: Integration tests verify interactions between different modules, services, and our backend (**Supabase**). We use a local, Docker-based Supabase environment for testing against a realistic database and auth setup, managed via the Supabase CLI (`supabase start`). Tests use Jest and **Supertest** to validate API endpoint behavior from the service layer down to the database.
+- **End-to-end (E2E)**: E2E tests simulate real user workflows using **Playwright**. These tests run against a fully self-contained environment spun up via Docker Compose, including the frontend applications and a local Supabase stack. This ensures high-fidelity testing of critical user paths like authentication, data creation, and core feature interactions. E2E test suites are located in `tests/e2e/`.
 
 ## Running Tests
-- Execute all tests with `npm run test` (runs Jest in the root, respecting monorepo workspaces).
-- Use watch mode locally: `npm run test -- --watch` for interactive development.
-- Add coverage runs before releases: `npm run test -- --coverage`, which generates reports in `coverage/` and enforces thresholds via `--coverageThreshold`.
-- For specific packages: `npm run test --workspace=packages/core`.
-- E2E tests: `npm run test:e2e` launches Playwright in headed mode; use `npm run test:e2e:ci` for headless CI runs.
+To ensure a consistent testing environment, first ensure the local Supabase stack is running for any tests that require it: `supabase start`.
+
+- **Run all tests**: `npm test` runs all Jest unit and integration tests across all workspaces.
+- **Watch mode for development**: `npm test -- --watch` reruns tests on file changes.
+- **Run with coverage**: `npm test -- --coverage` generates a coverage report in the `coverage/` directory and enforces thresholds.
+- **Run tests for a specific package**: `npm test -w <package-name>` (e.g., `npm test -w @scope/core`).
+- **Run E2E tests (UI Mode)**: `npm run test:e2e` launches Playwright in UI mode for local development and debugging.
+- **Run E2E tests (Headless/CI)**: `npm run test:e2e:ci` runs the full E2E suite in a headless browser, as it would in the CI pipeline.
 
 ## Quality Gates
-- Minimum coverage: 80% for unit tests (branch and statement), 70% for integration; enforced in CI via Jest config and GitHub Actions.
-- Linting: Prettier for formatting (enforced via `npm run format:check`) and ESLint for code quality (rules from `@typescript-eslint` and custom configs in `.eslintrc.js`), run as `npm run lint` before merges.
-- Required checks: All PRs must pass "Test Suite", "Lint & Format", and "Build" jobs in GitHub Actions. Security scans via `npm audit` are also gated.
+All pull requests are gated by the following required checks in our GitHub Actions CI pipeline:
+
+- **Static Analysis**: Code must pass linting and formatting checks.
+  - `npm run lint`: Runs ESLint for code quality and best practices.
+  - `npm run format:check`: Runs Prettier to ensure consistent code style.
+- **Type Checking**: `npm run type-check` verifies TypeScript types across the entire repository (`tsc --noEmit`).
+- **Unit & Integration Tests**: The `unit-and-integration-tests` job must pass, running the full Jest suite and meeting coverage requirements.
+  - **Minimum Coverage**: 80% for unit tests, 70% for integration tests (branch and statement).
+- **E2E Tests**: The `e2e-tests` job must pass, validating critical user flows.
+- **Build**: The `build` job must successfully compile all apps and packages.
+- **Security**: The `security` job runs `npm audit --audit-level=high` to check for critical vulnerabilities in dependencies.
 
 ## Troubleshooting
-- **Flaky suites**: Occasional timeouts in E2E tests due to network variability in CI; mitigated by retries (Playwright config: `retries: 2`) and isolated Docker environments. See [Issue #45](https://github.com/repo/issues/45) for ongoing network stability improvements.
-- **Long-running tests**: Integration tests with real DB setups can exceed 5 minutes; parallelize with Jest's `--runInBand` disabled and use `testTimeout: 30000` where needed.
-- **Environment quirks**: Ensure Node.js 18+ and Yarn 1.x for consistent monorepo resolution. If mocks fail, clear `node_modules` and run `yarn install --check-files`.
+- **Flaky E2E Tests**: E2E tests can occasionally fail in CI due to network timing or async operations. Our Playwright configuration includes a retry mechanism (`retries: 2` in CI) to mitigate this. Persistent flakiness should be investigated and fixed, not ignored. See [Issue #45](https://github.com/repo/issues/45) for tracking stability improvements.
+- **Slow Test Suites**: Integration and E2E tests can be slow due to the overhead of starting Docker containers for Supabase. To speed up local development, run tests against an already-running stack (`supabase start`). In CI, test suites are parallelized by default using Jest workers.
+- **Environment Mismatches**: Ensure you are using the Node.js version specified in `.nvmrc` (e.g., Node.js 20.x) and a recent version of `npm` (v9+). If you encounter strange dependency or module resolution errors, a clean install often helps: `rm -rf node_modules && npm install`.
 
 <!-- agent-readonly:guidance -->
 ## AI Update Checklist

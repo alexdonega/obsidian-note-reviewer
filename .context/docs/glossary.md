@@ -1,22 +1,26 @@
-
+```markdown
 <!-- agent-update:start:glossary -->
 # Glossary & Domain Concepts
 
-List project-specific terminology, acronyms, domain entities, and user personas.
+This document lists project-specific terminology, acronyms, domain entities, and user personas to establish a shared language for all contributors.
 
 ## Core Terms
-- <!-- agent-fill:term-one -->**Term** — Definition, relevance, and where it surfaces in the codebase.<!-- /agent-fill -->
-- <!-- agent-fill:term-two -->**Term** — Definition, domain context, related modules.<!-- /agent-fill -->
+- **Supabase** — Our primary Backend-as-a-Service (BaaS) provider. It supplies the project's PostgreSQL database, authentication, object storage, and serverless Edge Functions. Most backend logic and data modeling is configured within the [Supabase Studio](https://supabase.com/dashboard) and managed via migrations in the `supabase/` directory.
+- **Monorepo** — The architectural choice for this repository, managing multiple distinct projects (`apps/`) with shared code (`packages/`) in a single place. This simplifies dependency management and encourages code reuse for things like UI components, utility functions, or API types.
+- **Project "Transformation"** — The internal name for the initiative this codebase supports, as indicated by the `12-weeks-transformation` directory. It represents a focused effort to deliver a specific set of features or a new product version within a defined timeframe.
 
 ## Acronyms & Abbreviations
-- <!-- agent-fill:acronym -->**ABC** — Expanded form; why we use it; associated services or APIs.<!-- /agent-fill -->
+- **RLS (Row-Level Security)** — A PostgreSQL feature, central to our Supabase data access strategy. RLS policies are database rules that restrict which data rows users can query or modify based on their session context (e.g., their user ID). This ensures users can only access their own data. Policies are defined in `supabase/migrations/`.
+- **ADR (Architecture Decision Record)** — A short document describing a technically significant decision made during the project's evolution. ADRs capture the context, trade-offs, and consequences of a choice. See `docs/adr/` for existing records.
+- **CI/CD (Continuous Integration/Continuous Deployment)** — The automated process of building, testing, and deploying our applications. Workflows are defined in the `.github/workflows/` directory and handle tasks like running tests, linting code, and deploying changes to staging or production environments.
 
 ## Personas / Actors
-- <!-- agent-fill:persona -->**Persona Name** — Goals, key workflows, pain points addressed by the system.<!-- /agent-fill -->
+- **Administrator** — A privileged user responsible for system management, user oversight, and content moderation. Administrators interact with the system through a dedicated admin panel (likely located in `apps/admin/`) to perform tasks that are unavailable to standard users.
+- **End User** — The primary consumer of the application. Their goal is to use the core features of the product to solve a specific problem. Their experience is the main driver for our UI/UX and feature development.
 
 ## Domain Rules & Invariants
-- Capture business rules, validation constraints, or compliance requirements that the code enforces.
-- Note any region, localization, or regulatory nuances.
+- **User Data Isolation**: Enforced by RLS, a user can *never* view or modify data belonging to another user unless explicitly granted permission through a defined relationship (e.g., team membership).
+- **Authentication Requirement**: All API endpoints, except for the public sign-in/sign-up routes, require a valid JSON Web Token (JWT) issued by Supabase Auth. Unauthenticated requests will be rejected with a `401 Unauthorized` error.
 
 <!-- agent-readonly:guidance -->
 ## AI Update Checklist
@@ -32,3 +36,4 @@ List project-specific terminology, acronyms, domain entities, and user personas.
 - Conversations with domain experts (summarize outcomes if applicable).
 
 <!-- agent-update:end -->
+```
