@@ -261,3 +261,60 @@ export function getAllNoteTypeTemplates(): Record<string, string> {
   }
   return templates;
 }
+
+/**
+ * Export all settings as a JSON-serializable object
+ */
+export function exportAllSettings(): Record<string, unknown> {
+  return {
+    vaultPath: getVaultPath(),
+    notePath: getNotePath(),
+    noteType: getNoteType(),
+    noteName: getNoteName(),
+    lastUsedTemplate: getLastUsedTemplate(),
+    noteConfig: getNoteConfig(),
+    noteTypePaths: getAllNoteTypePaths(),
+    noteTypeTemplates: getAllNoteTypeTemplates(),
+  };
+}
+
+/**
+ * Validate imported settings
+ */
+export function validateSettingsImport(data: unknown): { valid: boolean; error?: string } {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Dados inválidos' };
+  }
+  return { valid: true };
+}
+
+/**
+ * Import all settings from a JSON object
+ */
+export function importAllSettings(data: Record<string, unknown>): void {
+  if (data.vaultPath && typeof data.vaultPath === 'string') {
+    setVaultPath(data.vaultPath);
+  }
+  if (data.notePath && typeof data.notePath === 'string') {
+    setNotePath(data.notePath);
+  }
+  if (data.noteType && typeof data.noteType === 'string') {
+    setNoteType(data.noteType);
+  }
+  if (data.noteName && typeof data.noteName === 'string') {
+    setNoteName(data.noteName);
+  }
+  if (data.lastUsedTemplate && typeof data.lastUsedTemplate === 'string') {
+    setLastUsedTemplate(data.lastUsedTemplate);
+  }
+  if (data.noteTypePaths && typeof data.noteTypePaths === 'object') {
+    for (const [tipo, path] of Object.entries(data.noteTypePaths as Record<string, string>)) {
+      setNoteTypePath(tipo, path);
+    }
+  }
+  if (data.noteTypeTemplates && typeof data.noteTypeTemplates === 'object') {
+    for (const [tipo, template] of Object.entries(data.noteTypeTemplates as Record<string, string>)) {
+      setNoteTypeTemplate(tipo, template);
+    }
+  }
+}

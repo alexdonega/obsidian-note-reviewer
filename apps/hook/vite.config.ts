@@ -21,6 +21,8 @@ export default defineConfig({
       '@obsidian-note-reviewer/ui': path.resolve(__dirname, '../../packages/ui'),
       '@obsidian-note-reviewer/editor/styles': path.resolve(__dirname, '../../packages/editor/index.css'),
       '@obsidian-note-reviewer/editor': path.resolve(__dirname, '../../packages/editor/App.tsx'),
+      '@obsidian-note-reviewer/security/vite-plugin-csp': path.resolve(__dirname, '../../packages/security/vite-plugin-csp.ts'),
+      '@obsidian-note-reviewer/security/csp': path.resolve(__dirname, '../../packages/security/csp.ts'),
     }
   },
   build: {

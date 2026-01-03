@@ -52,12 +52,7 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
     {/* Help link */}
     <button
       onClick={() => setShowHelp(true)}
-<<<<<<< HEAD
-      className="ml-2 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-      aria-label="Abrir ajuda - como funciona o Obsidian Note Reviewer"
-=======
       className="ml-2 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors rounded focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
->>>>>>> auto-claude/007-add-visible-focus-indicators-for-keyboard-navigati
     >
       como funciona?
     </button>
@@ -80,12 +75,7 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
             <h3 id="help-dialog-title" className="font-semibold text-sm">Como o Obsidian Note Reviewer Funciona</h3>
             <button
               onClick={() => setShowHelp(false)}
-<<<<<<< HEAD
-              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Fechar ajuda"
-=======
               className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
->>>>>>> auto-claude/007-add-visible-focus-indicators-for-keyboard-navigati
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -119,12 +109,7 @@ const ModeButton: React.FC<{
 }> = ({ active, onClick, icon, label, destructive }) => (
   <button
     onClick={onClick}
-<<<<<<< HEAD
-    aria-pressed={active}
-    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-=======
     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
->>>>>>> auto-claude/007-add-visible-focus-indicators-for-keyboard-navigati
       active
         ? destructive
           ? 'bg-destructive/15 text-destructive shadow-sm'

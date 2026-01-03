@@ -353,12 +353,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </div>
                 <button
                   onClick={handleRegenerateIdentity}
-<<<<<<< HEAD
-                  className="w-full px-2 py-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
-                  aria-label="Gerar nova identidade de revisor"
-=======
                   className="w-full px-2 py-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
->>>>>>> auto-claude/007-add-visible-focus-indicators-for-keyboard-navigati
                 >
                   Gerar Nova Identidade
                 </button>

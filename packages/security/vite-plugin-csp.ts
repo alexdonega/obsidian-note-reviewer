@@ -9,7 +9,7 @@
  */
 
 import type { Plugin, ViteDevServer, IndexHtmlTransformContext } from 'vite';
-import { getCSPHeader, getCSPMetaContent, type CSPOptions } from './csp';
+import { getCSPHeader, getCSPMetaContent, type CSPOptions } from './csp.ts';
 
 /**
  * Configuration options for the CSP Vite plugin

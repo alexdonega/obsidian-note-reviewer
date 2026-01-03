@@ -113,13 +113,8 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
                   </button>
                 ) : (
                   <a
-<<<<<<< HEAD
-                    href="https://obsidian-note-reviewer.vercel.app"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-=======
                     href="https://share.plannotator.ai"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-offset-2"
->>>>>>> auto-claude/007-add-visible-focus-indicators-for-keyboard-navigati
                   >
                     Open Demo
                     <svg

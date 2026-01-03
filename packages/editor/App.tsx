@@ -37,7 +37,7 @@ version: 0.2.1
 
 ## Sobre o Projeto
 
-O **Obsidian Note Reviewer** é uma ferramenta web para revisar e anotar documentos markdown do Obsidian de forma colaborativa. Este projeto é um fork do Plannotator, adaptado especificamente para integração com vaults Obsidian.
+O **Obsidian Note Reviewer** é uma ferramenta web para revisar e anotar documentos markdown do Obsidian de forma colaborativa. Este projeto é um fork do Obsidian Note Reviewer, adaptado especificamente para integração com vaults Obsidian.
 
 ## Funcionalidades Principais
 
@@ -94,7 +94,7 @@ O servidor local expõe:
 
 ## Melhorias Implementadas (v0.1 → v0.2.1)
 
-### Da Upstream (Plannotator)
+### Da Upstream (Obsidian Note Reviewer)
 1. ✅ Verificação automática de atualizações
 2. ✅ Exibição dinâmica da versão
 3. ✅ Correção de URLs de compartilhamento
