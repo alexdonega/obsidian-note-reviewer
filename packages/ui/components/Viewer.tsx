@@ -11,6 +11,7 @@ import * as LucideIcons from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
+import { sanitizeSvg } from '../utils/sanitize';
 
 interface ViewerProps {
   blocks: Block[];
@@ -733,7 +734,7 @@ const MermaidRenderer: React.FC<any> = (props) => {
               border1: '#6b7280',
               border2: '#9ca3af',
             },
-            securityLevel: 'loose',
+            securityLevel: 'strict',
             flowchart: {
               useMaxWidth: true,
               htmlLabels: true,
@@ -744,7 +745,7 @@ const MermaidRenderer: React.FC<any> = (props) => {
           const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
           const result = await mermaid.render(id, code);
 
-          setSvg(result.svg);
+          setSvg(sanitizeSvg(result.svg));
           setError(null);
         } catch (err) {
           console.error('Mermaid rendering error:', err);
