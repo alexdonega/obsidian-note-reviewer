@@ -1,25 +1,25 @@
 {
   "active": true,
-  "spec": "013-overly-permissive-cors-configuration-in-notes-api",
+  "spec": "014-cookie-security-flags-missing",
   "state": "building",
   "subtasks": {
-    "completed": 3,
-    "total": 6,
+    "completed": 8,
+    "total": 9,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Update Notes API",
-    "id": null,
-    "total": 2
+    "current": "",
+    "id": 0,
+    "total": 0
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 5,
-    "started_at": "2026-01-01T18:52:17.932368"
+    "number": 10,
+    "started_at": "2026-01-01T18:52:43.335174"
   },
-  "last_update": "2026-01-01T19:20:16.547685"
+  "last_update": "2026-01-01T20:04:53.479007"
 }

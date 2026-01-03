@@ -1,29 +1,47 @@
-import '@testing-library/jest-dom';
-import { Window } from 'happy-dom';
+// Note: Using minimal DOM setup for cookie tests
+// happy-dom's cookie implementation doesn't fully support all cookie attributes
 
-// Mock environment variables for Supabase
-process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
-process.env.VITE_SUPABASE_ANON_KEY = 'test-anon-key-12345';
-process.env.VITE_SENTRY_DSN = '';
-process.env.VITE_LOG_LEVEL = 'silent';
-process.env.NODE_ENV = 'test';
+// Minimal DOM setup for cookie-based tests
+// This provides just enough to test document.cookie operations
+const minimalDocument = {
+  _cookies: {} as Record<string, string>,
+  get cookie(): string {
+    return Object.entries(this._cookies)
+      .map(([k, v]) => `${k}=${v}`)
+      .join('; ');
+  },
+  set cookie(value: string) {
+    // Parse cookie string
+    const parts = value.split(';').map(p => p.trim());
+    const [keyValue, ...attrs] = parts;
+    const eqIndex = keyValue.indexOf('=');
+    const key = keyValue.substring(0, eqIndex);
+    const val = keyValue.substring(eqIndex + 1);
 
-// Setup DOM para testes
-const window = new Window();
-global.document = window.document;
-global.window = window as any;
-global.navigator = window.navigator;
+    // Check for max-age=0 (deletion)
+    const isDelete = attrs.some(a => a.toLowerCase().startsWith('max-age=0'));
 
-// Mock import.meta.env for Vite
-const mockEnv = {
-  VITE_SUPABASE_URL: 'https://test.supabase.co',
-  VITE_SUPABASE_ANON_KEY: 'test-anon-key-12345',
-  VITE_SENTRY_DSN: '',
-  VITE_LOG_LEVEL: 'silent',
-  MODE: 'test',
-  DEV: false,
-  PROD: false,
+    if (isDelete) {
+      delete this._cookies[key];
+    } else if (key) {
+      this._cookies[key] = val;
+    }
+  }
 };
 
-// Make import.meta.env available globally
-(global as any).importMetaEnv = mockEnv;
+const minimalWindow = {
+  isSecureContext: true, // Assume secure context for testing
+  location: {
+    protocol: 'https:',
+    hostname: 'localhost'
+  },
+  document: minimalDocument,
+  navigator: {}
+};
+
+// @ts-ignore - Minimal implementation for testing
+global.document = minimalDocument as any;
+// @ts-ignore
+global.window = minimalWindow as any;
+// @ts-ignore
+global.navigator = minimalWindow.navigator as any;
