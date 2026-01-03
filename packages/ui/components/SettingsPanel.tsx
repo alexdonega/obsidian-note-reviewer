@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getIdentity, regenerateIdentity } from '../utils/identity';
+import { getIdentity, getAnonymousIdentity, regenerateIdentity, updateDisplayName } from '../utils/identity';
+import { getDisplayName } from '../utils/storage';
 import {
   getNoteTypePath,
   setNoteTypePath,
@@ -38,6 +39,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onNotePathChange
 }) => {
   const [identity, setIdentity] = useState('');
+  const [displayName, setDisplayNameState] = useState('');
+  const [anonymousIdentity, setAnonymousIdentity] = useState('');
   const [notePaths, setNotePaths] = useState<Record<string, string>>({});
   const [noteTemplates, setNoteTemplates] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<CategoryTab>('regras');
@@ -47,6 +50,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   useEffect(() => {
     if (isOpen) {
       setIdentity(getIdentity());
+      setDisplayNameState(getDisplayName());
+      setAnonymousIdentity(getAnonymousIdentity());
 
       // Load all saved paths and templates
       const noteTypes = getNoteTypesByCategory();
@@ -76,8 +81,24 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const handleRegenerateIdentity = () => {
     const oldIdentity = identity;
     const newIdentity = regenerateIdentity();
+    setAnonymousIdentity(newIdentity);
+    // If no display name is set, the identity changes
+    if (!displayName.trim()) {
+      setIdentity(newIdentity);
+      onIdentityChange?.(oldIdentity, newIdentity);
+    }
+  };
+
+  const handleDisplayNameChange = (name: string) => {
+    const oldIdentity = identity;
+    setDisplayNameState(name);
+    updateDisplayName(name);
+    // Update displayed identity
+    const newIdentity = name.trim() || anonymousIdentity;
     setIdentity(newIdentity);
-    onIdentityChange?.(oldIdentity, newIdentity);
+    if (oldIdentity !== newIdentity) {
+      onIdentityChange?.(oldIdentity, newIdentity);
+    }
   };
 
   const handlePathChange = (tipo: string, path: string) => {
@@ -342,23 +363,54 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             {/* Seção: Identidade */}
             <section>
               <h4 className="text-xs font-semibold mb-2 text-primary">👤 Identidade do Revisor</h4>
-              <div className="space-y-2">
+              <div className="space-y-3">
+                {/* Campo de Nome de Usuário */}
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">
+                    Nome de Usuário (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => handleDisplayNameChange(e.target.value)}
+                    placeholder="Ex: João Silva"
+                    className="w-full px-3 py-2 bg-background rounded-md text-sm border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Deixe em branco para usar identidade anônima
+                  </p>
+                </div>
+
+                {/* Identidade Atual */}
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">
-                    Seu ID único
+                    Identidade ativa
                   </label>
                   <div className="px-2 py-1.5 bg-muted rounded-md text-xs font-mono text-muted-foreground break-all">
                     {identity}
                   </div>
                 </div>
+
+                {/* Identidade Anônima (mostrar apenas se tem displayName) */}
+                {displayName.trim() && (
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">
+                      Identidade anônima (backup)
+                    </label>
+                    <div className="px-2 py-1.5 bg-muted/50 rounded-md text-[10px] font-mono text-muted-foreground/60 break-all">
+                      {anonymousIdentity}
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={handleRegenerateIdentity}
                   className="w-full px-2 py-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
-                  Gerar Nova Identidade
+                  Gerar Nova Identidade Anônima
                 </button>
                 <p className="text-xs text-muted-foreground">
-                  Esta identidade será incluída nas anotações que você criar.
+                  A identidade será incluída nas anotações que você criar.
                 </p>
               </div>
             </section>

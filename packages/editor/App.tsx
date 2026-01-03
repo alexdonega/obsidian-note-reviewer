@@ -18,7 +18,9 @@ import {
   getNotePath,
   setVaultPath,
   setNotePath,
-  getNoteType
+  getNoteType,
+  saveAnnotations,
+  loadAnnotations
 } from '@obsidian-note-reviewer/ui/utils/storage';
 import { isInputFocused, formatTooltipWithShortcut } from '@obsidian-note-reviewer/ui/utils/shortcuts';
 import { type TipoNota } from '@obsidian-note-reviewer/ui/utils/notePaths';
@@ -208,7 +210,12 @@ const App: React.FC = () => {
   const [isParsing, setIsParsing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<'approved' | 'denied' | null>(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [isFullEditMode, setIsFullEditMode] = useState(false);
+  const [fullEditContent, setFullEditContent] = useState('');
   const viewerRef = useRef<ViewerHandle>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const fullEditTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   // URL-based sharing
   const {
@@ -229,6 +236,9 @@ const App: React.FC = () => {
     }
   );
 
+  // Track if annotations were loaded from localStorage to avoid re-saving immediately
+  const [annotationsLoadedFromStorage, setAnnotationsLoadedFromStorage] = useState(false);
+
   // Apply shared annotations to DOM after they're loaded
   useEffect(() => {
     if (pendingSharedAnnotations && pendingSharedAnnotations.length > 0) {
@@ -242,6 +252,56 @@ const App: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [pendingSharedAnnotations, clearPendingSharedAnnotations]);
+
+  // Load annotations from localStorage when markdown is ready (and not from share)
+  useEffect(() => {
+    if (isLoading || isLoadingShared || isSharedSession) return;
+
+    const storedAnnotations = loadAnnotations(markdown);
+    if (storedAnnotations && Array.isArray(storedAnnotations) && storedAnnotations.length > 0) {
+      // Validate and set annotations
+      setAnnotations(storedAnnotations as Annotation[]);
+      setAnnotationsLoadedFromStorage(true);
+
+      // Apply highlights after a small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        viewerRef.current?.clearAllHighlights();
+        viewerRef.current?.applySharedAnnotations(storedAnnotations as Annotation[]);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [markdown, isLoading, isLoadingShared, isSharedSession]);
+
+  // Save annotations to localStorage when they change
+  useEffect(() => {
+    // Don't save if we just loaded from storage (prevents unnecessary writes)
+    if (annotationsLoadedFromStorage) {
+      setAnnotationsLoadedFromStorage(false);
+      return;
+    }
+
+    // Don't save during initial load or if loaded from share URL
+    if (isLoading || isLoadingShared) return;
+
+    // Save annotations (including empty array to clear previous state)
+    saveAnnotations(markdown, annotations);
+  }, [annotations, markdown, isLoading, isLoadingShared, annotationsLoadedFromStorage]);
+
+  // Intersection Observer for sticky bar - shows when header is out of viewport
+  useEffect(() => {
+    if (!headerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Show sticky bar when header is NOT visible (threshold 0 means any part visible)
+        setShowStickyBar(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(headerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
 
   // Check if we're in API mode (served from Bun hook server)
@@ -382,6 +442,27 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Full edit mode keyboard shortcuts
+  useEffect(() => {
+    if (!isFullEditMode) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape to cancel
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleCancelFullEdit();
+      }
+      // Ctrl+Enter or Cmd+Enter to save
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleSaveFullEdit();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullEditMode, fullEditContent]);
+
   // API mode handlers
   const handleApprove = async () => {
     setIsSubmitting(true);
@@ -477,6 +558,37 @@ const App: React.FC = () => {
     }).join('\n\n');
   };
 
+  // Full edit mode handlers
+  const handleEnterFullEditMode = () => {
+    // Reconstruct markdown from blocks
+    const currentMarkdown = reconstructMarkdownFromBlocks(blocks);
+    setFullEditContent(currentMarkdown);
+    setIsFullEditMode(true);
+    // Focus textarea after render
+    setTimeout(() => {
+      if (fullEditTextareaRef.current) {
+        fullEditTextareaRef.current.focus();
+        fullEditTextareaRef.current.setSelectionRange(0, 0);
+      }
+    }, 100);
+  };
+
+  const handleSaveFullEdit = () => {
+    // Update markdown and reparse blocks
+    setMarkdown(fullEditContent);
+    const newBlocks = parseMarkdownToBlocks(fullEditContent);
+    setBlocks(newBlocks);
+    setIsFullEditMode(false);
+  };
+
+  const handleCancelFullEdit = () => {
+    setIsFullEditMode(false);
+    setFullEditContent('');
+  };
+
+  // State for showing copy feedback toast
+  const [showCopyToast, setShowCopyToast] = useState(false);
+
   const handleSaveToVault = async () => {
     if (!savePath.trim()) {
       setSaveError('Configure o caminho nas configurações');
@@ -500,6 +612,17 @@ const App: React.FC = () => {
           });
           setSubmitted('denied');
           console.log('✅ Alterações solicitadas ao Claude Code!');
+        } else {
+          // FALLBACK: Não está em API mode - copiar diff para clipboard
+          try {
+            await navigator.clipboard.writeText(diffOutput);
+            setShowCopyToast(true);
+            setTimeout(() => setShowCopyToast(false), 3000);
+            console.log('📋 Diff copiado para clipboard!');
+          } catch (clipboardError) {
+            console.error('❌ Erro ao copiar para clipboard:', clipboardError);
+            setSaveError('Erro ao copiar alterações para clipboard');
+          }
         }
         return;
       }
@@ -562,7 +685,7 @@ const App: React.FC = () => {
         ) : (
           <>
         {/* Minimal Header */}
-        <header className="h-12 flex items-center justify-between px-2 md:px-4 border-b border-border/50 bg-card/50 backdrop-blur-xl z-50">
+        <header ref={headerRef} className="h-12 flex items-center justify-between px-2 md:px-4 border-b border-border/50 bg-card/50 backdrop-blur-xl z-50">
           <div className="flex items-center gap-2 md:gap-3">
             <a
               href="https://plannotator.ai"
@@ -620,7 +743,19 @@ const App: React.FC = () => {
               </>
             )}
 
-            
+
+            {/* Botão Editar - Abre editor de texto completo */}
+            <button
+              onClick={handleEnterFullEditMode}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-blue-500/20 text-blue-600 hover:bg-blue-500/30 border border-blue-500/40"
+              title="Editar nota completa"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <span className="hidden md:inline">Editar</span>
+            </button>
+
             {/* Botão Salvar/Alterações - Condicional */}
             <button
               onClick={handleSaveToVault}
@@ -721,6 +856,89 @@ const App: React.FC = () => {
             </button>
           </div>
         </header>
+
+        {/* Sticky Action Bar - appears when header scrolls out of view */}
+        {showStickyBar && !isSettingsPanelOpen && (
+          <div className="fixed top-0 left-0 right-0 z-[60] bg-card/95 backdrop-blur-xl border-b border-border/50 shadow-lg animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between px-4 py-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {annotations.length} anotação{annotations.length !== 1 ? 'ões' : ''}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Botão principal - Fazer Alterações ou Salvar */}
+                <button
+                  onClick={handleSaveToVault}
+                  disabled={isSaving || !savePath}
+                  className={`
+                    flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all
+                    ${isSaving || !savePath
+                      ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
+                      : annotations.length > 0
+                        ? 'bg-orange-500/20 text-orange-600 hover:bg-orange-500/30 border border-orange-500/40'
+                        : 'bg-purple-500/20 text-purple-600 hover:bg-purple-500/30 border border-purple-500/40'
+                    }
+                  `}
+                >
+                  {annotations.length > 0 ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      {isSaving ? 'Processando...' : 'Fazer Alterações'}
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                      {isSaving ? 'Salvando...' : 'Salvar'}
+                    </>
+                  )}
+                </button>
+
+                {/* Exportar */}
+                <button
+                  onClick={() => setShowExport(true)}
+                  className="p-1.5 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
+                  title="Exportar"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                </button>
+
+                {/* Configurações */}
+                <button
+                  onClick={() => setIsSettingsPanelOpen(true)}
+                  className="p-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                  title="Configurações"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+
+                {/* Toggle painel de anotações */}
+                <button
+                  onClick={() => setIsPanelOpen(!isPanelOpen)}
+                  className={`p-1.5 rounded-md text-xs font-medium transition-all ${
+                    isPanelOpen
+                      ? 'bg-primary/15 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                  title={isPanelOpen ? 'Ocultar Painel' : 'Mostrar Painel'}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
@@ -857,6 +1075,81 @@ const App: React.FC = () => {
         )}
 
         {/* Update notification */}
+
+        {/* Full Edit Mode Overlay */}
+        {isFullEditMode && (
+          <div className="fixed inset-0 z-[100] bg-background flex flex-col">
+            {/* Full Edit Header */}
+            <div className="h-12 flex items-center justify-between px-4 border-b border-border/50 bg-card/50 backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span className="text-sm font-semibold">Modo de Edição</span>
+                <span className="text-xs text-muted-foreground font-mono">
+                  {fullEditContent.length} caracteres
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCancelFullEdit}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSaveFullEdit}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Salvar Alterações
+                </button>
+              </div>
+            </div>
+
+            {/* Full Edit Content */}
+            <div className="flex-1 overflow-hidden flex">
+              <textarea
+                ref={fullEditTextareaRef}
+                value={fullEditContent}
+                onChange={(e) => setFullEditContent(e.target.value)}
+                className="flex-1 w-full h-full p-6 md:p-8 bg-background text-foreground font-mono text-sm leading-relaxed resize-none focus:outline-none border-none"
+                placeholder="Digite o conteúdo markdown da sua nota..."
+                spellCheck={false}
+              />
+            </div>
+
+            {/* Full Edit Footer with tips */}
+            <div className="h-10 flex items-center justify-between px-4 border-t border-border/50 bg-muted/30 text-xs text-muted-foreground">
+              <div className="flex items-center gap-4">
+                <span>Esc para cancelar</span>
+                <span>Ctrl+Enter para salvar</span>
+              </div>
+              <div>
+                Edição markdown direta
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Copy to clipboard toast */}
+        {showCopyToast && (
+          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[200] animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="bg-card border border-border rounded-lg shadow-xl px-4 py-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Alterações copiadas!</p>
+                <p className="text-xs text-muted-foreground">Cole no Claude Code para processar</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ThemeProvider>
   );

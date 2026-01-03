@@ -318,3 +318,83 @@ export function importAllSettings(data: Record<string, unknown>): void {
     }
   }
 }
+
+// =====================================
+// Annotation Persistence (localStorage)
+// =====================================
+
+/**
+ * Generate a simple hash for the markdown content to use as storage key
+ */
+function generateContentHash(content: string): string {
+  let hash = 0;
+  for (let i = 0; i < Math.min(content.length, 1000); i++) {
+    const char = content.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return `note_${Math.abs(hash).toString(36)}`;
+}
+
+/**
+ * Save annotations to localStorage
+ */
+export function saveAnnotations(markdown: string, annotations: unknown[]): void {
+  try {
+    const hash = generateContentHash(markdown);
+    localStorage.setItem(`annotations_${hash}`, JSON.stringify(annotations));
+    // Also save the current hash so we can check if content changed
+    localStorage.setItem('current_note_hash', hash);
+  } catch (e) {
+    console.warn('Failed to save annotations to localStorage:', e);
+  }
+}
+
+/**
+ * Load annotations from localStorage
+ */
+export function loadAnnotations(markdown: string): unknown[] | null {
+  try {
+    const hash = generateContentHash(markdown);
+    const stored = localStorage.getItem(`annotations_${hash}`);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return null;
+  } catch (e) {
+    console.warn('Failed to load annotations from localStorage:', e);
+    return null;
+  }
+}
+
+/**
+ * Clear annotations from localStorage
+ */
+export function clearAnnotations(markdown: string): void {
+  try {
+    const hash = generateContentHash(markdown);
+    localStorage.removeItem(`annotations_${hash}`);
+  } catch (e) {
+    console.warn('Failed to clear annotations from localStorage:', e);
+  }
+}
+
+// =====================================
+// Display Name (User Preference)
+// =====================================
+
+const DISPLAY_NAME_KEY = 'obsidian-reviewer-display-name';
+
+/**
+ * Get display name from storage
+ */
+export function getDisplayName(): string {
+  return getItem(DISPLAY_NAME_KEY) ?? '';
+}
+
+/**
+ * Set display name in storage
+ */
+export function setDisplayName(name: string): void {
+  setItem(DISPLAY_NAME_KEY, name);
+}

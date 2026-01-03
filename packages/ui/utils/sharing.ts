@@ -214,6 +214,49 @@ export function fromShareable(data: ShareableAnnotation[]): Annotation[] {
  */
 const SHARE_BASE_URL = 'https://r.alexdonega.com.br';
 
+/**
+ * Extract a friendly slug from markdown content
+ * Tries to find: title from frontmatter > first heading > generic name
+ */
+function extractFriendlySlug(markdown: string): string {
+  // Try to extract title from frontmatter
+  const frontmatterMatch = markdown.match(/^---\s*\n[\s\S]*?title:\s*["']?([^"'\n]+)["']?[\s\S]*?\n---/i);
+  if (frontmatterMatch) {
+    return slugify(frontmatterMatch[1]);
+  }
+
+  // Try to extract first H1 heading
+  const h1Match = markdown.match(/^#\s+(.+)$/m);
+  if (h1Match) {
+    return slugify(h1Match[1]);
+  }
+
+  // Try to extract first H2 heading
+  const h2Match = markdown.match(/^##\s+(.+)$/m);
+  if (h2Match) {
+    return slugify(h2Match[1]);
+  }
+
+  // Fallback: use date-based slug
+  const now = new Date();
+  return `nota-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+}
+
+/**
+ * Convert text to URL-friendly slug
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+    .replace(/\s+/g, '-') // Spaces to hyphens
+    .replace(/-+/g, '-') // Multiple hyphens to single
+    .slice(0, 30) // Limit length
+    .replace(/^-+|-+$/g, ''); // Trim hyphens
+}
+
 export async function generateShareUrl(
   markdown: string,
   annotations: Annotation[]
@@ -224,11 +267,21 @@ export async function generateShareUrl(
   };
 
   const hash = await compress(payload);
-  return `${SHARE_BASE_URL}/#${hash}`;
+
+  // Generate a friendly slug prefix for the URL
+  const slug = extractFriendlySlug(markdown);
+  const annotationCount = annotations.length;
+
+  // Format: slug~count~hash (using ~ as separator since it's URL-safe and uncommon)
+  // This makes URLs like: r.alexdonega.com.br/#obsidian-note-reviewer~5~[compressed]
+  const friendlyHash = `${slug}~${annotationCount}~${hash}`;
+
+  return `${SHARE_BASE_URL}/#${friendlyHash}`;
 }
 
 /**
  * Parse a share URL hash and return the payload
+ * Supports both new format (slug~count~hash) and legacy format (hash only)
  * Returns null if no valid hash or parsing fails
  */
 export async function parseShareHash(): Promise<SharePayload | null> {
@@ -239,11 +292,47 @@ export async function parseShareHash(): Promise<SharePayload | null> {
   }
 
   try {
-    return await decompress(hash);
+    // Check for new format with slug prefix: slug~count~hash
+    const parts = hash.split('~');
+    let compressedHash: string;
+
+    if (parts.length >= 3) {
+      // New format: extract the actual hash (last part)
+      compressedHash = parts.slice(2).join('~'); // In case hash contains ~
+    } else {
+      // Legacy format: entire hash is the compressed data
+      compressedHash = hash;
+    }
+
+    return await decompress(compressedHash);
   } catch (e) {
     console.warn('Failed to parse share hash:', e);
     return null;
   }
+}
+
+/**
+ * Extract metadata from a friendly share URL hash
+ * Returns slug and annotation count if available
+ */
+export function extractShareMetadata(hash: string): { slug: string | null; count: number | null } {
+  if (!hash) {
+    return { slug: null, count: null };
+  }
+
+  const cleanHash = hash.startsWith('#') ? hash.slice(1) : hash;
+  const parts = cleanHash.split('~');
+
+  if (parts.length >= 3) {
+    const slug = parts[0];
+    const count = parseInt(parts[1], 10);
+    return {
+      slug: slug || null,
+      count: isNaN(count) ? null : count
+    };
+  }
+
+  return { slug: null, count: null };
 }
 
 /**

@@ -4,10 +4,12 @@
  * Generates anonymous identities for collaborative annotation sharing.
  * Format: {adjective}-tater-{noun}
  * Examples: "swift-tater-falcon", "gentle-tater-crystal"
+ *
+ * Users can also set a custom display name which takes precedence.
  */
 
 import { uniqueUsernameGenerator, adjectives, nouns } from 'unique-username-generator';
-import { storage } from './storage';
+import { storage, getDisplayName, setDisplayName } from './storage';
 
 const STORAGE_KEY = 'obsidian-reviewer-identity';
 
@@ -31,8 +33,16 @@ export function generateIdentity(): string {
 
 /**
  * Get current identity from storage, or generate one if none exists
+ * Returns display name if set, otherwise returns the anonymous identity
  */
 export function getIdentity(): string {
+  // Check for custom display name first
+  const displayName = getDisplayName();
+  if (displayName && displayName.trim()) {
+    return displayName.trim();
+  }
+
+  // Fall back to anonymous identity
   const stored = storage.getItem(STORAGE_KEY);
   if (stored) {
     return stored;
@@ -41,6 +51,27 @@ export function getIdentity(): string {
   const identity = generateIdentity();
   saveIdentity(identity);
   return identity;
+}
+
+/**
+ * Get the raw anonymous identity (ignoring display name)
+ */
+export function getAnonymousIdentity(): string {
+  const stored = storage.getItem(STORAGE_KEY);
+  if (stored) {
+    return stored;
+  }
+
+  const identity = generateIdentity();
+  saveIdentity(identity);
+  return identity;
+}
+
+/**
+ * Update the custom display name
+ */
+export function updateDisplayName(name: string): void {
+  setDisplayName(name);
 }
 
 /**
