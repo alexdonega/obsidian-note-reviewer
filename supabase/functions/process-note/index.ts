@@ -3,12 +3,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { checkRateLimit, createRateLimitResponse } from '../_shared/rate-limiter.ts';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 interface ProcessRequest {
   noteId: string;
@@ -16,10 +11,13 @@ interface ProcessRequest {
 }
 
 serve(async (req) => {
-  // Handle CORS
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return handleCorsPreflightRequest(req);
   }
+
+  // Get validated CORS headers for this request
+  const corsHeaders = getCorsHeaders(req);
 
   try {
     const supabase = createClient(
@@ -37,12 +35,6 @@ serve(async (req) => {
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-    }
-
-    // Rate limiting check (20 requests per minute for process operations)
-    const rateLimitResult = await checkRateLimit(user.id, 'process');
-    if (!rateLimitResult.success) {
-      return createRateLimitResponse(rateLimitResult);
     }
 
     const { noteId, operations }: ProcessRequest = await req.json();
