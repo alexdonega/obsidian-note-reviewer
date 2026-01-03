@@ -54,9 +54,8 @@ export function isPathTraversal(inputPath: string): boolean {
     return true;
   }
 
-  // Check for '..' in various forms
+  // Check for '..' in various forms (encoded patterns only - plain .. checked via regex below)
   const traversalPatterns = [
-    /\.\./,                    // Simple ..
     /\.%2e/i,                  // Mixed encoded
     /%2e\./i,                  // Mixed encoded
     /%2e%2e/i,                 // Fully URL encoded
@@ -77,7 +76,18 @@ export function isPathTraversal(inputPath: string): boolean {
   }
 
   // Check decoded and normalized path for simple traversal
-  if (normalizedSeparators.includes("..")) {
+  // Multiple patterns to catch different traversal attempts:
+  // 1. ".." as a complete path segment: start/separator + .. + separator/end
+  // 2. ".." followed immediately by separator anywhere (like "../" or "....//")
+  // Note: "..." and "...." as standalone filenames are valid, only block when followed by separator
+
+  // Pattern 1: ".." as complete segment (handles "../" and "/.." and just "..")
+  if (/(?:^|\/)\.\.(\/|$)/.test(normalizedSeparators)) {
+    return true;
+  }
+
+  // Pattern 2: Two or more dots followed by "/" (catches "../", "..../", etc.)
+  if (/\.\.+\//.test(normalizedSeparators)) {
     return true;
   }
 

@@ -132,20 +132,85 @@ export async function compress(payload: SharePayload): Promise<string> {
  * Decompress a base64url string back to SharePayload
  */
 export async function decompress(b64: string): Promise<SharePayload> {
+  // Validate input
+  if (!b64 || typeof b64 !== 'string' || b64.trim() === '') {
+    throw new Error('Invalid input: empty or non-string');
+  }
+
   // Restore standard base64
   const base64 = b64
     .replace(/-/g, '+')
     .replace(/_/g, '/');
 
-  const binary = atob(base64);
+  // Validate base64 format (only valid base64 chars)
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
+    throw new Error('Invalid base64 format');
+  }
+
+  let binary: string;
+  try {
+    binary = atob(base64);
+  } catch (e) {
+    throw new Error('Failed to decode base64');
+  }
+
+  if (binary.length === 0) {
+    throw new Error('Empty decoded data');
+  }
+
   const byteArray = Uint8Array.from(binary, c => c.charCodeAt(0));
 
-  const stream = new DecompressionStream('deflate-raw');
-  const writer = stream.writable.getWriter();
-  writer.write(byteArray);
-  writer.close();
+  let buffer: ArrayBuffer;
+  try {
+    // Use a Promise wrapper to catch all stream errors including async ones
+    buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+      const stream = new DecompressionStream('deflate-raw');
+      const writer = stream.writable.getWriter();
 
-  const buffer = await new Response(stream.readable).arrayBuffer();
+      // Collect all chunks
+      const chunks: Uint8Array[] = [];
+      const reader = stream.readable.getReader();
+
+      const readChunks = async () => {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+          }
+          // Combine all chunks into a single ArrayBuffer
+          const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+          const result = new Uint8Array(totalLength);
+          let offset = 0;
+          for (const chunk of chunks) {
+            result.set(chunk, offset);
+            offset += chunk.length;
+          }
+          resolve(result.buffer);
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      // Start reading in the background
+      readChunks();
+
+      // Write data and close
+      writer.write(byteArray)
+        .then(() => writer.close())
+        .catch(reject);
+    });
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message :
+      (typeof e === 'object' && e !== null && 'code' in e) ? String((e as {code: unknown}).code) :
+      'unknown error';
+    throw new Error(`Failed to decompress data: ${errorMessage}`);
+  }
+
+  if (buffer.byteLength === 0) {
+    throw new Error('Empty decompressed data');
+  }
+
   const json = new TextDecoder().decode(buffer);
 
   const result = safeJsonParse<SharePayload>(json, validateSharePayload);

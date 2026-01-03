@@ -169,11 +169,19 @@ describe('sharing module', () => {
       });
 
       it('should throw on corrupted compressed data', async () => {
-        const payload: SharePayload = { p: 'test', a: [] };
+        // Use a larger payload to ensure corruption has effect
+        const payload: SharePayload = {
+          p: 'This is a longer test payload that will compress better',
+          a: [['C', 'some text', 'comment', null] as ShareableAnnotation]
+        };
         const compressed = await compress(payload);
-        // Flip some bits in the middle
+        // Corrupt multiple positions to ensure decompression fails
         const chars = compressed.split('');
-        chars[Math.floor(compressed.length / 2)] = 'X';
+        const len = chars.length;
+        // Corrupt start, middle, and near-end of compressed data
+        chars[2] = chars[2] === 'X' ? 'Y' : 'X';
+        chars[Math.floor(len / 2)] = chars[Math.floor(len / 2)] === 'Z' ? 'W' : 'Z';
+        chars[len - 3] = chars[len - 3] === 'A' ? 'B' : 'A';
         const corrupted = chars.join('');
 
         await expect(decompress(corrupted)).rejects.toThrow();
@@ -721,7 +729,8 @@ describe('sharing module', () => {
 
       const url = await generateShareUrl('# Plan', annotations);
 
-      expect(url).toMatch(/^https:\/\/r\.alexdonega\.com\.br\/#[A-Za-z0-9_-]+$/);
+      // URL format: https://r.alexdonega.com.br/#slug~count~hash
+      expect(url).toMatch(/^https:\/\/r\.alexdonega\.com\.br\/#[a-z0-9-]+~\d+~[A-Za-z0-9_-]+$/);
     });
 
     it('should generate URL-safe characters only', async () => {
@@ -729,8 +738,8 @@ describe('sharing module', () => {
       const url = await generateShareUrl('Test plan', annotations);
       const hash = url.split('#')[1];
 
-      // Hash should only contain URL-safe characters
-      expect(hash).toMatch(/^[A-Za-z0-9_-]*$/);
+      // Hash format: slug~count~compressed, all URL-safe characters
+      expect(hash).toMatch(/^[A-Za-z0-9_~-]+$/);
     });
 
     it('should generate deterministic URL for same input', async () => {
