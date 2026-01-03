@@ -56,12 +56,14 @@ export const FrontmatterEditor: React.FC<FrontmatterEditorProps> = ({
             <button
               onClick={handleSave}
               className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
+              aria-label="Salvar alterações no frontmatter"
             >
               Salvar
             </button>
             <button
               onClick={handleCancel}
               className="px-2 py-1 text-xs bg-muted text-foreground rounded hover:bg-muted/80"
+              aria-label="Cancelar edição do frontmatter"
             >
               Cancelar
             </button>
@@ -72,6 +74,7 @@ export const FrontmatterEditor: React.FC<FrontmatterEditorProps> = ({
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           className="w-full min-h-[120px] p-2 bg-background border border-border rounded text-xs font-mono focus:border-primary focus:outline-none"
+          aria-label="Editor de frontmatter YAML"
         />
 
         {error && (
@@ -92,6 +95,7 @@ export const FrontmatterEditor: React.FC<FrontmatterEditorProps> = ({
         <button
           onClick={() => setIsEditing(true)}
           className="opacity-0 group-hover:opacity-100 px-2 py-1 text-xs bg-primary/10 text-primary rounded hover:bg-primary/20 transition-all"
+          aria-label="Editar frontmatter YAML"
         >
           Editar
         </button>

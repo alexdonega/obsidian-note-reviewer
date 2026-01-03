@@ -274,6 +274,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               onClick={handleLoadDefaults}
               className="px-2 py-1 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors flex items-center gap-1"
               title="Carregar valores padrão"
+              aria-label="Carregar valores padrão"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -285,6 +286,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 onClick={onClose}
                 className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
                 title="Fechar configurações"
+                aria-label="Fechar configurações"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -298,10 +300,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
       {/* Tabs Navigation */}
       <div className="border-b border-border bg-muted/20 overflow-x-auto">
-        <div className="flex px-2 min-w-max">
+        <div role="tablist" aria-label="Categorias de tipos de nota" className="flex px-2 min-w-max">
           {tabs.map(({ id, emoji, label }) => (
             <button
               key={id}
+              id={`settings-panel-tab-${id}`}
+              role="tab"
+              aria-selected={activeTab === id}
+              aria-controls={`settings-panel-content-${id}`}
               onClick={() => setActiveTab(id)}
               className={`
                 flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all relative whitespace-nowrap
@@ -319,7 +325,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       </div>
 
       {/* Tab Content */}
-      <div className={`${activeTab === 'regras' ? '' : 'p-4'} overflow-y-auto flex-1`}>
+      <div
+        id={`settings-panel-content-${activeTab}`}
+        role="tabpanel"
+        aria-labelledby={`settings-panel-tab-${activeTab}`}
+        className={`${activeTab === 'regras' ? '' : 'p-4'} overflow-y-auto flex-1`}
+      >
         {activeTab === 'regras' ? (
           <ConfigEditor />
         ) : (
@@ -345,6 +356,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <button
                   onClick={handleRegenerateIdentity}
                   className="w-full px-2 py-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
+                  aria-label="Gerar nova identidade de revisor"
                 >
                   Gerar Nova Identidade
                 </button>

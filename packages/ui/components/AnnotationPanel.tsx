@@ -170,15 +170,25 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
   if (!isOpen) return null;
 
   return (
-    <aside className="w-72 border-l border-border/50 bg-card/30 backdrop-blur-sm flex flex-col">
+    <aside role="complementary" aria-label="Painel de anotações" className="w-72 border-l border-border/50 bg-card/30 backdrop-blur-sm flex flex-col">
       {/* Header */}
       <div className="p-3 border-b border-border/50">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Anotações
           </h2>
+<<<<<<< HEAD
           <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isFilterActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
             {isFilterActive ? `${totalVisibleCount}/${annotations.length}` : annotations.length}
+=======
+          <span
+            aria-live="polite"
+            aria-atomic="true"
+            aria-label={`${annotations.length} anotações`}
+            className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground"
+          >
+            {annotations.length}
+>>>>>>> auto-claude/006-add-comprehensive-aria-labels-and-roles-for-access
           </span>
         </div>
 
@@ -283,6 +293,7 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
         <div className="p-2 border-t border-border/50">
           <button
             onClick={handleQuickShare}
+            aria-label={copied ? "Link copiado para área de transferência" : "Compartilhar URL com anotações"}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-muted/50"
           >
             {copied ? (
@@ -374,6 +385,7 @@ const AnnotationCard: React.FC<{
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          aria-label={`Excluir anotação: ${config.label}`}
           className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
         >
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

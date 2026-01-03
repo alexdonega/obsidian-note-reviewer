@@ -100,6 +100,7 @@ export const DecisionBar: React.FC<DecisionBarProps> = ({
           <button
             onClick={handleDeny}
             disabled={isSubmitting}
+            aria-label="Solicitar alterações na nota"
             className={`
               px-4 py-2 rounded-lg text-sm font-medium transition-all
               ${isSubmitting
@@ -114,6 +115,7 @@ export const DecisionBar: React.FC<DecisionBarProps> = ({
           <button
             onClick={handleApprove}
             disabled={isSubmitting}
+            aria-label="Aprovar nota e salvar no Obsidian"
             className={`
               px-4 py-2 rounded-lg text-sm font-medium transition-all
               ${isSubmitting
