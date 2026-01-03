@@ -22,6 +22,23 @@ describe('DecisionBar', () => {
     expect(screen.getByText(/3.*anotações/)).toBeDefined();
   });
 
+  test('mostra texto de instrução em português quando não há anotações', () => {
+    const mockApprove = mock(() => Promise.resolve());
+    const mockDeny = mock(() => Promise.resolve());
+    const mockGetFeedback = mock(() => 'feedback');
+
+    render(
+      <DecisionBar
+        onApprove={mockApprove}
+        onDeny={mockDeny}
+        annotationCount={0}
+        getFeedback={mockGetFeedback}
+      />
+    );
+
+    expect(screen.getByText('Revise o plano, depois aprove ou solicite alterações')).toBeDefined();
+  });
+
   test('chama onApprove ao clicar em aprovar', async () => {
     const mockApprove = mock(() => Promise.resolve());
     const mockDeny = mock(() => Promise.resolve());
