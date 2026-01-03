@@ -426,3 +426,148 @@ textarea:focus-visible,
 :root[data-theme="dark"] .callout.is-collapsible .callout-title:hover {
   background-color: rgba(var(--callout-color-rgb, 100, 116, 139), 0.2);
 }
+
+/* ============================================
+   COLLAPSIBLE SECTION
+   ============================================ */
+
+.collapsible-section {
+  @apply rounded-lg border border-border/50 overflow-hidden;
+  background-color: var(--muted);
+}
+
+.collapsible-section-header {
+  @apply flex items-center justify-between w-full px-3 py-2 cursor-pointer select-none;
+  @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+  @apply hover:bg-muted/80 transition-colors;
+}
+
+.collapsible-section-title {
+  @apply flex-grow text-left;
+}
+
+.collapsible-section-chevron {
+  @apply flex-shrink-0 transition-transform duration-200;
+  color: var(--muted-foreground);
+}
+
+.collapsible-section-chevron.is-collapsed {
+  transform: rotate(-90deg);
+}
+
+.collapsible-section-content {
+  @apply px-3 py-2 border-t border-border/30;
+  background-color: var(--card);
+}
+
+/* ============================================
+   ANNOTATION STATISTICS
+   ============================================ */
+
+.annotation-statistics {
+  @apply mx-2 mb-2;
+}
+
+.annotation-statistics-content {
+  @apply space-y-3;
+}
+
+.stats-section {
+  @apply space-y-1.5;
+}
+
+.stats-section-title {
+  @apply text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5;
+}
+
+/* Stats by Type */
+.stats-badges {
+  @apply flex flex-wrap gap-1.5;
+}
+
+.stats-badge {
+  @apply inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium;
+}
+
+.stats-badge-icon {
+  @apply flex-shrink-0;
+}
+
+.stats-badge-label {
+  @apply truncate;
+}
+
+.stats-badge-count {
+  @apply font-mono font-semibold;
+}
+
+/* Stats by Author */
+.stats-author-list {
+  @apply space-y-1;
+}
+
+.stats-author-item {
+  @apply flex items-center justify-between text-[11px];
+}
+
+.stats-author-current {
+  @apply bg-primary/5 rounded px-1.5 py-0.5 -mx-1.5;
+}
+
+.stats-author-name {
+  @apply truncate text-foreground/80;
+}
+
+.stats-author-name-current {
+  @apply text-primary font-medium;
+}
+
+.stats-author-count {
+  @apply font-mono text-muted-foreground;
+}
+
+.stats-author-count-current {
+  @apply text-primary/80;
+}
+
+/* Timing Distribution */
+.stats-timing-list {
+  @apply space-y-2;
+}
+
+.stats-timing-item {
+  @apply flex flex-col gap-0.5 text-[11px];
+}
+
+.stats-timing-info {
+  @apply flex items-center justify-between;
+}
+
+.stats-timing-label {
+  @apply text-foreground/80;
+}
+
+.stats-timing-count {
+  @apply font-mono text-muted-foreground;
+}
+
+.stats-timing-bar-container {
+  @apply w-full h-1.5 bg-muted/50 rounded-full overflow-hidden;
+}
+
+.stats-timing-bar {
+  @apply h-full rounded-full transition-all duration-300;
+  min-width: 4px; /* Ensure at least a dot is visible for small percentages */
+}
+
+.stats-timing-bar-today {
+  @apply bg-primary;
+}
+
+.stats-timing-bar-week {
+  @apply bg-secondary;
+}
+
+.stats-timing-bar-older {
+  @apply bg-muted-foreground/50;
+}
