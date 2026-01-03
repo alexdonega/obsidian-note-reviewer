@@ -1,6 +1,9 @@
 ﻿import React, { useState } from 'react';
-import { Annotation, AnnotationType, Block } from '../types';
+import { Annotation, AnnotationType, Block, SortOption } from '../types';
 import { isCurrentUser } from '../utils/identity';
+import { sortAnnotations } from '../utils/annotationSort';
+import { useSettingsStore } from '../store/useSettingsStore';
+import { SortSelector } from './SortSelector';
 
 interface PanelProps {
   isOpen: boolean;
@@ -10,52 +13,6 @@ interface PanelProps {
   onDelete: (id: string) => void;
   selectedId: string | null;
   shareUrl?: string;
-}
-
-/**
- * Filter annotations by search query
- * Matches against originalText, text (comment), author, or type label (case-insensitive)
- */
-function filterAnnotations(annotations: Annotation[], query: string): Annotation[] {
-  const trimmedQuery = query.trim().toLowerCase();
-
-  // Return all if empty query
-  if (!trimmedQuery) {
-    return annotations;
-  }
-
-  // Type label mapping (Portuguese labels matching typeConfig in AnnotationCard)
-  const typeLabels: Record<AnnotationType, string> = {
-    [AnnotationType.DELETION]: 'excluir',
-    [AnnotationType.INSERTION]: 'inserir',
-    [AnnotationType.REPLACEMENT]: 'substituir',
-    [AnnotationType.COMMENT]: 'comentario',
-    [AnnotationType.GLOBAL_COMMENT]: 'global',
-  };
-
-  return annotations.filter(annotation => {
-    // Check originalText
-    if (annotation.originalText?.toLowerCase().includes(trimmedQuery)) {
-      return true;
-    }
-
-    // Check text/comment
-    if (annotation.text?.toLowerCase().includes(trimmedQuery)) {
-      return true;
-    }
-
-    // Check author
-    if (annotation.author?.toLowerCase().includes(trimmedQuery)) {
-      return true;
-    }
-
-    // Check type label
-    if (typeLabels[annotation.type]?.includes(trimmedQuery)) {
-      return true;
-    }
-
-    return false;
-  });
 }
 
 export const AnnotationPanel: React.FC<PanelProps> = ({
@@ -68,20 +25,23 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
   shareUrl
 }) => {
   const [copied, setCopied] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const sortedAnnotations = [...annotations].sort((a, b) => a.createdA - b.createdA);
 
-  // Apply search filter
-  const filteredAnnotations = filterAnnotations(sortedAnnotations, searchQuery);
+  // Get persisted sort preference from store
+  const { annotationSort, setAnnotationSort } = useSettingsStore();
+  // Local state for immediate UI updates, initialized from store
+  const [sortOption, setSortOption] = useState<SortOption>(annotationSort);
+
+  // Handler that updates both local state (immediate) and store (persist)
+  const handleSortChange = (newSort: SortOption) => {
+    setSortOption(newSort);
+    setAnnotationSort(newSort);
+  };
+
+  const sortedAnnotations = sortAnnotations(annotations, sortOption);
 
   // Separate global comments from text annotations
-  const globalComments = filteredAnnotations.filter(ann => ann.isGlobal);
-  const textAnnotations = filteredAnnotations.filter(ann => !ann.isGlobal);
-
-  // Determine if search is active for count display
-  const isSearchActive = searchQuery.trim().length > 0;
-  const totalCount = annotations.length;
-  const filteredCount = filteredAnnotations.length;
+  const globalComments = sortedAnnotations.filter(ann => ann.isGlobal);
+  const textAnnotations = sortedAnnotations.filter(ann => !ann.isGlobal);
 
   const handleQuickShare = async () => {
     if (!shareUrl) return;
@@ -100,78 +60,33 @@ export const AnnotationPanel: React.FC<PanelProps> = ({
     <aside className="w-72 border-l border-border/50 bg-card/30 backdrop-blur-sm flex flex-col">
       {/* Header */}
       <div className="p-3 border-b border-border/50">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex-shrink-0">
             Anotações
           </h2>
-          <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-            {isSearchActive ? `${filteredCount} / ${totalCount}` : totalCount}
-          </span>
-        </div>
-        {/* Search Input */}
-        <div className="relative mt-2">
-          <svg
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none transition-colors"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar anotações..."
-            aria-label="Buscar anotações"
-            className="w-full pl-8 pr-8 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+          <SortSelector
+            currentSort={sortOption}
+            onSortChange={handleSortChange}
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              aria-label="Limpar busca"
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
+          <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground ml-auto flex-shrink-0">
+            {annotations.length}
+          </span>
         </div>
       </div>
 
       {/* List */}
       <div className="flex-1 overflow-y-auto p-2 space-y-3">
-        {filteredAnnotations.length === 0 ? (
-          isSearchActive ? (
-            // Empty state: Search returned no results
-            <div className="flex flex-col items-center justify-center h-40 text-center px-4">
-              <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Nenhuma anotação encontrada
-              </p>
-              <p className="text-[10px] text-muted-foreground/70 mt-1">
-                Tente uma busca diferente
-              </p>
+        {sortedAnnotations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40 text-center px-4">
+            <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+              <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              </svg>
             </div>
-          ) : (
-            // Empty state: No annotations at all
-            <div className="flex flex-col items-center justify-center h-40 text-center px-4">
-              <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                </svg>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Selecione texto para adicionar anotações
-              </p>
-            </div>
-          )
+            <p className="text-xs text-muted-foreground">
+              Selecione texto para adicionar anotações
+            </p>
+          </div>
         ) : (
           <>
             {/* Global Comments Section */}
@@ -282,22 +197,6 @@ const AnnotationCard: React.FC<{
   onSelect: () => void;
   onDelete: () => void;
 }> = ({ annotation, isSelected, onSelect, onDelete }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    // Copy comment/replacement text if available, otherwise copy highlighted text
-    const textToCopy = annotation.text || annotation.originalText;
-    if (!textToCopy) return;
-
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
-      // Clipboard access may fail in some contexts
-    }
-  };
-
   const typeConfig = {
     [AnnotationType.DELETION]: {
       label: 'Excluir',
@@ -394,31 +293,14 @@ const AnnotationCard: React.FC<{
             {formatTimestamp(annotation.createdA)}
           </span>
         </div>
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={(e) => { e.stopPropagation(); handleCopy(); }}
-            className={`p-1 rounded transition-all ${copied ? 'opacity-100 text-green-500' : 'opacity-0 group-hover:opacity-100 text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-            title={copied ? 'Copiado!' : 'Copiar'}
-          >
-            {copied ? (
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            )}
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+        >
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       {/* Original Text - Only show for non-global annotations */}

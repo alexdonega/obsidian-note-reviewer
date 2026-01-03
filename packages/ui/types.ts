@@ -8,6 +8,8 @@
 
 export type EditorMode = 'selection' | 'redline' | 'edit';
 
+export type SortOption = 'newest' | 'oldest' | 'type' | 'author';
+
 export interface Annotation {
   id: string;
   blockId: string; // Legacy - not used with web-highlighter
