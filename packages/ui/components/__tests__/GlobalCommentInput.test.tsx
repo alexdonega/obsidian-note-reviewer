@@ -1,9 +1,14 @@
 import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { ExportModal } from '../ExportModal';
+import { GlobalCommentInput } from '../GlobalCommentInput';
 
-describe('ExportModal', () => {
+// Mock the identity utility
+mock.module('../utils/identity', () => ({
+  getIdentity: () => 'test-tater-identity',
+}));
+
+describe('GlobalCommentInput', () => {
   let rafCallback: FrameRequestCallback | null = null;
   const originalRaf = window.requestAnimationFrame;
 
@@ -25,38 +30,34 @@ describe('ExportModal', () => {
   const defaultProps = {
     isOpen: true,
     onClose: mock(() => {}),
-    shareUrl: 'https://example.com/share/abc123',
-    shareUrlSize: '1.2 KB',
-    diffOutput: '+ Added line\n- Removed line',
-    annotationCount: 5,
+    onSubmit: mock(() => {}),
   };
 
   describe('focus trapping', () => {
     test('auto-focuses first focusable element when modal opens', async () => {
-      render(<ExportModal {...defaultProps} />);
+      render(<GlobalCommentInput {...defaultProps} />);
 
       // Wait for focus trap to set up
       await waitFor(() => {
-        // The first focusable element should be the close button or first tab button
-        const closeButton = screen.getByRole('button', { name: /close/i }) ||
-                           document.querySelector('button');
-        expect(document.activeElement?.tagName).toBe('BUTTON');
+        // The first focusable element should be focused (close button or input)
+        const dialog = screen.getByRole('dialog');
+        expect(dialog.contains(document.activeElement)).toBe(true);
       });
     });
 
     test('traps focus within modal - Tab cycles from last to first element', async () => {
-      render(<ExportModal {...defaultProps} />);
+      render(<GlobalCommentInput {...defaultProps} />);
 
       const dialog = screen.getByRole('dialog');
 
-      // Get all focusable buttons in the modal
-      const buttons = dialog.querySelectorAll('button');
-      expect(buttons.length).toBeGreaterThan(0);
+      // Get all focusable elements in the modal (buttons and inputs)
+      const focusableElements = dialog.querySelectorAll('button, input, textarea');
+      expect(focusableElements.length).toBeGreaterThan(0);
 
-      // Focus the last button
-      const lastButton = buttons[buttons.length - 1];
-      lastButton.focus();
-      expect(document.activeElement).toBe(lastButton);
+      // Focus the last focusable element (submit button)
+      const lastElement = focusableElements[focusableElements.length - 1];
+      (lastElement as HTMLElement).focus();
+      expect(document.activeElement).toBe(lastElement);
 
       // Simulate Tab key press
       fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: false });
@@ -70,18 +71,18 @@ describe('ExportModal', () => {
     });
 
     test('traps focus within modal - Shift+Tab cycles from first to last element', async () => {
-      render(<ExportModal {...defaultProps} />);
+      render(<GlobalCommentInput {...defaultProps} />);
 
       const dialog = screen.getByRole('dialog');
 
-      // Get all focusable buttons in the modal
-      const buttons = dialog.querySelectorAll('button');
-      expect(buttons.length).toBeGreaterThan(0);
+      // Get all focusable elements in the modal
+      const focusableElements = dialog.querySelectorAll('button, input, textarea');
+      expect(focusableElements.length).toBeGreaterThan(0);
 
-      // Focus the first button
-      const firstButton = buttons[0];
-      firstButton.focus();
-      expect(document.activeElement).toBe(firstButton);
+      // Focus the first focusable element (close button)
+      const firstElement = focusableElements[0];
+      (firstElement as HTMLElement).focus();
+      expect(document.activeElement).toBe(firstElement);
 
       // Simulate Shift+Tab key press
       fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
@@ -95,11 +96,11 @@ describe('ExportModal', () => {
     });
 
     test('focus stays within modal when pressing Tab', async () => {
-      render(<ExportModal {...defaultProps} />);
+      render(<GlobalCommentInput {...defaultProps} />);
 
       const dialog = screen.getByRole('dialog');
 
-      // Focus an element in the middle of the modal
+      // Focus the textarea
       const textarea = dialog.querySelector('textarea');
       if (textarea) {
         textarea.focus();
@@ -120,7 +121,7 @@ describe('ExportModal', () => {
   describe('Escape key handling', () => {
     test('closes modal when Escape key is pressed', async () => {
       const onClose = mock(() => {});
-      render(<ExportModal {...defaultProps} onClose={onClose} />);
+      render(<GlobalCommentInput {...defaultProps} onClose={onClose} />);
 
       const dialog = screen.getByRole('dialog');
 
@@ -139,7 +140,7 @@ describe('ExportModal', () => {
       // Add a parent handler
       document.body.addEventListener('keydown', parentHandler);
 
-      render(<ExportModal {...defaultProps} onClose={onClose} />);
+      render(<GlobalCommentInput {...defaultProps} onClose={onClose} />);
 
       const dialog = screen.getByRole('dialog');
 
@@ -156,7 +157,7 @@ describe('ExportModal', () => {
 
     test('other keys do not close modal', async () => {
       const onClose = mock(() => {});
-      render(<ExportModal {...defaultProps} onClose={onClose} />);
+      render(<GlobalCommentInput {...defaultProps} onClose={onClose} />);
 
       const dialog = screen.getByRole('dialog');
 
@@ -176,7 +177,7 @@ describe('ExportModal', () => {
 
       // Create and focus a trigger button before rendering the modal
       const triggerButton = document.createElement('button');
-      triggerButton.textContent = 'Open Modal';
+      triggerButton.textContent = 'Open Global Comment';
       document.body.appendChild(triggerButton);
       triggerButton.focus();
 
@@ -184,7 +185,7 @@ describe('ExportModal', () => {
 
       // Render the modal (simulating it opening after trigger click)
       const { rerender } = render(
-        <ExportModal {...defaultProps} isOpen={true} onClose={onClose} />
+        <GlobalCommentInput {...defaultProps} isOpen={true} onClose={onClose} />
       );
 
       // Wait for auto-focus to happen
@@ -194,7 +195,7 @@ describe('ExportModal', () => {
       });
 
       // Close the modal by rerendering with isOpen=false
-      rerender(<ExportModal {...defaultProps} isOpen={false} onClose={onClose} />);
+      rerender(<GlobalCommentInput {...defaultProps} isOpen={false} onClose={onClose} />);
 
       // Wait for focus restoration
       await waitFor(() => {
@@ -210,13 +211,13 @@ describe('ExportModal', () => {
 
       // Create and focus a trigger button
       const triggerButton = document.createElement('button');
-      triggerButton.textContent = 'Open Modal';
+      triggerButton.textContent = 'Open Global Comment';
       document.body.appendChild(triggerButton);
       triggerButton.focus();
 
       // Render the modal
       const { rerender } = render(
-        <ExportModal {...defaultProps} isOpen={true} onClose={onClose} />
+        <GlobalCommentInput {...defaultProps} isOpen={true} onClose={onClose} />
       );
 
       await waitFor(() => {
@@ -228,7 +229,7 @@ describe('ExportModal', () => {
       document.body.removeChild(triggerButton);
 
       // Close the modal - should not throw
-      rerender(<ExportModal {...defaultProps} isOpen={false} onClose={onClose} />);
+      rerender(<GlobalCommentInput {...defaultProps} isOpen={false} onClose={onClose} />);
 
       // Test passes if no error is thrown
     });
@@ -236,61 +237,85 @@ describe('ExportModal', () => {
 
   describe('ARIA attributes', () => {
     test('modal has role="dialog"', () => {
-      render(<ExportModal {...defaultProps} />);
+      render(<GlobalCommentInput {...defaultProps} />);
 
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeDefined();
     });
 
     test('modal has aria-modal="true"', () => {
-      render(<ExportModal {...defaultProps} />);
+      render(<GlobalCommentInput {...defaultProps} />);
 
       const dialog = screen.getByRole('dialog');
       expect(dialog.getAttribute('aria-modal')).toBe('true');
     });
 
     test('modal has aria-labelledby pointing to title', () => {
-      render(<ExportModal {...defaultProps} />);
+      render(<GlobalCommentInput {...defaultProps} />);
 
       const dialog = screen.getByRole('dialog');
       const labelledBy = dialog.getAttribute('aria-labelledby');
-      expect(labelledBy).toBe('export-modal-title');
+      expect(labelledBy).toBe('global-comment-modal-title');
 
       // Verify the title element exists with this id
-      const title = document.getElementById('export-modal-title');
+      const title = document.getElementById('global-comment-modal-title');
       expect(title).toBeDefined();
-      expect(title?.textContent).toBe('Export');
+      expect(title?.textContent).toBe('Comentário Global');
     });
   });
 
   describe('modal visibility', () => {
     test('does not render when isOpen is false', () => {
-      render(<ExportModal {...defaultProps} isOpen={false} />);
+      render(<GlobalCommentInput {...defaultProps} isOpen={false} />);
 
       expect(screen.queryByRole('dialog')).toBeNull();
     });
 
     test('renders when isOpen is true', () => {
-      render(<ExportModal {...defaultProps} isOpen={true} />);
+      render(<GlobalCommentInput {...defaultProps} isOpen={true} />);
 
       expect(screen.getByRole('dialog')).toBeDefined();
     });
   });
 
-  describe('tab navigation', () => {
-    test('can switch between Share and Raw Diff tabs', async () => {
-      render(<ExportModal {...defaultProps} />);
+  describe('form interaction', () => {
+    test('can enter comment text', async () => {
+      render(<GlobalCommentInput {...defaultProps} />);
 
-      // Share tab should be active by default
-      expect(screen.getByText('Shareable URL')).toBeDefined();
+      const textarea = screen.getByPlaceholderText(/Adicione um comentário/i);
+      fireEvent.change(textarea, { target: { value: 'Test comment' } });
 
-      // Click Raw Diff tab
-      const rawDiffTab = screen.getByRole('button', { name: /Raw Diff/i });
-      fireEvent.click(rawDiffTab);
+      expect((textarea as HTMLTextAreaElement).value).toBe('Test comment');
+    });
 
-      // Raw Diff content should be visible
+    test('can enter author name', async () => {
+      render(<GlobalCommentInput {...defaultProps} />);
+
+      const authorInput = screen.getByPlaceholderText(/Seu nome/i);
+      fireEvent.change(authorInput, { target: { value: 'Test Author' } });
+
+      expect((authorInput as HTMLInputElement).value).toBe('Test Author');
+    });
+
+    test('submit button is disabled when comment is empty', () => {
+      render(<GlobalCommentInput {...defaultProps} />);
+
+      const submitButton = screen.getByRole('button', { name: /Adicionar Comentário/i });
+      expect(submitButton.getAttribute('disabled')).toBe('');
+    });
+
+    test('Ctrl+Enter submits the comment', async () => {
+      const onSubmit = mock(() => {});
+      render(<GlobalCommentInput {...defaultProps} onSubmit={onSubmit} />);
+
+      const textarea = screen.getByPlaceholderText(/Adicione um comentário/i);
+      fireEvent.change(textarea, { target: { value: 'Test comment' } });
+
+      // Press Ctrl+Enter
+      fireEvent.keyDown(textarea, { key: 'Enter', ctrlKey: true });
+
       await waitFor(() => {
-        expect(screen.getByText(/Added line/)).toBeDefined();
+        expect(onSubmit).toHaveBeenCalled();
       });
     });
   });

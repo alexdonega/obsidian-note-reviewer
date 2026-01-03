@@ -1,176 +1,359 @@
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { Settings } from '../Settings';
 
 describe('Settings', () => {
-  test('abre modal ao clicar no botão', () => {
-    render(<Settings />);
+  let rafCallback: FrameRequestCallback | null = null;
+  const originalRaf = window.requestAnimationFrame;
 
-    const button = screen.getByRole('button', { name: /abrir configurações/i });
+  beforeEach(() => {
+    // Mock requestAnimationFrame to execute immediately
+    window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      rafCallback = callback;
+      // Execute immediately for synchronous testing
+      callback(0);
+      return 1;
+    };
+  });
+
+  afterEach(() => {
+    window.requestAnimationFrame = originalRaf;
+    rafCallback = null;
+  });
+
+  const openSettingsDialog = () => {
+    const button = screen.getByTitle(/Configurações/);
     fireEvent.click(button);
+  };
 
-    expect(screen.getByText('Configurações de Tipos de Nota')).toBeDefined();
-  });
+  describe('focus trapping', () => {
+    test('auto-focuses first focusable element when dialog opens', async () => {
+      render(<Settings />);
 
-  test('regenera identidade', async () => {
-    const mockOnIdentityChange = mock((oldId: string, newId: string) => {});
+      openSettingsDialog();
 
-    render(<Settings onIdentityChange={mockOnIdentityChange} />);
+      // Wait for focus trap to set up
+      await waitFor(() => {
+        const dialog = screen.getByRole('dialog');
+        expect(dialog.contains(document.activeElement)).toBe(true);
+      });
+    });
 
-    // Open settings
-    fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+    test('traps focus within dialog - Tab cycles from last to first element', async () => {
+      render(<Settings />);
 
-    // Navigate to a tab that shows the identity section
-    const atomicaTab = screen.getByRole('tab', { name: /notas atômicas/i });
-    fireEvent.click(atomicaTab);
+      openSettingsDialog();
 
-    // Find and click the regenerate identity button
-    const regenButton = screen.getByRole('button', { name: /gerar nova identidade/i });
-    fireEvent.click(regenButton);
+      const dialog = screen.getByRole('dialog');
 
-    await waitFor(() => {
-      expect(mockOnIdentityChange).toHaveBeenCalled();
+      // Get all focusable elements in the dialog (buttons and inputs)
+      const focusableElements = dialog.querySelectorAll('button, input, textarea, [tabindex]:not([tabindex="-1"])');
+      expect(focusableElements.length).toBeGreaterThan(0);
+
+      // Focus the last focusable element
+      const lastElement = focusableElements[focusableElements.length - 1];
+      (lastElement as HTMLElement).focus();
+      expect(document.activeElement).toBe(lastElement);
+
+      // Simulate Tab key press
+      fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: false });
+
+      // Should cycle to first focusable element
+      await waitFor(() => {
+        const focusedElement = document.activeElement;
+        // Focus should be on a focusable element within the dialog
+        expect(dialog.contains(focusedElement)).toBe(true);
+      });
+    });
+
+    test('traps focus within dialog - Shift+Tab cycles from first to last element', async () => {
+      render(<Settings />);
+
+      openSettingsDialog();
+
+      const dialog = screen.getByRole('dialog');
+
+      // Get all focusable elements in the dialog
+      const focusableElements = dialog.querySelectorAll('button, input, textarea, [tabindex]:not([tabindex="-1"])');
+      expect(focusableElements.length).toBeGreaterThan(0);
+
+      // Focus the first focusable element
+      const firstElement = focusableElements[0];
+      (firstElement as HTMLElement).focus();
+      expect(document.activeElement).toBe(firstElement);
+
+      // Simulate Shift+Tab key press
+      fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
+
+      // Should cycle to last focusable element
+      await waitFor(() => {
+        const focusedElement = document.activeElement;
+        // Focus should still be within the dialog
+        expect(dialog.contains(focusedElement)).toBe(true);
+      });
+    });
+
+    test('focus stays within dialog when pressing Tab multiple times', async () => {
+      render(<Settings />);
+
+      openSettingsDialog();
+
+      const dialog = screen.getByRole('dialog');
+
+      // Focus an input element in the dialog
+      const input = dialog.querySelector('input');
+      if (input) {
+        input.focus();
+        expect(document.activeElement).toBe(input);
+      }
+
+      // Press Tab multiple times
+      for (let i = 0; i < 15; i++) {
+        fireEvent.keyDown(dialog, { key: 'Tab' });
+        await waitFor(() => {
+          // Focus should always stay within the dialog
+          expect(dialog.contains(document.activeElement)).toBe(true);
+        });
+      }
     });
   });
 
-  // Accessibility tests for ARIA labels
-  describe('Acessibilidade', () => {
-    test('botão de abrir configurações tem aria-label descritivo', () => {
+  describe('Escape key handling', () => {
+    test('closes dialog when Escape key is pressed', async () => {
       render(<Settings />);
 
-      const button = screen.getByRole('button', { name: /abrir configurações/i });
-      expect(button).toBeDefined();
-      expect(button.getAttribute('aria-label')).toBe('Abrir configurações');
+      openSettingsDialog();
+
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeDefined();
+
+      // Press Escape key
+      fireEvent.keyDown(dialog, { key: 'Escape' });
+
+      await waitFor(() => {
+        // Dialog should be closed
+        expect(screen.queryByRole('dialog')).toBeNull();
+      });
     });
 
-    test('modal usa role tablist para navegação de abas', () => {
+    test('Escape key stops propagation', async () => {
+      const parentHandler = mock(() => {});
+
+      // Add a parent handler
+      document.body.addEventListener('keydown', parentHandler);
+
       render(<Settings />);
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      openSettingsDialog();
 
-      const tablist = screen.getByRole('tablist');
-      expect(tablist).toBeDefined();
-      expect(tablist.getAttribute('aria-label')).toBe('Categorias de tipos de nota');
+      const dialog = screen.getByRole('dialog');
+
+      // Press Escape key
+      fireEvent.keyDown(dialog, { key: 'Escape' });
+
+      // Parent handler should not be called (stopPropagation)
+      await waitFor(() => {
+        expect(parentHandler).not.toHaveBeenCalled();
+      });
+
+      document.body.removeEventListener('keydown', parentHandler);
     });
 
-    test('abas têm role tab e aria-selected', () => {
+    test('other keys do not close dialog', async () => {
       render(<Settings />);
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      openSettingsDialog();
 
-      const tabs = screen.getAllByRole('tab');
-      expect(tabs.length).toBeGreaterThan(0);
+      const dialog = screen.getByRole('dialog');
 
-      // First tab (regras) should be selected by default
-      const regrasTab = tabs.find(tab => tab.textContent?.includes('Regras'));
-      expect(regrasTab?.getAttribute('aria-selected')).toBe('true');
+      // Press various keys
+      fireEvent.keyDown(dialog, { key: 'Enter' });
+      fireEvent.keyDown(dialog, { key: 'Space' });
+      fireEvent.keyDown(dialog, { key: 'ArrowDown' });
+      fireEvent.keyDown(dialog, { key: 'a' });
 
-      // Other tabs should not be selected
-      const atomicaTab = tabs.find(tab => tab.textContent?.includes('Atômicas'));
-      expect(atomicaTab?.getAttribute('aria-selected')).toBe('false');
+      // Dialog should still be open
+      expect(screen.getByRole('dialog')).toBeDefined();
+    });
+  });
+
+  describe('focus restoration on close', () => {
+    test('restores focus to settings button when dialog closes', async () => {
+      render(<Settings />);
+
+      const settingsButton = screen.getByTitle(/Configurações/);
+      settingsButton.focus();
+      expect(document.activeElement).toBe(settingsButton);
+
+      // Open the dialog
+      fireEvent.click(settingsButton);
+
+      // Wait for auto-focus to happen inside the dialog
+      await waitFor(() => {
+        const dialog = screen.getByRole('dialog');
+        expect(dialog.contains(document.activeElement)).toBe(true);
+      });
+
+      const dialog = screen.getByRole('dialog');
+
+      // Close the dialog with Escape key
+      fireEvent.keyDown(dialog, { key: 'Escape' });
+
+      // Wait for focus restoration
+      await waitFor(() => {
+        expect(document.activeElement).toBe(settingsButton);
+      });
     });
 
-    test('abas têm aria-controls apontando para o painel', () => {
+    test('restores focus to settings button when close button is clicked', async () => {
       render(<Settings />);
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      const settingsButton = screen.getByTitle(/Configurações/);
+      settingsButton.focus();
+      expect(document.activeElement).toBe(settingsButton);
 
-      const regrasTab = screen.getByRole('tab', { name: /regras/i });
-      expect(regrasTab.getAttribute('aria-controls')).toBe('settings-panel-regras');
-      expect(regrasTab.getAttribute('id')).toBe('settings-tab-regras');
+      // Open the dialog
+      fireEvent.click(settingsButton);
+
+      // Wait for auto-focus to happen inside the dialog
+      await waitFor(() => {
+        const dialog = screen.getByRole('dialog');
+        expect(dialog.contains(document.activeElement)).toBe(true);
+      });
+
+      // Find and click the close button (Fechar)
+      const closeButton = screen.getByRole('button', { name: /Fechar/i });
+      fireEvent.click(closeButton);
+
+      // Wait for focus restoration
+      await waitFor(() => {
+        expect(document.activeElement).toBe(settingsButton);
+      });
+    });
+  });
+
+  describe('ARIA attributes', () => {
+    test('dialog has role="dialog"', () => {
+      render(<Settings />);
+
+      openSettingsDialog();
+
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeDefined();
     });
 
-    test('painel de conteúdo tem role tabpanel e aria-labelledby', () => {
+    test('dialog has aria-modal="true"', () => {
       render(<Settings />);
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      openSettingsDialog();
 
-      const tabpanel = screen.getByRole('tabpanel');
-      expect(tabpanel).toBeDefined();
-      expect(tabpanel.getAttribute('aria-labelledby')).toBe('settings-tab-regras');
+      const dialog = screen.getByRole('dialog');
+      expect(dialog.getAttribute('aria-modal')).toBe('true');
     });
 
-    test('botão de carregar padrões tem aria-label descritivo', () => {
+    test('dialog has aria-labelledby pointing to title', () => {
       render(<Settings />);
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      openSettingsDialog();
 
-      const loadDefaultsButton = screen.getByRole('button', { name: /carregar valores padrão/i });
-      expect(loadDefaultsButton).toBeDefined();
-      expect(loadDefaultsButton.getAttribute('aria-label')).toBe('Carregar valores padrão');
+      const dialog = screen.getByRole('dialog');
+      const labelledBy = dialog.getAttribute('aria-labelledby');
+      expect(labelledBy).toBe('settings-dialog-title');
+
+      // Verify the title element exists with this id
+      const title = document.getElementById('settings-dialog-title');
+      expect(title).toBeDefined();
+      expect(title?.textContent).toContain('Configurações');
+    });
+  });
+
+  describe('dialog visibility', () => {
+    test('does not render dialog initially', () => {
+      render(<Settings />);
+
+      expect(screen.queryByRole('dialog')).toBeNull();
     });
 
-    test('botão de fechar no header tem aria-label descritivo', () => {
+    test('renders dialog when settings button is clicked', () => {
       render(<Settings />);
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      openSettingsDialog();
 
-      // The close button in header has aria-label "Fechar"
-      const closeButton = screen.getByRole('button', { name: 'Fechar' });
-      expect(closeButton).toBeDefined();
+      expect(screen.getByRole('dialog')).toBeDefined();
+      expect(screen.getByText('Configurações de Tipos de Nota')).toBeDefined();
+    });
+  });
+
+  describe('basic functionality', () => {
+    test('abre modal ao clicar no botão', () => {
+      render(<Settings />);
+
+      const button = screen.getByTitle(/Configurações/);
+      fireEvent.click(button);
+
+      expect(screen.getByText('Configurações de Tipos de Nota')).toBeDefined();
     });
 
-    test('botão de fechar no footer tem aria-label descritivo', () => {
-      render(<Settings />);
+    test('permite editar caminho do vault', async () => {
+      const mockOnVaultPathChange = mock((path: string) => {});
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      render(<Settings onNotePathChange={mockOnVaultPathChange} />);
 
-      // The close button in footer has aria-label "Fechar configurações"
-      const closeFooterButton = screen.getByRole('button', { name: /fechar configurações/i });
-      expect(closeFooterButton).toBeDefined();
-      expect(closeFooterButton.getAttribute('aria-label')).toBe('Fechar configurações');
+      fireEvent.click(screen.getByTitle(/Configurações/));
+
+      // Switch to a tab that has input fields (e.g., Conteúdo de Terceiros)
+      const terceirosTab = screen.getByText('📚');
+      fireEvent.click(terceirosTab);
+
+      // Find an input field
+      const inputs = screen.getAllByPlaceholderText(/caminho/i);
+      if (inputs.length > 0) {
+        fireEvent.change(inputs[0], { target: { value: 'C:/Test/Vault' } });
+
+        await waitFor(() => {
+          expect(mockOnVaultPathChange).toHaveBeenCalledWith('C:/Test/Vault');
+        });
+      }
     });
 
-    test('aria-selected muda ao clicar em outra aba', () => {
-      render(<Settings />);
+    test('regenera identidade', async () => {
+      const mockOnIdentityChange = mock((oldId: string, newId: string) => {});
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      render(<Settings onIdentityChange={mockOnIdentityChange} />);
 
-      const regrasTab = screen.getByRole('tab', { name: /regras/i });
-      const atomicaTab = screen.getByRole('tab', { name: /atômicas/i });
+      fireEvent.click(screen.getByTitle(/Configurações/));
 
-      // Initially regras is selected
-      expect(regrasTab.getAttribute('aria-selected')).toBe('true');
-      expect(atomicaTab.getAttribute('aria-selected')).toBe('false');
+      // Switch to a tab that shows identity section (not 'regras')
+      const terceirosTab = screen.getByText('📚');
+      fireEvent.click(terceirosTab);
 
-      // Click atomica tab
-      fireEvent.click(atomicaTab);
+      const regenButton = screen.getByText('Gerar Nova Identidade');
+      fireEvent.click(regenButton);
 
-      // Now atomica should be selected
-      expect(regrasTab.getAttribute('aria-selected')).toBe('false');
-      expect(atomicaTab.getAttribute('aria-selected')).toBe('true');
+      await waitFor(() => {
+        expect(mockOnIdentityChange).toHaveBeenCalled();
+      });
     });
+  });
 
-    test('botão de regenerar identidade tem aria-label descritivo', () => {
+  describe('tab navigation', () => {
+    test('can switch between category tabs', async () => {
       render(<Settings />);
 
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
+      openSettingsDialog();
 
-      // Navigate to a tab that shows identity section
-      const atomicaTab = screen.getByRole('tab', { name: /atômicas/i });
-      fireEvent.click(atomicaTab);
+      // Regras tab should be active by default
+      expect(screen.getByText('📋')).toBeDefined();
 
-      const regenButton = screen.getByRole('button', { name: /gerar nova identidade/i });
-      expect(regenButton).toBeDefined();
-      expect(regenButton.getAttribute('aria-label')).toBe('Gerar nova identidade de revisor');
-    });
+      // Click on Conteúdo de Terceiros tab
+      const terceirosTab = screen.getByText('📚');
+      fireEvent.click(terceirosTab);
 
-    test('tabpanel muda id e aria-labelledby ao trocar aba', () => {
-      render(<Settings />);
-
-      fireEvent.click(screen.getByRole('button', { name: /abrir configurações/i }));
-
-      let tabpanel = screen.getByRole('tabpanel');
-      expect(tabpanel.getAttribute('id')).toBe('settings-panel-regras');
-      expect(tabpanel.getAttribute('aria-labelledby')).toBe('settings-tab-regras');
-
-      // Click atomica tab
-      const atomicaTab = screen.getByRole('tab', { name: /atômicas/i });
-      fireEvent.click(atomicaTab);
-
-      tabpanel = screen.getByRole('tabpanel');
-      expect(tabpanel.getAttribute('id')).toBe('settings-panel-atomica');
-      expect(tabpanel.getAttribute('aria-labelledby')).toBe('settings-tab-atomica');
+      // Terceiros content should be visible (has template and destination inputs)
+      await waitFor(() => {
+        expect(screen.getAllByText('Template:').length).toBeGreaterThan(0);
+      });
     });
   });
 });

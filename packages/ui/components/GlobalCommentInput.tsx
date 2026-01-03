@@ -5,8 +5,9 @@
  * rather than specific text selections.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getIdentity } from '../utils/identity';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface GlobalCommentInputProps {
   isOpen: boolean;
@@ -21,12 +22,22 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
 }) => {
   const [comment, setComment] = useState('');
   const [author, setAuthor] = useState('');
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Set up focus trap for accessibility
+  useFocusTrap({
+    containerRef: modalRef,
+    isOpen,
+    onClose,
+  });
 
   // Load author from storage on mount
   useEffect(() => {
     if (isOpen) {
       const identity = getIdentity();
-      setAuthor(identity); // Always set author, even if empty it will generate one
+      if (identity) {
+        setAuthor(identity);
+      }
       setComment(''); // Reset comment when opening
     }
   }, [isOpen]);
@@ -48,11 +59,7 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
       e.preventDefault();
       handleSubmit();
     }
-    // Escape to close
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      onClose();
-    }
+    // Note: Escape key is handled by useFocusTrap hook for consistency
   };
 
   return (
@@ -61,14 +68,11 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
       onClick={onClose}
     >
       <div
-<<<<<<< HEAD
-        className="bg-card border border-border rounded-xl w-full max-w-2xl shadow-2xl"
-=======
+        ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="global-comment-modal-title"
         className="bg-card border border-border rounded-xl w-full max-w-lg shadow-2xl"
->>>>>>> auto-claude/006-add-comprehensive-aria-labels-and-roles-for-access
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -84,16 +88,7 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
             </div>
             <button
               onClick={onClose}
-<<<<<<< HEAD
-<<<<<<< HEAD
-              className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-=======
-              aria-label="Fechar modal de comentário global"
               className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
->>>>>>> auto-claude/006-add-comprehensive-aria-labels-and-roles-for-access
-=======
-              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
->>>>>>> auto-claude/007-add-visible-focus-indicators-for-keyboard-navigati
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -129,8 +124,8 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Adicione um comentário que se aplica ao documento inteiro...&#10;&#10;"
-              rows={8}
+              placeholder="Adicione um comentário que se aplica ao documento inteiro..."
+              rows={5}
               autoFocus
               className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
             />
@@ -144,24 +139,14 @@ export const GlobalCommentInput: React.FC<GlobalCommentInputProps> = ({
         <div className="p-4 border-t border-border flex justify-end gap-2">
           <button
             onClick={onClose}
-<<<<<<< HEAD
-            aria-label="Cancelar e fechar modal"
             className="px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-=======
-            className="px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
->>>>>>> auto-claude/007-add-visible-focus-indicators-for-keyboard-navigati
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             disabled={!comment.trim()}
-<<<<<<< HEAD
-            aria-label="Adicionar comentário global ao documento"
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-=======
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
->>>>>>> auto-claude/007-add-visible-focus-indicators-for-keyboard-navigati
               comment.trim()
                 ? 'bg-blue-500 text-white hover:bg-blue-600'
                 : 'bg-muted text-muted-foreground cursor-not-allowed'
