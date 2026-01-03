@@ -155,7 +155,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
 
               <p className="text-xs text-muted-foreground">
-                Esta URL contém o plano completo e todas as anotações. Qualquer pessoa com este link pode visualizar e adicionar às suas anotações.
+                Esta URL contém a nota completa e todas as anotações. Qualquer pessoa com este link pode visualizar e adicionar às suas anotações.
               </p>
             </div>
           ) : (

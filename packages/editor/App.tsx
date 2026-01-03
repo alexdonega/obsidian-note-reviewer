@@ -688,7 +688,7 @@ const App: React.FC = () => {
         <header ref={headerRef} className="h-12 flex items-center justify-between px-2 md:px-4 border-b border-border/50 bg-card/50 backdrop-blur-xl z-50">
           <div className="flex items-center gap-2 md:gap-3">
             <a
-              href="https://plannotator.ai"
+              href="https://github.com/alexdonega/obsidian-note-reviewer"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 md:gap-2 hover:opacity-80 transition-opacity"

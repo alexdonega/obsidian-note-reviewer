@@ -6,7 +6,7 @@ interface LandingProps {
   onEnter?: () => void;
 }
 
-export const LandingObsidian Note ReviewerPtBr: React.FC<LandingProps> = ({ onEnter }) => {
+export const LandingPtBr: React.FC<LandingProps> = ({ onEnter }) => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
@@ -47,7 +47,7 @@ export const LandingObsidian Note ReviewerPtBr: React.FC<LandingProps> = ({ onEn
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Para Claude Code & OpenCode
+              Para Claude Code
             </div>
 
             <div className="flex items-center gap-6 mb-4">
@@ -134,15 +134,6 @@ export const LandingObsidian Note ReviewerPtBr: React.FC<LandingProps> = ({ onEn
                 )}
               </div>
 
-              {/* OpenCode video link */}
-              <a
-                href="https://youtu.be/_N7uo0EFI-U"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Também assistir para OpenCode →
-              </a>
             </div>
           </div>
         </section>
@@ -347,8 +338,7 @@ export const LandingObsidian Note ReviewerPtBr: React.FC<LandingProps> = ({ onEn
           <div className="space-y-6 max-w-2xl">
             <Step num={1} title="Agente gera nota no terminal">
               <span className="text-xs">
-                <strong>Claude Code:</strong> Skill /nota gera markdown formatado<br />
-                <strong>OpenCode:</strong> Comando note_review inicia revisão
+                <strong>Claude Code:</strong> Skill /nota gera markdown formatado
               </span>
             </Step>
 
@@ -375,10 +365,6 @@ export const LandingObsidian Note ReviewerPtBr: React.FC<LandingProps> = ({ onEn
             <li className="flex items-center gap-2">
               <span className="text-primary">•</span>
               <strong>Claude Code:</strong> Skill /nota com hook que abre interface
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">•</span>
-              <strong>OpenCode:</strong> Comando note_review integrado
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">•</span>

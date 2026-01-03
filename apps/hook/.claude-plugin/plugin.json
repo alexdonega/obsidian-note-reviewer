@@ -1,10 +1,24 @@
 {
   "name": "obsidian-note-reviewer",
-  "description": "Interactive Plan Review: Mark up and refine your plans using a UI, easily share for team collaboration, automatically integrates with plan mode hooks.",
-  "version": "0.2.0",
+  "description": "Review and annotate Obsidian notes before saving. Supports multiple note types (videos, articles, books, atomic concepts, MOCs, projects) with visual annotations, collaborative sharing, and direct vault integration.",
+  "version": "0.2.1",
   "author": {
     "name": "alexdonega"
   },
   "repository": "https://github.com/alexdonega/obsidian-note-reviewer",
-  "keywords": ["planning", "review", "hooks", "ExitPlanMode", "collaboration"]
+  "keywords": [
+    "obsidian",
+    "note-review",
+    "annotations",
+    "vault",
+    "markdown",
+    "youtube",
+    "articles",
+    "books",
+    "atomic-notes",
+    "moc",
+    "zettelkasten",
+    "claude-code",
+    "hooks"
+  ]
 }

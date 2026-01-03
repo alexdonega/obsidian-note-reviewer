@@ -91,7 +91,7 @@ export const DecisionBar: React.FC<DecisionBarProps> = ({
           {annotationCount > 0 ? (
             <span>{annotationCount} {annotationCount !== 1 ? 'anotações' : 'anotação'} para enviar como feedback</span>
           ) : (
-            <span>Revise o plano, depois aprove ou solicite alterações</span>
+            <span>Revise a nota, depois aprove ou solicite alterações</span>
           )}
         </div>
 

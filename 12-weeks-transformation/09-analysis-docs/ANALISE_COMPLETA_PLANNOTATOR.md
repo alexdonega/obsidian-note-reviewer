@@ -36,7 +36,6 @@ obsidian-note-reviewer/
 │   ├── hook/              # CLI + Servidor efêmero (Bun)
 │   ├── portal/            # Web app principal (React + Vite)
 │   ├── marketing/         # Landing page
-│   └── opencode-plugin/   # Plugin OpenCode
 ├── packages/
 │   ├── editor/            # Componente App principal
 │   └── ui/                # Componentes reutilizáveis
@@ -69,7 +68,7 @@ obsidian-note-reviewer/
 - **LOC:** ~7.582 linhas (TypeScript/TSX)
 - **node_modules:** 511 MB
 - **Executáveis:** 2 × 113 MB = 226 MB
-- **Apps:** 4 (hook, portal, marketing, opencode-plugin)
+- **Apps:** 3 (hook, portal, marketing)
 - **Packages:** 2 (editor, ui)
 - **Licença:** BSL 1.1 (Business Source License)
 
@@ -303,7 +302,7 @@ if (origin && ALLOWED_ORIGINS.includes(origin)) {
 
 #### Diferencial Competitivo
 - ✅ **Único tool de review visual** para AI coding agents (pioneiro)
-- ✅ **Integração nativa** com Claude Code e OpenCode
+- ✅ **Integração nativa** com Claude Code
 - ✅ **Workflow approve/deny** integrado ao fluxo do agente
 - ✅ **Interface de anotação visual** superior a text-based feedback
 
@@ -322,7 +321,7 @@ if (origin && ALLOWED_ORIGINS.includes(origin)) {
 
 #### Vantagem Sustentável
 - First-mover advantage no nicho AI coding review
-- Network effects se virar padrão no ecossistema Claude/OpenCode
+- Network effects se virar padrão no ecossistema Claude
 - Integration lock-in (quanto mais usam, mais dependem)
 
 **Por que nota 8:**

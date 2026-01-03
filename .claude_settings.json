@@ -11,14 +11,24 @@
       "Edit(./**)",
       "Glob(./**)",
       "Grep(./**)",
+      "Read(C:\\dev\\obsidian-note-reviewer/**)",
+      "Write(C:\\dev\\obsidian-note-reviewer/**)",
+      "Edit(C:\\dev\\obsidian-note-reviewer/**)",
+      "Glob(C:\\dev\\obsidian-note-reviewer/**)",
+      "Grep(C:\\dev\\obsidian-note-reviewer/**)",
+      "Read(C:\\dev\\obsidian-note-reviewer\\.auto-claude\\ideation/**)",
+      "Write(C:\\dev\\obsidian-note-reviewer\\.auto-claude\\ideation/**)",
+      "Edit(C:\\dev\\obsidian-note-reviewer\\.auto-claude\\ideation/**)",
       "Bash(*)",
-      "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs",
-      "mcp__graphiti-memory__search_nodes",
-      "mcp__graphiti-memory__search_facts",
-      "mcp__graphiti-memory__add_episode",
-      "mcp__graphiti-memory__get_episodes",
-      "mcp__graphiti-memory__get_entity_edge"
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "mcp__context7__resolve-library-id(*)",
+      "mcp__context7__get-library-docs(*)",
+      "mcp__graphiti-memory__search_nodes(*)",
+      "mcp__graphiti-memory__search_facts(*)",
+      "mcp__graphiti-memory__add_episode(*)",
+      "mcp__graphiti-memory__get_episodes(*)",
+      "mcp__graphiti-memory__get_entity_edge(*)"
     ]
   }
 }

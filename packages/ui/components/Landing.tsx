@@ -47,7 +47,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              For Claude Code & OpenCode
+              For Claude Code
             </div>
 
             <div className="flex items-center gap-6 mb-4">
@@ -68,7 +68,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
 
             <p className="text-lg text-muted-foreground mb-8 max-w-lg">
               Interactive Plan Review for coding agents. Mark up and refine plans visually,
-              share for team collaboration. Works with Claude Code and OpenCode.
+              share for team collaboration. Works with Claude Code.
             </p>
 
             <div className="flex flex-col gap-3">
@@ -134,15 +134,6 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
                 )}
               </div>
 
-              {/* OpenCode video link */}
-              <a
-                href="https://youtu.be/_N7uo0EFI-U"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              >
-                Also watch for OpenCode →
-              </a>
             </div>
           </div>
         </section>
@@ -356,8 +347,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
           <div className="space-y-6 max-w-2xl">
             <Step num={1} title="Agent triggers Obsidian Note Reviewer">
               <span className="text-xs">
-                <strong>Claude Code:</strong> ExitPlanMode hook opens UI<br />
-                <strong>OpenCode:</strong> Agent calls submit_plan tool
+                <strong>Claude Code:</strong> ExitPlanMode hook opens UI
               </span>
             </Step>
 
@@ -384,10 +374,6 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
             <li className="flex items-center gap-2">
               <span className="text-primary">•</span>
               <strong>Claude Code:</strong> Binary + plugin with PermissionRequest hook
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">•</span>
-              <strong>OpenCode:</strong> npm package with submit_plan tool
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">•</span>

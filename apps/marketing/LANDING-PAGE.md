@@ -70,7 +70,7 @@ Esta landing page foi construída seguindo rigorosamente os DNAs do produto loca
 ## 🎨 Estrutura da Landing Page
 
 ### 1. Hero Section
-- Badge de beta com "Integração nativa com Claude Code e OpenCode"
+- Badge de beta com "Integração nativa com Claude Code"
 - Headline: "Revise notas como elas merecem ser revisadas"
 - Subheadline com benefício central
 - CTAs: "Experimentar Grátis" + "Ver Demo"

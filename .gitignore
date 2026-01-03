@@ -15,9 +15,6 @@ dist-ssr
 # npm pack output
 *.tgz
 
-# OpenCode plugin build artifact (generated from hook dist)
-apps/opencode-plugin/plannotator.html
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

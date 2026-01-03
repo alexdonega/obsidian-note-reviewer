@@ -70,7 +70,7 @@
 ## 🎯 DIFERENCIAIS COMPETITIVOS
 
 1. **Único** tool de review visual para AI agents
-2. **Integração nativa** com Claude Code e OpenCode
+2. **Integração nativa** com Claude Code
 3. **Workflow approve/deny** integrado
 4. **Offline-first** com sync opcional
 5. **410 testes** (excelente qualidade)

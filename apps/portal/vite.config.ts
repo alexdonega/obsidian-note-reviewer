@@ -26,7 +26,10 @@ export default defineConfig({
       '@obsidian-note-reviewer/ui': path.resolve(__dirname, '../../packages/ui'),
       '@obsidian-note-reviewer/editor/styles': path.resolve(__dirname, '../../packages/editor/index.css'),
       '@obsidian-note-reviewer/editor': path.resolve(__dirname, '../../packages/editor/App.tsx'),
-    }
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+    },
+    dedupe: ['react', 'react-dom'],
   },
   build: {
     target: 'esnext',

@@ -4,26 +4,15 @@
 
 # Plannotator
 
-Interactive Plan Review for AI Coding Agents. Mark up and refine your plans using a visual UI, share for team collaboration, and seamlessly integrate with **Claude Code** and **OpenCode**.
+Interactive Plan Review for AI Coding Agents. Mark up and refine your plans using a visual UI, share for team collaboration, and seamlessly integrate with **Claude Code**.
 
-<table>
-<tr>
-<td align="center" width="50%">
-<h3>Claude Code</h3>
+<p align="center">
 <a href="https://www.youtube.com/watch?v=a_AT7cEN_9I">
-<img src="apps/marketing/public/youtube.png" alt="Claude Code Demo" width="100%" />
+<img src="apps/marketing/public/youtube.png" alt="Claude Code Demo" width="60%" />
 </a>
-<p><a href="https://www.youtube.com/watch?v=a_AT7cEN_9I">Watch Demo</a></p>
-</td>
-<td align="center" width="50%">
-<h3>OpenCode</h3>
-<a href="https://youtu.be/_N7uo0EFI-U">
-<img src="apps/marketing/public/youtube-opencode.png" alt="OpenCode Demo" width="100%" />
-</a>
-<p><a href="https://youtu.be/_N7uo0EFI-U">Watch Demo</a></p>
-</td>
-</tr>
-</table>
+<br />
+<a href="https://www.youtube.com/watch?v=a_AT7cEN_9I">Watch Demo</a>
+</p>
 
 ---
 
@@ -53,20 +42,6 @@ irm https://plannotator.ai/install.ps1 | iex
 ```
 
 See [apps/hook/README.md](apps/hook/README.md) for detailed installation instructions including a `manual hook` approach.
-
----
-
-## Install for OpenCode
-
-Add to your `opencode.json`:
-
-```json
-{
-  "plugin": ["@plannotator/opencode"]
-}
-```
-
-That's it! Restart OpenCode and the `submit_plan` tool will be available.
 
 ---
 
