@@ -123,7 +123,7 @@ Esta landing page foi construída seguindo rigorosamente os DNAs do produto loca
   2. Links úteis
   3. Construído por Alex Donega
 - Copyright + licença BSL-1.1
-- Menção ao fork do Plannotator
+- Menção ao fork do Obsidian Note Reviewer
 
 ## 🎯 Princípios de Design Aplicados
 
@@ -217,7 +217,7 @@ Quando implementar analytics:
 - ❌ Não esconder que é beta (transparência)
 - ❌ Não usar jargão técnico desnecessário
 - ❌ Não adicionar features que não existem
-- ❌ Não remover menção ao Plannotator (crédito ao fork)
+- ❌ Não remover menção ao Obsidian Note Reviewer (crédito ao fork)
 
 ### O que SEMPRE fazer
 - ✅ Manter tom brasileiro autêntico
@@ -230,7 +230,7 @@ Quando implementar analytics:
 
 - **Produto**: https://github.com/alexdonega/obsidian-note-reviewer
 - **DNAs**: `C:\dev\obsidian-alexdonega\Esforços\Work\DNAs`
-- **Fork original**: https://github.com/backnotprop/plannotator
+- **Fork original**: https://github.com/alexdonega/obsidian-note-reviewer
 - **Demo**: https://r.alexdonega.com.br
 
 ---

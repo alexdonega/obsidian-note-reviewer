@@ -51,7 +51,7 @@ bun run dev:marketing
 ```
 
 **Acessar versões:**
-- **Versão original (Plannotator)**: http://localhost:3002/
+- **Versão original (Obsidian Note Reviewer)**: http://localhost:3002/
 - **Versão pt-BR (Note Reviewer)**: http://localhost:3002/index.pt-br.html
 
 ### Build para Produção
@@ -112,7 +112,7 @@ Arquivos gerados em `apps/marketing/dist/`:
 - 410 testes passando
 - Stack moderna (React 19, Tailwind 4)
 - Building in public
-- Fork de projeto estabelecido (Plannotator)
+- Fork de projeto estabelecido (Obsidian Note Reviewer)
 
 ## 🔧 Customização
 
@@ -213,7 +213,7 @@ Antes de fazer deploy para produção:
 
 - **DNAs completos**: `C:\dev\obsidian-alexdonega\Esforços\Work\DNAs`
 - **Documentação detalhada**: `apps/marketing/LANDING-PAGE.md`
-- **Projeto original**: https://github.com/backnotprop/plannotator
+- **Projeto original**: https://github.com/alexdonega/obsidian-note-reviewer
 - **Produto**: https://github.com/alexdonega/obsidian-note-reviewer
 
 ## 🤝 Contribuindo

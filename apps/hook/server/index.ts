@@ -66,7 +66,7 @@ function createRateLimiter(): Ratelimit | null {
       redis,
       limiter: Ratelimit.slidingWindow(10, '10 s'), // 10 requests per 10 seconds
       analytics: true,
-      prefix: '@plannotator/ratelimit'
+      prefix: '@obsidian-note-reviewer/ratelimit'
     });
   }
 

@@ -1,8 +1,8 @@
 /**
- * Plannotator Plugin for OpenCode
+ * Obsidian Note Reviewer Plugin for OpenCode
  *
  * Provides a Claude Code-style planning experience with interactive plan review.
- * When the agent calls submit_plan, the Plannotator UI opens for the user to
+ * When the agent calls submit_plan, the Obsidian Note Reviewer UI opens for the user to
  * annotate, approve, or request changes to the plan.
  *
  * @packageDocumentation
@@ -12,7 +12,7 @@ import { type Plugin, tool } from "@opencode-ai/plugin";
 import { $ } from "bun";
 
 // @ts-ignore - Bun import attribute for text
-import indexHtml from "./plannotator.html" with { type: "text" };
+import indexHtml from "./obsreview.html" with { type: "text" };
 const htmlContent = indexHtml as unknown as string;
 
 interface ServerResult {
@@ -22,7 +22,7 @@ interface ServerResult {
   stop: () => void;
 }
 
-async function startPlannotatorServer(planContent: string): Promise<ServerResult> {
+async function startObsReviewServer(planContent: string): Promise<ServerResult> {
   let resolveDecision: (result: { approved: boolean; feedback?: string }) => void;
   const decisionPromise = new Promise<{ approved: boolean; feedback?: string }>(
     (resolve) => { resolveDecision = resolve; }
@@ -80,7 +80,7 @@ async function openBrowser(url: string): Promise<void> {
   }
 }
 
-export const PlannotatorPlugin: Plugin = async (ctx) => {
+export const ObsReviewPlugin: Plugin = async (ctx) => {
   return {
     "experimental.chat.system.transform": async (_input, output) => {
       output.system.push(`
@@ -114,7 +114,7 @@ Do NOT proceed with implementation until your plan is approved.
         },
 
         async execute(args, _context) {
-          const server = await startPlannotatorServer(args.plan);
+          const server = await startObsReviewServer(args.plan);
           await openBrowser(server.url);
 
           const result = await server.waitForDecision();
@@ -154,4 +154,4 @@ Please revise your plan based on this feedback and call \`submit_plan\` again wh
   };
 };
 
-export default PlannotatorPlugin;
+export default ObsReviewPlugin;

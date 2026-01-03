@@ -10,8 +10,8 @@ const notes: Record<string, { title: string; content: string; createdAt: string 
 
 // Security: Whitelist of allowed origins (no wildcards for production)
 const ALLOWED_ORIGINS = [
-  'https://plannotator.ai',
-  'https://www.plannotator.ai',
+  'https://obsidian-note-reviewer.vercel.app',
+  'https://www.obsidian-note-reviewer.vercel.app',
   'https://r.alexdonega.com.br',
   'http://localhost:3000',
   'http://localhost:5173',

@@ -1,13 +1,13 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Plannotator Windows CMD Bootstrap Script
+REM Obsidian Note Reviewer Windows CMD Bootstrap Script
 
 REM Parse command line argument
 set "VERSION=%~1"
 if "!VERSION!"=="" set "VERSION=latest"
 
-set "REPO=backnotprop/plannotator"
+set "REPO=backnotprop/obsreview"
 set "INSTALL_DIR=%USERPROFILE%\.local\bin"
 set "PLATFORM=win32-x64"
 
@@ -17,7 +17,7 @@ if /i "%PROCESSOR_ARCHITECTURE%"=="ARM64" goto :arch_valid
 if /i "%PROCESSOR_ARCHITEW6432%"=="AMD64" goto :arch_valid
 if /i "%PROCESSOR_ARCHITEW6432%"=="ARM64" goto :arch_valid
 
-echo Plannotator does not support 32-bit Windows. >&2
+echo Obsidian Note Reviewer does not support 32-bit Windows. >&2
 exit /b 1
 
 :arch_valid
@@ -62,14 +62,14 @@ if /i "!VERSION!"=="latest" (
     if !ERRORLEVEL! neq 0 set "TAG=v!TAG!"
 )
 
-echo Installing plannotator !TAG!...
+echo Installing obsreview !TAG!...
 
-set "BINARY_NAME=plannotator-!PLATFORM!.exe"
+set "BINARY_NAME=obsreview-!PLATFORM!.exe"
 set "BINARY_URL=https://github.com/!REPO!/releases/download/!TAG!/!BINARY_NAME!"
 set "CHECKSUM_URL=!BINARY_URL!.sha256"
 
 REM Download binary
-set "TEMP_FILE=%TEMP%\plannotator-!TAG!.exe"
+set "TEMP_FILE=%TEMP%\obsreview-!TAG!.exe"
 curl -fsSL "!BINARY_URL!" -o "!TEMP_FILE!"
 if !ERRORLEVEL! neq 0 (
     echo Failed to download binary >&2
@@ -106,11 +106,11 @@ if /i "!ACTUAL_CHECKSUM!" neq "!EXPECTED_CHECKSUM!" (
 )
 
 REM Install binary
-set "INSTALL_PATH=!INSTALL_DIR!\plannotator.exe"
+set "INSTALL_PATH=!INSTALL_DIR!\obsreview.exe"
 move /y "!TEMP_FILE!" "!INSTALL_PATH!" >nul
 
 echo.
-echo plannotator !TAG! installed to !INSTALL_PATH!
+echo obsreview !TAG! installed to !INSTALL_PATH!
 
 REM Check if install directory is in PATH
 echo !PATH! | findstr /i /c:"!INSTALL_DIR!" >nul
@@ -129,10 +129,10 @@ if !ERRORLEVEL! neq 0 (
 
 echo.
 echo Test the install:
-echo   echo {"tool_input":{"plan":"# Test Plan\\n\\nHello world"}} ^| plannotator
+echo   echo {"tool_input":{"plan":"# Test Plan\\n\\nHello world"}} ^| obsreview
 echo.
 echo Then install the Claude Code plugin:
-echo   /plugin marketplace add backnotprop/plannotator
-echo   /plugin install plannotator@plannotator
+echo   /plugin marketplace add backnotprop/obsreview
+echo   /plugin install obsreview@obsreview
 echo.
 exit /b 0

@@ -7,12 +7,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $ProgressPreference = 'SilentlyContinue'
 
-$REPO = "backnotprop/plannotator"
+$REPO = "backnotprop/obsreview"
 $INSTALL_DIR = "$env:USERPROFILE\.local\bin"
 
 # Check for 32-bit Windows
 if (-not [Environment]::Is64BitProcess) {
-    Write-Error "Plannotator does not support 32-bit Windows."
+    Write-Error "Obsidian Note Reviewer does not support 32-bit Windows."
     exit 1
 }
 
@@ -41,14 +41,14 @@ else {
     }
 }
 
-Write-Output "Installing plannotator $tag..."
+Write-Output "Installing obsreview $tag..."
 
-$binaryName = "plannotator-$platform.exe"
+$binaryName = "obsreview-$platform.exe"
 $binaryUrl = "https://github.com/$REPO/releases/download/$tag/$binaryName"
 $checksumUrl = "$binaryUrl.sha256"
 
 # Download binary
-$tempFile = Join-Path $env:TEMP "plannotator-$tag.exe"
+$tempFile = Join-Path $env:TEMP "obsreview-$tag.exe"
 try {
     Invoke-WebRequest -Uri $binaryUrl -OutFile $tempFile -ErrorAction Stop
 }
@@ -79,11 +79,11 @@ if ($actualChecksum -ne $expectedChecksum) {
 }
 
 # Install binary
-$installPath = Join-Path $INSTALL_DIR "plannotator.exe"
+$installPath = Join-Path $INSTALL_DIR "obsreview.exe"
 Move-Item -Force $tempFile $installPath
 
 Write-Output ""
-Write-Output "plannotator $tag installed to $installPath"
+Write-Output "obsreview $tag installed to $installPath"
 
 # Check if install directory is in PATH
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -102,9 +102,9 @@ if ($userPath -notlike "*$INSTALL_DIR*") {
 
 Write-Output ""
 Write-Output "Test the install:"
-Write-Output '  echo ''{"tool_input":{"plan":"# Test Plan\\n\\nHello world"}}'' | plannotator'
+Write-Output '  echo ''{"tool_input":{"plan":"# Test Plan\\n\\nHello world"}}'' | obsreview'
 Write-Output ""
 Write-Output "Then install the Claude Code plugin:"
-Write-Output "  /plugin marketplace add backnotprop/plannotator"
-Write-Output "  /plugin install plannotator@plannotator"
+Write-Output "  /plugin marketplace add backnotprop/obsreview"
+Write-Output "  /plugin install obsreview@obsreview"
 Write-Output ""

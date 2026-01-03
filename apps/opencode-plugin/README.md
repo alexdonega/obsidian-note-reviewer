@@ -1,4 +1,4 @@
-# @plannotator/opencode
+# @obsidian-note-reviewer/opencode
 
 **Annotate plans. Not in the terminal.**
 
@@ -22,7 +22,7 @@ Add to your `opencode.json`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@plannotator/opencode"]
+  "plugin": ["@obsidian-note-reviewer/opencode"]
 }
 ```
 
@@ -30,7 +30,7 @@ Restart OpenCode. The `submit_plan` tool is now available.
 
 ## How It Works
 
-1. Agent calls `submit_plan` → Plannotator opens in your browser
+1. Agent calls `submit_plan` → Obsidian Note Reviewer opens in your browser
 2. Select text → annotate (delete, replace, comment)
 3. **Approve** → Agent proceeds with implementation
 4. **Request changes** → Annotations sent back as structured feedback
@@ -43,10 +43,10 @@ Restart OpenCode. The `submit_plan` tool is now available.
 
 ## Links
 
-- [Website](https://plannotator.ai)
-- [GitHub](https://github.com/backnotprop/plannotator)
-- [Claude Code Plugin](https://github.com/backnotprop/plannotator/tree/main/apps/hook)
+- [Website](https://obsidian-note-reviewer.vercel.app)
+- [GitHub](https://github.com/alexdonega/obsidian-note-reviewer)
+- [Claude Code Plugin](https://github.com/alexdonega/obsidian-note-reviewer/tree/main/apps/hook)
 
 ## License
 
-Copyright (c) 2025 backnotprop. Licensed under [BSL-1.1](https://github.com/backnotprop/plannotator/blob/main/LICENSE).
+Copyright (c) 2025 alexdonega. Licensed under [BSL-1.1](https://github.com/alexdonega/obsidian-note-reviewer/blob/main/LICENSE).

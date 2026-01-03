@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { parseMarkdownToBlocks, exportDiff } from '@obsidian-note-reviewer/ui/utils/parser';
 import { Viewer, ViewerHandle } from '@obsidian-note-reviewer/ui/components/Viewer';
 import { AnnotationPanel } from '@obsidian-note-reviewer/ui/components/AnnotationPanel';
@@ -190,8 +190,6 @@ const App: React.FC = () => {
 
   // History for undo (Ctrl+Z)
   const [annotationHistory, setAnnotationHistory] = useState<string[]>([]);
-  // Redo stack for Ctrl+Shift+Z (stores full annotation objects)
-  const [redoStack, setRedoStack] = useState<Annotation[]>([]);
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [showExport, setShowExport] = useState(false);
@@ -290,49 +288,47 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Ctrl+Z to undo, Ctrl+Shift+Z to redo annotation
+  // Keyboard shortcuts: Ctrl+Z (undo), Ctrl+S (save), Ctrl+E (export), Ctrl+G (global comment)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+Shift+Z: Redo (must check before Ctrl+Z)
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
-        e.preventDefault();
-        if (redoStack.length > 0) {
-          // Pop the last undone annotation from redo stack
-          const annotationToRedo = redoStack[redoStack.length - 1];
-          setRedoStack(prev => prev.slice(0, -1));
-          // Add annotation back to annotations array
-          setAnnotations(prev => [...prev, annotationToRedo]);
-          // Add ID back to annotation history
-          setAnnotationHistory(prev => [...prev, annotationToRedo.id]);
-          // Re-apply highlight to viewer
-          viewerRef.current?.applySharedAnnotations([annotationToRedo]);
-        }
-      }
-      // Ctrl+Z: Undo
-      else if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      // Ctrl+Z: Undo last annotation
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
         e.preventDefault();
         if (annotationHistory.length > 0) {
           const lastAnnotationId = annotationHistory[annotationHistory.length - 1];
-          // Find and store annotation for redo, then remove
-          setAnnotations(prev => {
-            const annotationToUndo = prev.find(a => a.id === lastAnnotationId);
-            if (annotationToUndo) {
-              // Push to redo stack for Ctrl+Shift+Z
-              setRedoStack(redoPrev => [...redoPrev, annotationToUndo]);
-            }
-            return prev.filter(a => a.id !== lastAnnotationId);
-          });
+          // Remove annotation
+          setAnnotations(prev => prev.filter(a => a.id !== lastAnnotationId));
           // Remove from history
           setAnnotationHistory(prev => prev.slice(0, -1));
           // Remove highlight from viewer
           viewerRef.current?.removeHighlight(lastAnnotationId);
         }
       }
+
+      // Ctrl+S: Save to Vault
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (savePath && !isSaving) {
+          handleSaveToVault();
+        }
+      }
+
+      // Ctrl+E: Open Export Modal
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        setShowExport(true);
+      }
+
+      // Ctrl+G: Open Global Comment Modal
+      if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+        e.preventDefault();
+        setShowGlobalCommentModal(true);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [annotationHistory, redoStack]);
+  }, [annotationHistory, savePath, isSaving, handleSaveToVault]);
 
   // API mode handlers
   const handleApprove = async () => {
@@ -360,8 +356,6 @@ const App: React.FC = () => {
   };
 
   const handleAddAnnotation = (ann: Annotation) => {
-    // Clear redo stack when new annotation is added (standard undo/redo behavior)
-    setRedoStack([]);
     setAnnotations(prev => [...prev, ann]);
     setSelectedAnnotationId(ann.id);
     setIsPanelOpen(true);
@@ -376,8 +370,6 @@ const App: React.FC = () => {
   };
 
   const handleAddGlobalComment = (comment: string, author: string) => {
-    // Clear redo stack when new global comment is added (standard undo/redo behavior)
-    setRedoStack([]);
     const newAnnotation: Annotation = {
       id: `global-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       blockId: '', // Not tied to a specific block
@@ -433,7 +425,9 @@ const App: React.FC = () => {
     }).join('\n\n');
   };
 
-  const handleSaveToVault = async () => {
+  const diffOutput = useMemo(() => exportDiff(blocks, annotations), [blocks, annotations]);
+
+  const handleSaveToVault = useCallback(async () => {
     if (!savePath.trim()) {
       setSaveError('Configure o caminho nas configurações');
       return;
@@ -498,9 +492,7 @@ const App: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const diffOutput = useMemo(() => exportDiff(blocks, annotations), [blocks, annotations]);
+  }, [savePath, annotations, blocks, diffOutput, isApiMode]);
 
   return (
     <ThemeProvider defaultTheme="dark">
@@ -521,7 +513,7 @@ const App: React.FC = () => {
         <header className="h-12 flex items-center justify-between px-2 md:px-4 border-b border-border/50 bg-card/50 backdrop-blur-xl z-50">
           <div className="flex items-center gap-2 md:gap-3">
             <a
-              href="https://github.com/alexdonega/obsidian-note-reviewer"
+              href="https://plannotator.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 md:gap-2 hover:opacity-80 transition-opacity"
@@ -593,8 +585,8 @@ const App: React.FC = () => {
                 !savePath
                   ? 'Configure o caminho nas configurações'
                   : annotations.length > 0
-                    ? 'Fazer alterações no Claude Code'
-                    : 'Salvar nota no Obsidian'
+                    ? 'Fazer alterações no Claude Code (Ctrl+S)'
+                    : 'Salvar nota no Obsidian (Ctrl+S)'
               }
             >
               {annotations.length > 0 ? (
@@ -603,6 +595,7 @@ const App: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   <span className="hidden md:inline">{isSaving ? 'Processando...' : 'Fazer Alterações'}</span>
+                  <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-background/50 border border-current/20 rounded opacity-60">Ctrl+S</kbd>
                 </>
               ) : (
                 <>
@@ -610,19 +603,21 @@ const App: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                   </svg>
                   <span className="hidden md:inline">{isSaving ? 'Salvando...' : 'Salvar no Obsidian'}</span>
+                  <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-background/50 border border-current/20 rounded opacity-60">Ctrl+S</kbd>
                 </>
               )}
             </button>
 
             <button
               onClick={() => setShowGlobalCommentModal(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium bg-blue-500/20 text-blue-600 hover:bg-blue-500/30 border border-blue-500/40 transition-all whitespace-nowrap"
-              title="Adicionar Comentário Global"
+              className="flex items-center gap-2 p-1.5 md:px-2.5 md:py-1 rounded-md text-xs font-medium bg-blue-500/20 text-blue-600 hover:bg-blue-500/30 border border-blue-500/40 transition-all"
+              title="Adicionar Comentário Global (Ctrl+G)"
             >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="hidden sm:inline">Comentário Global</span>
+              <span className="hidden md:inline">Comentário Global</span>
+              <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-background/50 border border-current/20 rounded opacity-60">Ctrl+G</kbd>
             </button>
 
             <ModeToggle />
@@ -656,13 +651,14 @@ const App: React.FC = () => {
 
             <button
               onClick={() => setShowExport(true)}
-              className="p-1.5 md:px-2.5 md:py-1 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
-              title="Exportar"
+              className="flex items-center gap-2 p-1.5 md:px-2.5 md:py-1 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
+              title="Exportar (Ctrl+E)"
             >
               <svg className="w-4 h-4 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
               <span className="hidden md:inline">Exportar</span>
+              <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-background/50 border border-current/20 rounded opacity-60">Ctrl+E</kbd>
             </button>
           </div>
         </header>
@@ -711,7 +707,7 @@ const App: React.FC = () => {
           shareUrlSize={shareUrlSize}
           diffOutput={diffOutput}
           annotationCount={annotations.length}
-          annotations={annotations}
+
         />
 
         {/* Global Comment Input Modal */}

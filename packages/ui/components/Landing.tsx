@@ -1,5 +1,5 @@
 import React from "react";
-// import logoImage from "../plannotator.webp"; // Temporarily disabled - image not found
+// import logoImage from "../obsidian-note-reviewer.webp"; // Temporarily disabled - image not found
 import { ModeToggle } from "./ModeToggle";
 
 interface LandingProps {
@@ -13,13 +13,13 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
       <nav className="fixed top-0 left-0 right-0 h-12 flex items-center justify-between px-6 bg-background/80 backdrop-blur-sm border-b border-border/30 z-50">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold tracking-tight">
-            Plannotator
+            Obsidian Note Reviewer
           </span>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs">
             <a
-              href="https://github.com/backnotprop/plannotator"
+              href="https://github.com/alexdonega/obsidian-note-reviewer"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -28,7 +28,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
             </a>
             <span className="text-muted-foreground/50">|</span>
             <a
-              href="https://github.com/backnotprop/plannotator/blob/main/apps/hook/README.md"
+              href="https://github.com/alexdonega/obsidian-note-reviewer/blob/main/apps/hook/README.md"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -61,7 +61,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
               {/* Logo temporarily disabled - image not found */}
               {/* <img
                 src={logoImage}
-                alt="Plannotator logo"
+                alt="Obsidian Note Reviewer logo"
                 className="w-20 h-20 md:w-24 md:h-24 object-contain shrink-0 -scale-x-100"
               /> */}
             </div>
@@ -113,7 +113,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
                   </button>
                 ) : (
                   <a
-                    href="https://share.plannotator.ai"
+                    href="https://obsidian-note-reviewer.vercel.app"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
                   >
                     Open Demo
@@ -195,7 +195,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
               <div>
                 <h3 className="font-semibold mb-1">Runs locally.</h3>
                 <p className="text-muted-foreground text-sm">
-                  Local plugin. No network requests. Plannotator runs entirely
+                  Local plugin. No network requests. Obsidian Note Reviewer runs entirely
                   in your browser. Plans never leave your machine.
                 </p>
               </div>
@@ -255,7 +255,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
               <div className="flex-1 flex justify-center">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <div className="w-4 h-4 rounded bg-primary/20" />
-                  <span>Plannotator</span>
+                  <span>Obsidian Note Reviewer</span>
                 </div>
               </div>
               <div className="w-16" />
@@ -354,7 +354,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
           <h2 className="text-xl font-semibold mb-8">How it works</h2>
 
           <div className="space-y-6 max-w-2xl">
-            <Step num={1} title="Agent triggers Plannotator">
+            <Step num={1} title="Agent triggers Obsidian Note Reviewer">
               <span className="text-xs">
                 <strong>Claude Code:</strong> ExitPlanMode hook opens UI<br />
                 <strong>OpenCode:</strong> Agent calls submit_plan tool
@@ -396,7 +396,7 @@ export const Landing: React.FC<LandingProps> = ({ onEnter }) => {
           </ul>
 
           <a
-            href="https://github.com/backnotprop/plannotator"
+            href="https://github.com/alexdonega/obsidian-note-reviewer"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"

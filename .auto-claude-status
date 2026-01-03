@@ -1,15 +1,15 @@
 {
   "active": true,
-  "spec": "003-add-annotation-type-filter-to-panel",
+  "spec": "004-add-more-keyboard-shortcuts-save-export-global-com",
   "state": "building",
   "subtasks": {
-    "completed": 2,
-    "total": 8,
+    "completed": 8,
+    "total": 9,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Implement Filter Buttons UI",
+    "current": "Testing and Verification",
     "id": null,
     "total": 2
   },
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 4,
-    "started_at": "2026-01-01T18:51:30.316449"
+    "number": 10,
+    "started_at": "2026-01-01T18:51:31.222958"
   },
-  "last_update": "2026-01-01T19:07:09.393952"
+  "last_update": "2026-01-01T19:39:52.235573"
 }

@@ -1,24 +1,24 @@
-# Plannotator Claude Code Plugin
+# Obsidian Note Reviewer Claude Code Plugin
 
-This directory contains the Claude Code plugin configuration for Plannotator.
+This directory contains the Claude Code plugin configuration for Obsidian Note Reviewer.
 
 ## Prerequisites
 
-Install the `plannotator` command so Claude Code can use it:
+Install the `obsreview` command so Claude Code can use it:
 
 **macOS / Linux / WSL:**
 ```bash
-curl -fsSL https://plannotator.ai/install.sh | bash
+curl -fsSL https://obsreview.ai/install.sh | bash
 ```
 
 **Windows PowerShell:**
 ```powershell
-irm https://plannotator.ai/install.ps1 | iex
+irm https://obsreview.ai/install.ps1 | iex
 ```
 
 **Windows CMD:**
 ```cmd
-curl -fsSL https://plannotator.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
+curl -fsSL https://obsreview.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
 ```
 
 ---
@@ -32,8 +32,8 @@ curl -fsSL https://plannotator.ai/install.cmd -o install.cmd && install.cmd && d
 In Claude Code:
 
 ```
-/plugin marketplace add backnotprop/plannotator
-/plugin install plannotator@plannotator
+/plugin marketplace add alexdonega/obsreview
+/plugin install obsreview@obsreview
 ```
 
 **Important:** Restart Claude Code after installing the plugin for the hooks to take effect.
@@ -51,7 +51,7 @@ If you prefer not to use the plugin system, add this to your `~/.claude/settings
         "hooks": [
           {
             "type": "command",
-            "command": "plannotator",
+            "command": "obsreview",
             "timeout": 1800
           }
         ]
@@ -65,7 +65,7 @@ If you prefer not to use the plugin system, add this to your `~/.claude/settings
 
 When Claude Code calls `ExitPlanMode`, this hook intercepts and:
 
-1. Opens Plannotator UI in your browser
+1. Opens Obsidian Note Reviewer UI in your browser
 2. Lets you annotate the plan visually
 3. Approve → Claude proceeds with implementation
 4. Request changes → Your annotations are sent back to Claude

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO="backnotprop/plannotator"
+REPO="backnotprop/obsreview"
 INSTALL_DIR="$HOME/.local/bin"
 
 case "$(uname -s)" in
@@ -17,7 +17,7 @@ case "$(uname -m)" in
 esac
 
 platform="${os}-${arch}"
-binary_name="plannotator-${platform}"
+binary_name="obsreview-${platform}"
 
 echo "Fetching latest version..."
 latest_tag=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name"' | cut -d'"' -f4)
@@ -27,7 +27,7 @@ if [ -z "$latest_tag" ]; then
     exit 1
 fi
 
-echo "Installing plannotator ${latest_tag}..."
+echo "Installing obsreview ${latest_tag}..."
 
 binary_url="https://github.com/${REPO}/releases/download/${latest_tag}/${binary_name}"
 checksum_url="${binary_url}.sha256"
@@ -51,11 +51,11 @@ if [ "$actual_checksum" != "$expected_checksum" ]; then
     exit 1
 fi
 
-mv "$tmp_file" "$INSTALL_DIR/plannotator"
-chmod +x "$INSTALL_DIR/plannotator"
+mv "$tmp_file" "$INSTALL_DIR/obsreview"
+chmod +x "$INSTALL_DIR/obsreview"
 
 echo ""
-echo "plannotator ${latest_tag} installed to ${INSTALL_DIR}/plannotator"
+echo "obsreview ${latest_tag} installed to ${INSTALL_DIR}/obsreview"
 
 if ! echo "$PATH" | tr ':' '\n' | grep -qx "$INSTALL_DIR"; then
     echo ""
@@ -74,8 +74,8 @@ fi
 
 echo ""
 echo "Test the install:"
-echo '  echo '"'"'{"tool_input":{"plan":"# Test Plan\\\\n\\\\nHello world"}}'"'"' | plannotator'
+echo '  echo '"'"'{"tool_input":{"plan":"# Test Plan\\\\n\\\\nHello world"}}'"'"' | obsreview'
 echo ""
 echo "Then install the Claude Code plugin:"
-echo "  /plugin marketplace add backnotprop/plannotator"
-echo "  /plugin install plannotator@plannotator"
+echo "  /plugin marketplace add backnotprop/obsreview"
+echo "  /plugin install obsreview@obsreview"
