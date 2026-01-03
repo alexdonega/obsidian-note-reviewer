@@ -398,30 +398,67 @@ pre code.hljs {
 }
 
 /* ============================================
-   TOUCH/FOCUS VISIBILITY UTILITIES
+   SKELETON LOADING ANIMATIONS
    ============================================ */
 
-/*
- * .touch-visible - Makes elements visible on touch devices and when parent has focus
- *
- * Use alongside opacity-0 and group-hover:opacity-100 for elements that should be:
- * - Hidden by default for mouse users (shown on hover)
- * - Always visible on touch devices (cannot hover)
- * - Visible when parent element has keyboard focus (accessibility)
- *
- * Usage: <div className="group">
- *          <button className="opacity-0 group-hover:opacity-100 touch-visible">...</button>
- *        </div>
- */
-
-/* Show on touch devices (mobile/tablet) - cannot hover, so always show */
-@media (pointer: coarse) {
-  .touch-visible {
-    opacity: 1 !important;
+/* Define pulse animation keyframes */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 
-/* Show when parent group has keyboard focus (focus-within) */
-.group:focus-within .touch-visible {
-  opacity: 1;
+/* Custom skeleton animation that works with theme colors */
+.animate-pulse {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Skeleton base styling - uses theme-aware muted color */
+.skeleton {
+  background-color: var(--muted);
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Skeleton shimmer effect variant (optional alternative) */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    oklch(from var(--muted) calc(l + 0.1) c h) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Light mode shimmer adjustment */
+.light .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    oklch(from var(--muted) calc(l - 0.05) c h) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* Disable skeleton animation when reduced motion is preferred */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .skeleton,
+  .skeleton-shimmer {
+    animation: none;
+  }
 }
