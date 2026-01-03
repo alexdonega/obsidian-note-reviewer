@@ -4,34 +4,21 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { setCorsHeaders, handlePreflightRequest } from '../utils/cors';
 
 // Simulação de banco de dados em memória (em produção, usar DB real)
 const notes: Record<string, { title: string; content: string; createdAt: string }> = {};
 
-// Security: Whitelist of allowed origins (no wildcards for production)
-const ALLOWED_ORIGINS = [
-  'https://obsidian-note-reviewer.vercel.app',
-  'https://www.obsidian-note-reviewer.vercel.app',
-  'https://r.alexdonega.com.br',
-  'http://localhost:3000',
-  'http://localhost:5173',
-  process.env.ALLOWED_ORIGIN,
-].filter(Boolean) as string[];
-
 export default function handler(req: VercelRequest, res: VercelResponse) {
-  // Security: CORS with origin validation
-  const origin = req.headers.origin || '';
+  // Get the Origin header from the request for CORS validation
+  const origin = req.headers.origin;
 
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
+  // Set secure CORS headers based on origin validation
+  setCorsHeaders(res, origin);
 
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  // Handle CORS preflight request
+  if (handlePreflightRequest(req.method, res)) {
+    return;
   }
 
   const { slug } = req.query;
