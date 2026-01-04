@@ -319,16 +319,7 @@ const App: React.FC = () => {
         setIsApiMode(true);
       })
       .catch(() => {
-        // Not in API mode - try to restore from localStorage
-        try {
-          const savedMarkdown = localStorage.getItem('note_reviewer_markdown');
-          if (savedMarkdown) {
-            setMarkdown(savedMarkdown);
-            console.log('✅ Markdown restaurado do localStorage');
-          }
-        } catch (e) {
-          console.warn('⚠️ Não foi possível restaurar do localStorage:', e);
-        }
+        // Not in API mode - use default content
         setIsApiMode(false);
       })
       .finally(() => setIsLoading(false));
@@ -625,19 +616,11 @@ const App: React.FC = () => {
   };
 
   const handleSaveFullEdit = () => {
-    // Update markdown - the useEffect will handle reparsing blocks
+    // Update markdown and reparse blocks
     setMarkdown(fullEditContent);
+    const newBlocks = parseMarkdownToBlocks(fullEditContent);
+    setBlocks(newBlocks);
     setIsFullEditMode(false);
-
-    // Persist to localStorage so changes survive refresh (when not in API mode)
-    if (!isApiMode) {
-      try {
-        localStorage.setItem('note_reviewer_markdown', fullEditContent);
-        console.log('✅ Markdown salvo no localStorage');
-      } catch (e) {
-        console.warn('⚠️ Não foi possível salvar no localStorage:', e);
-      }
-    }
   };
 
   const handleCancelFullEdit = () => {
@@ -907,12 +890,13 @@ const App: React.FC = () => {
 
             <button
               onClick={() => setShowExport(true)}
-              className="p-1.5 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
+              className="p-1.5 md:px-2.5 md:py-1 rounded-md text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
               title="Exportar"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
+              <span className="hidden md:inline">Exportar</span>
             </button>
           </div>
         </header>

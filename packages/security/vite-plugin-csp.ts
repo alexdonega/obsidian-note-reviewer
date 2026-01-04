@@ -179,7 +179,7 @@ export function viteCSPHook(): Plugin {
  */
 export function viteCSPPortal(): Plugin {
   return viteCSP({
-    allowCDN: false,
+    allowCDN: true,
     allowGoogleFonts: true,
   });
 }
