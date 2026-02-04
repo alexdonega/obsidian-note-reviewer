@@ -1,13 +1,13 @@
 /**
- * Obsidian Note Reviewer Ephemeral Server (Sistema Unificado)
+ * Obsidian Note Reviewer Ephemeral Server (PostToolUse/Write)
  *
- * Spawned by hook to serve Obsidian Note Reviewer UI and handle approve/deny decisions.
- * Uses random port to support multiple concurrent Claude Code sessions.
+ * Triggered by PostToolUse hook on Write tool.
+ * Checks if the written file is a draft note in the temp dir.
+ * If yes: serves reviewer UI, waits for user decision, returns feedback.
+ * If no: exits silently (pass-through).
  *
- * Reads hook event from stdin, extracts note content, serves UI, returns decision.
- *
- * API Endpoints (ONLY 4):
- * - GET  /api/content - Returns note content from hook event
+ * API Endpoints:
+ * - GET  /api/content - Returns note content
  * - POST /api/approve - User approved (no changes)
  * - POST /api/deny - User requested changes (with feedback)
  * - POST /api/save - Save note to Obsidian vault
@@ -15,17 +15,17 @@
 
 import { $ } from "bun";
 import { getHookCSP } from "@obsidian-note-reviewer/security/csp";
+import { validatePath, validatePathWithAllowedDirs } from "./pathValidation";
 
 // Embed the built HTML at compile time
 import indexHtml from "../dist/index.html" with { type: "text" };
 
-// CSP header for all responses (not in development mode - this is the ephemeral server)
+// Temp dir where draft notes are written (must match skill config)
+const TEMP_DIR = "C:/dev/tools/obsidian-note-reviewer/.temp";
+
+// CSP header for all responses
 const cspHeader = getHookCSP(false);
 
-/**
- * Security headers applied to all responses
- * CSP prevents XSS attacks even when handling user-generated content
- */
 function getSecurityHeaders(): Record<string, string> {
   return {
     "Content-Security-Policy": cspHeader,
@@ -35,21 +35,35 @@ function getSecurityHeaders(): Record<string, string> {
   };
 }
 
-// Read hook event from stdin
+// Read PostToolUse hook event from stdin
 const eventJson = await Bun.stdin.text();
 
+let filePath = "";
 let noteContent = "";
+
 try {
   const event = JSON.parse(eventJson);
-  noteContent = event.tool_input?.content || event.tool_input?.plan || "";
+  // PostToolUse Write sends: { tool_input: { file_path, content }, tool_result: ... }
+  filePath = event.tool_input?.file_path || "";
+  noteContent = event.tool_input?.content || "";
 } catch {
-  console.error("Failed to parse hook event from stdin");
-  process.exit(1);
+  // Not valid JSON, exit silently
+  process.exit(0);
+}
+
+// Normalize path separators for comparison
+const normalizedPath = filePath.replace(/\\/g, "/");
+const normalizedTempDir = TEMP_DIR.replace(/\\/g, "/");
+
+// Only activate reviewer for files in the temp dir
+if (!normalizedPath.startsWith(normalizedTempDir)) {
+  // Not a draft note - pass through silently
+  process.exit(0);
 }
 
 if (!noteContent) {
-  console.error("No note content in hook event");
-  process.exit(1);
+  console.error("[Server] Draft file has no content, skipping review");
+  process.exit(0);
 }
 
 // Promise that resolves when user makes a decision
@@ -59,7 +73,7 @@ const decisionPromise = new Promise<{ approved: boolean; feedback?: string }>(
 );
 
 const server = Bun.serve({
-  port: 0, // Random available port - critical for multi-instance support
+  port: 0, // Random available port
 
   async fetch(req) {
     const url = new URL(req.url);
@@ -67,9 +81,9 @@ const server = Bun.serve({
     console.log(`[Server] ${req.method} ${url.pathname}`);
 
     // API: Get note content
-    if (url.pathname === "/api/content" || url.pathname === "/api/plan") {
+    if (url.pathname === "/api/content") {
       return Response.json(
-        { content: noteContent, plan: noteContent },
+        { content: noteContent, filePath },
         { headers: getSecurityHeaders() }
       );
     }
@@ -84,9 +98,9 @@ const server = Bun.serve({
     if (url.pathname === "/api/deny" && req.method === "POST") {
       try {
         const body = await req.json() as { feedback?: string };
-        resolveDecision({ approved: false, feedback: body.feedback || "Plan rejected by user" });
+        resolveDecision({ approved: false, feedback: body.feedback || "Changes requested" });
       } catch {
-        resolveDecision({ approved: false, feedback: "Plan rejected by user" });
+        resolveDecision({ approved: false, feedback: "Changes requested" });
       }
       return Response.json({ ok: true }, { headers: getSecurityHeaders() });
     }
@@ -95,19 +109,41 @@ const server = Bun.serve({
     if (url.pathname === "/api/save" && req.method === "POST") {
       try {
         const body = await req.json() as { content: string; path: string };
+
+        // SECURITY: Validate path to prevent path traversal attacks (CWE-22)
+        const allowedPathsEnv = process.env.ALLOWED_SAVE_PATHS;
+        let pathValidation;
+
+        if (allowedPathsEnv) {
+          // Use allowed directories restriction if configured
+          const allowedPaths = allowedPathsEnv.split(",").map((p) => p.trim());
+          pathValidation = validatePathWithAllowedDirs(body.path, allowedPaths);
+        } else {
+          // Use basic validation (blocks traversal but allows any valid path)
+          pathValidation = validatePath(body.path);
+        }
+
+        if (!pathValidation.valid) {
+          console.error(`[Server] ❌ Path validation failed: ${pathValidation.error}`);
+          return Response.json(
+            { ok: false, error: pathValidation.error },
+            { status: 400, headers: getSecurityHeaders() }
+          );
+        }
+
+        // Use normalized path from validation
+        const safePath = pathValidation.normalizedPath || body.path;
+
         const fs = await import("fs/promises");
         const pathModule = await import("path");
 
-        // Ensure directory exists
-        const dir = pathModule.dirname(body.path);
+        const dir = pathModule.dirname(safePath);
         await fs.mkdir(dir, { recursive: true });
+        await fs.writeFile(safePath, body.content, "utf-8");
 
-        // Save file
-        await fs.writeFile(body.path, body.content, "utf-8");
-
-        console.log(`[Server] ✅ Nota salva: ${body.path}`);
+        console.log(`[Server] ✅ Nota salva: ${safePath}`);
         return Response.json(
-          { ok: true, message: "Nota salva com sucesso", path: body.path },
+          { ok: true, message: "Nota salva com sucesso", path: safePath },
           { headers: getSecurityHeaders() }
         );
       } catch (error) {
@@ -129,7 +165,7 @@ const server = Bun.serve({
   },
 });
 
-// Open browser - cross-platform support
+// Open browser
 const url = `http://localhost:${server.port}`;
 console.error(`[Server] Obsidian Note Reviewer running on ${url}`);
 
@@ -149,30 +185,27 @@ try {
 // Wait for user decision (blocks until approve/deny)
 const result = await decisionPromise;
 
-// Give browser time to receive response and update UI
+// Give browser time to receive response
 await Bun.sleep(1500);
 
 // Cleanup
 server.stop();
 
-// Output JSON for PermissionRequest hook decision control
+// Output for PostToolUse hook
+// This output becomes additional context for Claude after the Write tool result
 if (result.approved) {
   console.log(JSON.stringify({
     hookSpecificOutput: {
-      hookEventName: "PermissionRequest",
-      decision: {
-        behavior: "allow"
-      }
+      hookEventName: "PostToolUse",
+      result: "REVIEW_APPROVED"
     }
   }));
 } else {
   console.log(JSON.stringify({
     hookSpecificOutput: {
-      hookEventName: "PermissionRequest",
-      decision: {
-        behavior: "deny",
-        message: result.feedback || "Plan changes requested"
-      }
+      hookEventName: "PostToolUse",
+      result: "REVIEW_CHANGES_REQUESTED",
+      feedback: result.feedback
     }
   }));
 }
