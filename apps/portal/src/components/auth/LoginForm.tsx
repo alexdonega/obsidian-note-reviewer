@@ -18,7 +18,8 @@ export function LoginForm() {
 
     try {
       await signInWithEmail(email, password)
-      navigate('/dashboard')
+      // Use window.location to force navigation and ensure redirect happens
+      window.location.href = '/dashboard'
     } catch (error: any) {
       setError(error.message || 'Erro ao fazer login. Tente novamente.')
     } finally {

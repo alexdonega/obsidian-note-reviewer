@@ -31,7 +31,8 @@ export function SignupForm() {
 
     try {
       await signUpWithEmail({ email, password })
-      navigate('/welcome')
+      // Use window.location to force navigation and avoid PublicRoute interception
+      window.location.href = '/welcome'
     } catch (error: any) {
       setError(error.message || 'Erro ao criar conta. Tente novamente.')
     } finally {
