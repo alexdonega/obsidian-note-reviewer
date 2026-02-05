@@ -13,8 +13,8 @@ import type {
 } from '@supabase/supabase-js'
 import {
   supabase,
-} from '../supabase/client.js'
-import { signInWithOAuth } from '../supabase/oauth.js'
+} from '../supabase/client'
+import { signInWithOAuth } from '../supabase/oauth'
 import type {
   AuthState,
   AuthContextValue,
@@ -22,7 +22,7 @@ import type {
   OAuthLoginOptions,
   EmailSignUpOptions,
   UserProfile,
-} from '../supabase/types.js'
+} from '../supabase/types'
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 

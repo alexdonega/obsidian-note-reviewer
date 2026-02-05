@@ -1,8 +1,8 @@
 {
   "hooks": {
-    "PermissionRequest": [
+    "PostToolUse": [
       {
-        "matcher": "ExitPlanMode",
+        "matcher": "Write",
         "hooks": [
           {
             "type": "command",

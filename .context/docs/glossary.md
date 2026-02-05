@@ -1,39 +1,75 @@
-```markdown
-<!-- agent-update:start:glossary -->
-# Glossary & Domain Concepts
+# Glossário
 
-This document lists project-specific terminology, acronyms, domain entities, and user personas to establish a shared language for all contributors.
+## Termos do Domínio
 
-## Core Terms
-- **Supabase** — Our primary Backend-as-a-Service (BaaS) provider. It supplies the project's PostgreSQL database, authentication, object storage, and serverless Edge Functions. Most backend logic and data modeling is configured within the [Supabase Studio](https://supabase.com/dashboard) and managed via migrations in the `supabase/` directory.
-- **Monorepo** — The architectural choice for this repository, managing multiple distinct projects (`apps/`) with shared code (`packages/`) in a single place. This simplifies dependency management and encourages code reuse for things like UI components, utility functions, or API types.
-- **Project "Transformation"** — The internal name for the initiative this codebase supports, as indicated by the `12-weeks-transformation` directory. It represents a focused effort to deliver a specific set of features or a new product version within a defined timeframe.
+### Curso
+Conjunto completo de conteúdo educacional organizado em módulos e aulas.
 
-## Acronyms & Abbreviations
-- **RLS (Row-Level Security)** — A PostgreSQL feature, central to our Supabase data access strategy. RLS policies are database rules that restrict which data rows users can query or modify based on their session context (e.g., their user ID). This ensures users can only access their own data. Policies are defined in `supabase/migrations/`.
-- **ADR (Architecture Decision Record)** — A short document describing a technically significant decision made during the project's evolution. ADRs capture the context, trade-offs, and consequences of a choice. See `docs/adr/` for existing records.
-- **CI/CD (Continuous Integration/Continuous Deployment)** — The automated process of building, testing, and deploying our applications. Workflows are defined in the `.github/workflows/` directory and handle tasks like running tests, linting code, and deploying changes to staging or production environments.
+### Módulo
+Seção de um curso que agrupa aulas relacionadas por tema.
 
-## Personas / Actors
-- **Administrator** — A privileged user responsible for system management, user oversight, and content moderation. Administrators interact with the system through a dedicated admin panel (likely located in `apps/admin/`) to perform tasks that are unavailable to standard users.
-- **End User** — The primary consumer of the application. Their goal is to use the core features of the product to solve a specific problem. Their experience is the main driver for our UI/UX and feature development.
+### Aula (Lesson)
+Unidade individual de conteúdo dentro de um módulo, pode conter múltiplos recursos.
 
-## Domain Rules & Invariants
-- **User Data Isolation**: Enforced by RLS, a user can *never* view or modify data belonging to another user unless explicitly granted permission through a defined relationship (e.g., team membership).
-- **Authentication Requirement**: All API endpoints, except for the public sign-in/sign-up routes, require a valid JSON Web Token (JWT) issued by Supabase Auth. Unauthenticated requests will be rejected with a `401 Unauthorized` error.
+### Recurso
+Arquivo individual para download (vídeo, PDF, arquivo complementar).
 
-<!-- agent-readonly:guidance -->
-## AI Update Checklist
-1. Harvest terminology from recent PRs, issues, and discussions.
-2. Confirm definitions with product or domain experts when uncertain.
-3. Link terms to relevant docs or modules for deeper context.
-4. Remove or archive outdated concepts; flag unknown terms for follow-up.
+### Sessão
+Estado de autenticação mantido com a plataforma de cursos (cookies, tokens).
 
-<!-- agent-readonly:sources -->
-## Acceptable Sources
-- Product requirement docs, RFCs, user research, or support tickets.
-- Service contracts, API schemas, data dictionaries.
-- Conversations with domain experts (summarize outcomes if applicable).
+### Metadata
+Informações sobre a estrutura do curso (títulos, ordem, URLs).
 
-<!-- agent-update:end -->
-```
+## Termos Técnicos
+
+### Retry Logic
+Mecanismo de tentativa automática em caso de falha, geralmente com backoff exponencial.
+
+### Backoff Exponencial
+Estratégia de espera crescente entre tentativas (1s, 2s, 4s, 8s...).
+
+### Parallel Downloads
+Download simultâneo de múltiplos arquivos para otimizar velocidade.
+
+### Rate Limiting
+Controle de taxa de requisições para evitar bloqueio pela plataforma.
+
+### Scraping
+Extração de dados de páginas HTML quando API não está disponível.
+
+### Filesystem Hierarchy
+Estrutura de pastas criada para organizar o conteúdo baixado.
+
+## Acrônimos
+
+- **CLI**: Command Line Interface - Interface de linha de comando
+- **API**: Application Programming Interface
+- **HTTP**: HyperText Transfer Protocol
+- **URL**: Uniform Resource Locator
+- **I/O**: Input/Output - Entrada/Saída
+
+## Padrões de Nomenclatura
+
+### Arquivos
+- Vídeos: `<numero>-<nome-aula>.mp4`
+- PDFs: `<nome>-material.pdf`
+- Legendas: `<nome-video>.srt`
+
+### Pastas
+- Curso: `<nome-curso>/`
+- Módulo: `<numero>-<nome-modulo>/`
+- Aula: `<numero>-<nome-aula>/`
+
+## Conceitos de Negócio
+
+### Download Completo
+Download de todos os recursos de um curso, incluindo vídeos, materiais e anexos.
+
+### Download Seletivo
+Permitir ao usuário escolher módulos ou aulas específicas para download.
+
+### Resumable Download
+Capacidade de continuar um download interrompido do ponto onde parou.
+
+### Verificação de Integridade
+Checagem de hash/checksum para garantir que o arquivo foi baixado corretamente.

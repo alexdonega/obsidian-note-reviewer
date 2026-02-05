@@ -565,3 +565,48 @@ pre code.hljs {
     transition: none !important;
   }
 }
+
+/* ============================================
+   KEYBOARD NAVIGATION - BLOCK FOCUS
+   ============================================ */
+
+/* Focused block indicator - ring effect */
+.block-focused {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 8px;
+  animation: block-focus-pulse 0.3s ease-out;
+}
+
+/* Focus pulse animation */
+@keyframes block-focus-pulse {
+  0% {
+    outline-width: 4px;
+    outline-color: oklch(0.75 0.18 280 / 0.8);
+  }
+  100% {
+    outline-width: 2px;
+    outline-color: var(--primary);
+  }
+}
+
+/* Navigation hint indicator */
+.block-focused::before {
+  content: '→';
+  position: absolute;
+  left: -28px;
+  color: var(--primary);
+  font-weight: bold;
+  animation: nav-hint-slide-in 0.2s ease-out;
+}
+
+@keyframes nav-hint-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

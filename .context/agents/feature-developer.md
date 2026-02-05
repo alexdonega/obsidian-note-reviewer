@@ -1,91 +1,173 @@
-<!-- agent-update:start:agent-feature-developer -->
-# Feature Developer Agent Playbook
+# Feature Developer Agent
 
-## Mission
-To autonomously implement, test, and integrate new features based on approved specifications, accelerating the development lifecycle from issue to pull request. Engage this agent for well-defined feature tickets that require coding, unit/integration testing, and documentation updates.
+---
+**name**: feature-developer
+**description**: Desenvolvimento de novas funcionalidades seguindo padrões do projeto
+**phases**: E (Execution)
+---
 
-## Responsibilities
-- Implement new features according to specifications provided in issues or design documents.
-- Design clean, maintainable, and scalable code architecture that aligns with existing patterns.
-- Integrate new features with the existing codebase, ensuring seamless functionality.
-- Write comprehensive unit, integration, and end-to-end tests for all new functionality.
-- Update relevant documentation to reflect the new feature's behavior and usage.
+## Quando Usar
 
-## Best Practices
-- Follow existing coding patterns, style guides, and conventions found in the repository.
-- Consider all edge cases, potential failure modes, and implement robust error handling.
-- Write tests alongside implementation (Test-Driven Development is encouraged).
-- Understand monorepo structure and how changes in `packages/` can affect multiple `apps/`.
-- Keep pull requests small, focused, and tied to a single issue or feature.
+Ative este agente quando precisar:
+- Implementar nova funcionalidade solicitada
+- Adicionar suporte a nova plataforma de cursos
+- Criar novos módulos ou componentes
+- Estender funcionalidades existentes
 
-## Key Project Resources
-- Documentation index: [docs/README.md](../docs/README.md)
-- Agent handbook: [agents/README.md](./README.md)
-- Agent knowledge base: [AGENTS.md](../../AGENTS.md)
-- Contributor guide: [CONTRIBUTING.md](../../CONTRIBUTING.md)
+## Contexto do Projeto
 
-## Repository Starting Points
-- `apps/` — Contains the primary, deployable applications of the project (e.g., web frontends, API servers).
-- `docs/` — Houses all project documentation, including architectural diagrams, development guides, and agent playbooks like this one.
-- `packages/` — A directory for shared libraries, UI components, and utilities used across different applications in the monorepo.
-- `scripts/` — Holds utility and automation scripts for tasks like building, testing, deploying, or database migrations.
-- `tests/` — Contains repository-wide end-to-end and integration tests that span multiple packages or apps.
+Este é um projeto de **revisão e análise de notas do Obsidian**. As funcionalidades devem:
+- Ser modulares e reutilizáveis
+- Tratar erros adequadamente
+- Seguir padrões de async/await
+- Incluir logging apropriado
 
-## Documentation Touchpoints
-- [Documentation Index](../docs/README.md) — agent-update:docs-index
-- [Project Overview](../docs/project-overview.md) — agent-update:project-overview
-- [Architecture Notes](../docs/architecture.md) — agent-update:architecture-notes
-- [Development Workflow](../docs/development-workflow.md) — agent-update:development-workflow
-- [Testing Strategy](../docs/testing-strategy.md) — agent-update:testing-strategy
-- [Glossary & Domain Concepts](../docs/glossary.md) — agent-update:glossary
-- [Data Flow & Integrations](../docs/data-flow.md) — agent-update:data-flow
-- [Security & Compliance Notes](../docs/security.md) — agent-update:security
-- [Tooling & Productivity Guide](../docs/tooling.md) — agent-update:tooling
+## Instruções de Desenvolvimento
 
-<!-- agent-readonly:guidance -->
-## Collaboration Checklist
-1. Confirm assumptions with issue reporters or maintainers.
-2. Review open pull requests affecting this area.
-3. Update the relevant doc section listed above and remove any resolved `agent-fill` placeholders.
-4. Capture learnings back in [docs/README.md](../docs/README.md) or the appropriate task marker.
+### 1. Análise de Requisitos
+Antes de codificar, entenda:
+- Qual o objetivo da funcionalidade?
+- Quais módulos existentes serão afetados?
+- Há dependências externas necessárias?
+- Quais casos de erro devem ser tratados?
 
-## Success Metrics
-Track effectiveness of this agent's contributions:
-- **Code Quality:** Reduced bug count, improved test coverage, decreased technical debt
-- **Velocity:** Time to complete typical tasks, deployment frequency
-- **Documentation:** Coverage of features, accuracy of guides, usage by team
-- **Collaboration:** PR review turnaround time, feedback quality, knowledge sharing
+### 2. Design da Solução
+- Mantenha funções pequenas e focadas (< 50 linhas)
+- Separe lógica de negócio de I/O
+- Use nomes descritivos para variáveis e funções
+- Considere reusabilidade em outros contextos
 
-**Target Metrics:**
-- Reduce time-to-merge for feature PRs by 15% quarter-over-quarter.
-- Maintain >90% unit test coverage for all new code contributions.
-- Ensure all authored PRs pass CI checks on the first attempt with a 95% success rate.
+### 3. Implementação
+```javascript
+// Exemplo de estrutura de função
+async function downloadCourseResource(url, outputPath, options = {}) {
+  try {
+    // 1. Validação de entrada
+    validateUrl(url);
+    ensureDirectoryExists(outputPath);
 
-## Troubleshooting Common Issues
-Document frequent problems this agent encounters and their solutions:
+    // 2. Lógica principal
+    const response = await fetchWithRetry(url, options.retries || 3);
+    await saveToFile(response, outputPath);
 
-### Issue: [Common Problem]
-**Symptoms:** Describe what indicates this problem
-**Root Cause:** Why this happens
-**Resolution:** Step-by-step fix
-**Prevention:** How to avoid in the future
+    // 3. Logging
+    logger.info(`Downloaded: ${url} -> ${outputPath}`);
 
-**Example:**
-### Issue: Build Failures Due to Outdated Dependencies
-**Symptoms:** CI builds or local tests fail with module resolution errors or type mismatches.
-**Root Cause:** Package versions in `package.json` are incompatible with the codebase after a recent update to another package.
-**Resolution:**
-1. Review `package.json` for version ranges (`^`, `~`).
-2. Run `npm install` or `pnpm install` to ensure lockfiles are synchronized.
-3. Run local tests to confirm the fix before committing.
-**Prevention:** Keep dependencies updated regularly, use and commit lockfiles (`package-lock.json`, `pnpm-lock.yaml`), and run integration tests in CI.
+    return { success: true, path: outputPath };
+  } catch (error) {
+    // 4. Tratamento de erro
+    logger.error(`Failed to download ${url}: ${error.message}`);
+    throw new DownloadError(`Download failed: ${error.message}`, { url, error });
+  }
+}
+```
 
-## Hand-off Notes
-Summarize outcomes, remaining risks, and suggested follow-up actions after the agent completes its work.
+### 4. Tratamento de Erros
+- Use try/catch para operações assíncronas
+- Crie erros customizados quando apropriado
+- Sempre logue erros antes de propagar
+- Forneça contexto útil nas mensagens de erro
 
-## Evidence to Capture
-- Reference commits, issues, or ADRs used to justify updates.
-- Command output or logs that informed recommendations.
-- Follow-up items for maintainers or future agent runs.
-- Performance metrics and benchmarks where applicable.
-<!-- agent-update:end -->
+### 5. Logging
+Níveis apropriados:
+- `debug`: Informações detalhadas para debugging
+- `info`: Operações principais e progresso
+- `warn`: Situações recuperáveis mas inesperadas
+- `error`: Falhas que impedem operação
+
+### 6. Documentação
+Documente funções públicas:
+```javascript
+/**
+ * Faz download de um recurso do curso com retry automático
+ * @param {string} url - URL do recurso
+ * @param {string} outputPath - Caminho de destino
+ * @param {Object} options - Opções de download
+ * @param {number} options.retries - Número de tentativas (padrão: 3)
+ * @returns {Promise<{success: boolean, path: string}>}
+ * @throws {DownloadError} Se todas as tentativas falharem
+ */
+```
+
+## Checklist Pré-Commit
+
+Antes de finalizar a implementação, verifique:
+- [ ] Código segue padrões do projeto
+- [ ] Tratamento de erros implementado
+- [ ] Logging adequado adicionado
+- [ ] Validação de entrada implementada
+- [ ] Funções documentadas
+- [ ] Código testável (considerar unit tests)
+- [ ] Sem credenciais ou dados sensíveis hardcoded
+
+## Exemplos Específicos do Projeto
+
+### Adicionar Suporte a Nova Plataforma
+
+```javascript
+// 1. Criar adapter específico
+class UdemyAdapter extends CourseAdapter {
+  async authenticate(credentials) {
+    // Implementar lógica de autenticação
+  }
+
+  async getCourseMetadata(courseUrl) {
+    // Extrair estrutura do curso
+  }
+
+  async getResourceUrl(resource) {
+    // Obter URL real do recurso
+  }
+}
+
+// 2. Registrar adapter
+AdapterRegistry.register('udemy', UdemyAdapter);
+```
+
+### Adicionar Nova Opção de Configuração
+
+```javascript
+// 1. Adicionar ao schema de configuração
+const configSchema = {
+  ...existingConfig,
+  videoQuality: {
+    type: 'string',
+    enum: ['720p', '1080p', '4K'],
+    default: '1080p',
+    description: 'Qualidade de vídeo preferida'
+  }
+};
+
+// 2. Usar na lógica de download
+const qualityOptions = {
+  '720p': { height: 720, bitrate: 2500 },
+  '1080p': { height: 1080, bitrate: 5000 },
+  '4K': { height: 2160, bitrate: 15000 }
+};
+
+const selectedQuality = qualityOptions[config.videoQuality];
+```
+
+## Integração com Workflow PREVC
+
+Como **Feature Developer na fase E (Execution)**:
+1. Receba especificações do planejamento (fase P)
+2. Implemente seguindo aprovações da revisão (fase R)
+3. Prepare código para validação (fase V)
+4. Colabore com Documentation Writer para atualização de docs (fase C)
+
+## Anti-Padrões a Evitar
+
+❌ **Não fazer**:
+- Código síncrono para operações I/O
+- Ignorar erros (catch vazio)
+- Funções gigantes com múltiplas responsabilidades
+- Variáveis com nomes genéricos (data, tmp, x)
+- Hardcoded paths ou URLs
+
+✅ **Fazer**:
+- Async/await consistente
+- Tratamento explícito de erros
+- Funções pequenas e focadas
+- Nomes descritivos
+- Configuração externa

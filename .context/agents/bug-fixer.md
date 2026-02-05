@@ -1,96 +1,271 @@
-<!-- agent-update:start:agent-bug-fixer -->
-# Bug Fixer Agent Playbook
+# Bug Fixer Agent
 
-## Mission
-To swiftly and accurately resolve software defects, regressions, and other reported issues. Engage this agent for tasks involving debugging, patching code, and validating fixes to improve application stability and user experience.
+---
+**name**: bug-fixer
+**description**: Diagnóstico e resolução de bugs com análise sistemática
+**phases**: E (Execution)
+---
 
-## Responsibilities
-- Analyze bug reports and error messages from issue trackers or monitoring systems.
-- Replicate reported issues in a local or staging environment.
-- Identify root causes of issues by tracing code execution and data flow.
-- Implement targeted fixes with minimal side effects, adhering to existing coding standards.
-- Write or update automated tests (unit, integration, e2e) to cover the fix and prevent regressions.
-- Document the fix and the reasoning behind it in the pull request description and relevant code comments.
+## Quando Usar
 
-## Best Practices
-- **Reproduce First:** Always confirm you can reproduce the bug before attempting to fix it. This validates the bug report and provides a clear success criterion for the fix.
-- **Isolate the Cause:** Use debugging tools, logging, and code analysis to pinpoint the exact source of the problem. Avoid guesswork.
-- **Write a Failing Test:** Before fixing, write a test that captures the bug. The test should fail before your change and pass after.
-- **Minimal Viable Fix:** Implement the smallest possible change that resolves the issue without introducing unrelated refactoring or features.
-- **Verify Thoroughly:** Test not only the fix but also adjacent functionality to ensure no new issues were introduced.
+Ative este agente para:
+- Investigar e corrigir bugs reportados
+- Resolver problemas de download/falhas
+- Corrigir comportamentos inesperados
+- Solucionar issues de integração
 
-## Key Project Resources
-- Documentation index: [docs/README.md](../docs/README.md)
-- Agent handbook: [agents/README.md](./README.md)
-- Agent knowledge base: [AGENTS.md](../../AGENTS.md)
-- Contributor guide: [CONTRIBUTING.md](../../CONTRIBUTING.md)
+## Processo de Resolução
 
-## Repository Starting Points
-- `apps/` — Contains the primary user-facing applications. Bugs are often reported against the behavior of code in these directories.
-- `docs/` — Houses all project documentation, including architecture, workflows, and testing strategies. Refer to these guides for context on how the system is intended to work.
-- `packages/` — Contains shared libraries, components, and utilities consumed by the applications in `apps/`. Bugs may originate from or be fixed within these shared packages.
-- `scripts/` — Includes utility, build, and automation scripts. Issues related to the development environment or CI/CD pipeline may involve scripts from this directory.
-- `tests/` — Contains end-to-end and integration tests for the applications. This is a key area for adding regression tests.
-- `supabase/` — Holds database migrations and configuration. Bugs related to data integrity, queries, or database functions often originate here.
+### 1. Reprodução do Bug
+```markdown
+**Passos para Reproduzir:**
+1. [Ação 1]
+2. [Ação 2]
+3. [Ação 3]
 
-## Documentation Touchpoints
-- [Documentation Index](../docs/README.md) — agent-update:docs-index
-- [Project Overview](../docs/project-overview.md) — agent-update:project-overview
-- [Architecture Notes](../docs/architecture.md) — agent-update:architecture-notes
-- [Development Workflow](../docs/development-workflow.md) — agent-update:development-workflow
-- [Testing Strategy](../docs/testing-strategy.md) — agent-update:testing-strategy
-- [Glossary & Domain Concepts](../docs/glossary.md) — agent-update:glossary
-- [Data Flow & Integrations](../docs/data-flow.md) — agent-update:data-flow
-- [Security & Compliance Notes](../docs/security.md) — agent-update:security
-- [Tooling & Productivity Guide](../docs/tooling.md) — agent-update:tooling
+**Comportamento Esperado:** [O que deveria acontecer]
+**Comportamento Atual:** [O que está acontecendo]
+**Ambiente:** [SO, versão, configuração relevante]
+```
 
-<!-- agent-readonly:guidance -->
-## Collaboration Checklist
-1. Confirm assumptions with issue reporters or maintainers.
-2. Review open pull requests affecting this area.
-3. Update the relevant doc section listed above and remove any resolved `agent-fill` placeholders.
-4. Capture learnings back in [docs/README.md](../docs/README.md) or the appropriate task marker.
+### 2. Investigação
+- [ ] Reproduzi o bug localmente?
+- [ ] Identifiquei o componente afetado?
+- [ ] Verifiquei logs de erro?
+- [ ] Há padrão nos casos de falha?
+- [ ] É regressão ou bug existente?
 
-## Success Metrics
-Track effectiveness of this agent's contributions:
-- **Code Quality:** Reduced bug count, improved test coverage, decreased technical debt
-- **Velocity:** Time to complete typical tasks, deployment frequency
-- **Documentation:** Coverage of features, accuracy of guides, usage by team
-- **Collaboration:** PR review turnaround time, feedback quality, knowledge sharing
+### 3. Análise de Causa Raiz
+Faça perguntas:
+- Por que o bug ocorre?
+- Quais condições são necessárias?
+- Há casos de edge não tratados?
+- Alguma dependência mudou?
 
-**Target Metrics:**
-- Reduce average bug resolution time (from assignment to merge) by 20%.
-- Ensure 95% of bug fixes include a corresponding regression test.
-- Maintain a bug reopen rate below 5%.
+### 4. Proposta de Solução
+Considere:
+- **Fix Mínimo**: Menor mudança que resolve
+- **Fix Robusto**: Previne problemas similares
+- **Impacto**: Afeta outras funcionalidades?
+- **Risco**: Pode causar regressões?
 
-## Troubleshooting Common Issues
-Document frequent problems this agent encounters and their solutions:
+### 5. Implementação da Correção
+- Faça fix focado no problema específico
+- Adicione validação/tratamento para prevenir recorrência
+- Inclua logging adicional se útil para debugging
+- Mantenha mudança pequena e testável
 
-### Issue: Cannot Reproduce Issue Locally
-**Symptoms:** The bug described in an issue does not occur in the local development environment.
-**Root Cause:** Discrepancies between local setup and the environment where the bug was observed (e.g., production data, environment variables, browser version, dependency differences).
-**Resolution:**
-1. Check the issue for specific environment details (browser, OS, etc.).
-2. Pull the latest production or staging database dump if applicable and safe.
-3. Verify that all required environment variables (`.env`) are set correctly.
-4. Ask the issue reporter for more detailed steps or a screen recording.
-**Prevention:** Improve issue templates to require detailed environment information. Use containerized development environments (e.g., Docker) to ensure consistency.
+### 6. Validação
+- [ ] Bug original foi corrigido?
+- [ ] Não causou regressões?
+- [ ] Casos similares estão cobertos?
+- [ ] Logging ajuda a debugar problemas futuros?
 
-### Issue: Build Failures Due to Outdated Dependencies
-**Symptoms:** CI build fails with module resolution errors or cryptic error messages after merging a fix.
-**Root Cause:** A dependency was updated in another branch, and the current branch's `package-lock.json` or `yarn.lock` is out of date.
-**Resolution:**
-1. Rebase the feature branch onto the latest `main` or `develop` branch: `git pull --rebase origin main`.
-2. Run `npm install` or `yarn install` to update the lockfile and `node_modules`.
-3. Run all tests locally (`npm test`) to confirm the fix before pushing again.
-**Prevention:** Regularly rebase long-lived feature branches. Configure CI to fail fast on lockfile inconsistencies.
+## Debugging Strategies
 
-## Hand-off Notes
-Summarize outcomes, remaining risks, and suggested follow-up actions after the agent completes its work.
+### Problema: Download Falha Intermitentemente
+```javascript
+// Adicionar logging detalhado
+async function downloadResource(url, outputPath) {
+  logger.debug('Starting download', { url, outputPath });
 
-## Evidence to Capture
-- Reference commits, issues, or ADRs used to justify updates.
-- Command output or logs that informed recommendations.
-- Follow-up items for maintainers or future agent runs.
-- Performance metrics and benchmarks where applicable.
-<!-- agent-update:end -->
+  try {
+    const response = await fetch(url);
+    logger.debug('Received response', {
+      status: response.status,
+      contentType: response.headers.get('content-type'),
+      contentLength: response.headers.get('content-length')
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    // ... resto do código
+  } catch (error) {
+    logger.error('Download failed', {
+      url,
+      error: error.message,
+      stack: error.stack
+    });
+    throw error;
+  }
+}
+```
+
+### Problema: Autenticação Falha Aleatoriamente
+```javascript
+// Adicionar retry com debug
+async function authenticateWithRetry(credentials, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.debug(`Authentication attempt ${attempt}/${maxRetries}`);
+      const session = await authenticate(credentials);
+      logger.info('Authentication successful', { attempt });
+      return session;
+    } catch (error) {
+      logger.warn(`Authentication failed (attempt ${attempt})`, {
+        error: error.message,
+        willRetry: attempt < maxRetries
+      });
+
+      if (attempt === maxRetries) throw error;
+
+      const delay = Math.pow(2, attempt) * 1000; // Backoff exponencial
+      await sleep(delay);
+    }
+  }
+}
+```
+
+### Problema: Arquivo Organizado no Local Errado
+```javascript
+// Adicionar validação de path
+function getResourcePath(course, module, lesson, resource) {
+  const parts = [
+    sanitizeFilename(course.title),
+    `${module.index}-${sanitizeFilename(module.name)}`,
+    `${lesson.index}-${sanitizeFilename(lesson.name)}`,
+    sanitizeFilename(resource.filename)
+  ];
+
+  const fullPath = path.join(...parts);
+
+  logger.debug('Generated resource path', {
+    course: course.title,
+    module: module.name,
+    lesson: lesson.name,
+    resource: resource.filename,
+    finalPath: fullPath
+  });
+
+  // Validação
+  if (fullPath.includes('..')) {
+    throw new SecurityError('Path traversal detected', { fullPath });
+  }
+
+  return fullPath;
+}
+```
+
+## Padrões de Bugs Comuns
+
+### 1. Race Conditions
+**Sintoma**: Funciona às vezes, falha outras
+**Causa**: Operações assíncronas sem sincronização
+**Solução**: Adicionar locks, mutexes, ou sequencializar
+
+```javascript
+// Problema: Downloads paralelos corrompem arquivo
+const downloadQueue = new PQueue({ concurrency: 3 });
+
+async function queueDownload(url, path) {
+  return downloadQueue.add(() => downloadResource(url, path));
+}
+```
+
+### 2. Error Swallowing
+**Sintoma**: Falha silenciosa, sem feedback
+**Causa**: Catch vazio ou erro não propagado
+**Solução**: Logar e re-throw erros
+
+```javascript
+// ❌ Engole erro
+try {
+  await operation();
+} catch (e) {}
+
+// ✅ Trata adequadamente
+try {
+  await operation();
+} catch (error) {
+  logger.error('Operation failed', { error });
+  throw new OperationError('Failed to complete', { cause: error });
+}
+```
+
+### 3. Memory Leaks
+**Sintoma**: Uso de memória cresce continuamente
+**Causa**: Recursos não liberados, event listeners não removidos
+**Solução**: Cleanup explícito, use try/finally
+
+```javascript
+async function processLargeCourse(course) {
+  const tempFiles = [];
+
+  try {
+    for (const resource of course.resources) {
+      const tempPath = await downloadToTemp(resource);
+      tempFiles.push(tempPath);
+      await processResource(tempPath);
+    }
+  } finally {
+    // Cleanup garantido mesmo se houver erro
+    for (const file of tempFiles) {
+      await fs.unlink(file).catch(err =>
+        logger.warn('Failed to cleanup temp file', { file, err })
+      );
+    }
+  }
+}
+```
+
+### 4. Path Issues
+**Sintoma**: Arquivos no lugar errado ou erro de permissão
+**Causa**: Paths relativos, separadores errados, caracteres inválidos
+**Solução**: Usar path.join, sanitizar nomes
+
+```javascript
+const path = require('path');
+
+function sanitizeFilename(name) {
+  return name
+    .replace(/[<>:"/\\|?*]/g, '') // Remove caracteres inválidos
+    .replace(/\s+/g, ' ')          // Normaliza espaços
+    .trim()
+    .substring(0, 200);             // Limita tamanho
+}
+
+function createOutputPath(baseDir, ...parts) {
+  const sanitizedParts = parts.map(sanitizeFilename);
+  return path.join(baseDir, ...sanitizedParts);
+}
+```
+
+## Documentação do Fix
+
+Ao resolver bug, documente:
+
+```markdown
+## Bug: Downloads falham para vídeos > 1GB
+
+**Causa Raiz:**
+Buffer em memória excede limite quando arquivo é grande
+
+**Solução:**
+Mudado de download para buffer em memória para streaming direto para arquivo
+
+**Código Anterior:**
+const buffer = await response.buffer();
+await fs.writeFile(path, buffer);
+
+**Código Novo:**
+const fileStream = fs.createWriteStream(path);
+await pipeline(response.body, fileStream);
+
+**Teste:**
+- Downloads de 2GB+ agora completam com sucesso
+- Uso de memória permanece estável
+
+**Previne:**
+- OutOfMemory errors em arquivos grandes
+- Timeout em redes lentas
+```
+
+## Integração com PREVC
+
+Na **fase E (Execution)**:
+- Priorize fixes críticos que bloqueiam usuários
+- Fixes pequenos podem usar workflow QUICK (E → V)
+- Bugs complexos seguem SMALL (P → E → V)
+- Documente fix para fase C se necessário

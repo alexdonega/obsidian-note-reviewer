@@ -1,92 +1,341 @@
-<!-- agent-update:start:agent-test-writer -->
-# Test Writer Agent Playbook
+# Test Writer Agent
 
-## Mission
-To guarantee the reliability, quality, and correctness of the codebase by developing, maintaining, and executing a comprehensive suite of automated tests. This agent is the primary owner of the testing strategy and ensures all new code is accompanied by effective tests.
+---
+**name**: test-writer
+**description**: Criação de testes unitários e de integração
+**phases**: E (Execution), V (Validation)
+---
 
-## Responsibilities
-- Write comprehensive unit, integration, and end-to-end (E2E) tests.
-- Ensure high test coverage for critical paths and new features.
-- Create and maintain reusable test utilities, mocks, and fixtures.
-- Refactor existing tests to improve clarity, performance, and reliability.
-- Diagnose and fix CI test failures.
+## Quando Usar
 
-## Best Practices
-- Write tests that are clear, concise, and maintainable, following the AAA (Arrange, Act, Assert) pattern.
-- Test both the "happy path" and critical edge cases, including error handling and invalid inputs.
-- Use descriptive test names that clearly state what is being tested (e.g., `it('should return an error when the user is not authenticated')`).
-- Isolate tests from each other by ensuring a clean state before each run.
-- Prefer integration tests for business logic and unit tests for pure functions and utilities.
+Ative este agente para:
+- Escrever testes para nova funcionalidade
+- Adicionar cobertura a código existente
+- Criar testes de regressão para bugs corrigidos
+- Implementar testes de integração
 
-## Key Project Resources
-- Documentation index: [docs/README.md](../docs/README.md)
-- Agent handbook: [agents/README.md](./README.md)
-- Agent knowledge base: [AGENTS.md](../../AGENTS.md)
-- Contributor guide: [CONTRIBUTING.md](../../CONTRIBUTING.md)
+## Estratégia de Testes
 
-## Repository Starting Points
-- `apps/` — Contains the main user-facing and backend applications. The test writer will focus on component, page, and integration tests here to validate user flows and business logic.
-- `docs/` — The source of truth for project standards and architecture. The test writer must adhere to and update the `docs/testing-strategy.md` guide.
-- `packages/` — Houses shared libraries, UI components, and utilities. These are critical targets for high-coverage unit tests to ensure their stability and reusability across the monorepo.
-- `tests/` — The dedicated directory for end-to-end (E2E) tests, typically using frameworks like Playwright or Cypress. This is where cross-application user journeys are validated.
-- `scripts/` — Contains scripts for building, testing, and deploying. The agent may need to understand or modify test execution scripts located here (e.g., `scripts/test.sh`).
-- `supabase/` — Contains database migrations and configuration. The agent should be aware of this to write tests that require a specific database state or to mock database interactions.
+### Pirâmide de Testes
+```
+        /\
+       /  \  E2E (poucos)
+      /____\
+     /      \
+    / Integ  \ (alguns)
+   /__________\
+  /            \
+ /   Unit Tests \ (muitos)
+/____ ____________\
+```
 
-## Documentation Touchpoints
-- [Documentation Index](../docs/README.md) — agent-update:docs-index
-- [Project Overview](../docs/project-overview.md) — agent-update:project-overview
-- [Architecture Notes](../docs/architecture.md) — agent-update:architecture-notes
-- [Development Workflow](../docs/development-workflow.md) — agent-update:development-workflow
-- [Testing Strategy](../docs/testing-strategy.md) — agent-update:testing-strategy
-- [Glossary & Domain Concepts](../docs/glossary.md) — agent-update:glossary
-- [Data Flow & Integrations](../docs/data-flow.md) — agent-update:data-flow
-- [Security & Compliance Notes](../docs/security.md) — agent-update:security
-- [Tooling & Productivity Guide](../docs/tooling.md) — agent-update:tooling
+**Foco**: Máxima cobertura com testes unitários, testes de integração seletivos, E2E mínimos.
 
-<!-- agent-readonly:guidance -->
-## Collaboration Checklist
-1. Confirm assumptions with issue reporters or maintainers.
-2. Review open pull requests affecting this area.
-3. Update the relevant doc section listed above and remove any resolved `agent-fill` placeholders.
-4. Capture learnings back in [docs/README.md](../docs/README.md) or the appropriate task marker.
+## Testes Unitários
 
-## Success Metrics
-Track effectiveness of this agent's contributions:
-- **Code Quality:** Reduced bug count, improved test coverage, decreased technical debt
-- **Velocity:** Time to complete typical tasks, deployment frequency
-- **Documentation:** Coverage of features, accuracy of guides, usage by team
-- **Collaboration:** PR review turnaround time, feedback quality, knowledge sharing
+### Estrutura de Teste
+```javascript
+describe('ModuleName', () => {
+  describe('functionName', () => {
+    it('should handle happy path correctly', async () => {
+      // Arrange
+      const input = 'test-input';
+      const expected = 'expected-output';
 
-**Target Metrics:**
-- Achieve and maintain >85% unit test coverage for all new code merged into `packages/`.
-- Ensure 100% of API endpoints have integration test coverage for happy paths and common error states.
-- Reduce the number of flaky E2E tests in the `main` branch by 75% within a quarter.
+      // Act
+      const result = await functionName(input);
 
-## Troubleshooting Common Issues
-Document frequent problems this agent encounters and their solutions:
+      // Assert
+      expect(result).toBe(expected);
+    });
 
-### Issue: Build Failures Due to Outdated Dependencies
-**Symptoms:** Tests fail with module resolution errors or cryptic build errors.
-**Root Cause:** `package.json` versions are incompatible with codebase changes or other dependencies. A dependency has introduced a breaking change.
-**Resolution:**
-1. Run `npm install` or `yarn install` to ensure the lockfile is respected.
-2. If issues persist, review the lockfile (`package-lock.json` or `yarn.lock`) for version discrepancies.
-3. Run `npm outdated` to identify packages that can be updated.
-4. Cautiously run `npm update` or manually update specific packages in `package.json`, then test locally before committing.
-**Prevention:** Use lockfiles to ensure reproducible builds. Regularly update dependencies in a controlled manner, not all at once.
+    it('should throw error for invalid input', async () => {
+      // Arrange
+      const invalidInput = null;
 
-### Issue: Flaky End-to-End Tests
-**Symptoms:** Tests fail intermittently in CI pipelines without any related code changes, often due to timing issues.
-**Root Cause:** Race conditions where the test runner acts before the UI has updated, or unstable network/API responses.
-**Resolution:** Replace fixed delays (e.g., `sleep(1000)`) with explicit waits for elements to appear, become clickable, or contain specific text. Mock API endpoints to provide consistent and fast responses.
-**Prevention:** Enforce a "no fixed waits" policy in test reviews. Utilize testing library utilities like Playwright's auto-waiting or Cypress's `cy.intercept()` for network mocking.
+      // Act & Assert
+      await expect(functionName(invalidInput))
+        .rejects.toThrow(ValidationError);
+    });
+  });
+});
+```
 
-## Hand-off Notes
-Summarize outcomes, remaining risks, and suggested follow-up actions after the agent completes its work.
+### O Que Testar
 
-## Evidence to Capture
-- Reference commits, issues, or ADRs used to justify updates.
-- Command output or logs that informed recommendations.
-- Follow-up items for maintainers or future agent runs.
-- Performance metrics and benchmarks where applicable.
-<!-- agent-update:end -->
+#### Download de Recursos
+```javascript
+describe('downloadResource', () => {
+  it('should download file successfully', async () => {
+    const url = 'https://example.com/video.mp4';
+    const outputPath = '/tmp/video.mp4';
+
+    const result = await downloadResource(url, outputPath);
+
+    expect(result.success).toBe(true);
+    expect(fs.existsSync(outputPath)).toBe(true);
+  });
+
+  it('should retry on network failure', async () => {
+    // Mock fetch para falhar 2x depois suceder
+    const mockFetch = jest.fn()
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockRejectedValueOnce(new Error('Timeout'))
+      .mockResolvedValueOnce({ ok: true, buffer: () => Buffer.from('data') });
+
+    global.fetch = mockFetch;
+
+    await downloadResource('https://example.com/file', '/tmp/file');
+
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('should fail after max retries', async () => {
+    const mockFetch = jest.fn()
+      .mockRejectedValue(new Error('Network error'));
+
+    global.fetch = mockFetch;
+
+    await expect(downloadResource('https://example.com/file', '/tmp/file'))
+      .rejects.toThrow('Download failed');
+
+    expect(mockFetch).toHaveBeenCalledTimes(3); // max retries
+  });
+});
+```
+
+#### Organização de Arquivos
+```javascript
+describe('organizeFiles', () => {
+  it('should create correct folder structure', () => {
+    const course = {
+      title: 'Test Course',
+      modules: [{
+        index: 1,
+        name: 'Module 1',
+        lessons: [{
+          index: 1,
+          name: 'Lesson 1'
+        }]
+      }]
+    };
+
+    const structure = generateFolderStructure(course);
+
+    expect(structure).toEqual([
+      'Test Course',
+      'Test Course/1-Module 1',
+      'Test Course/1-Module 1/1-Lesson 1'
+    ]);
+  });
+
+  it('should sanitize invalid characters in filenames', () => {
+    const unsafeName = 'File: With <Invalid> Characters?';
+    const safeName = sanitizeFilename(unsafeName);
+
+    expect(safeName).toBe('File With Invalid Characters');
+    expect(safeName).not.toMatch(/[<>:"/\\|?*]/);
+  });
+});
+```
+
+#### Autenticação
+```javascript
+describe('authenticate', () => {
+  it('should return valid session on success', async () => {
+    const credentials = { username: 'user', password: 'pass' };
+    const mockSession = { token: 'abc123', expiresAt: Date.now() + 3600000 };
+
+    mockAuthAPI.login.mockResolvedValue(mockSession);
+
+    const session = await authenticate(credentials);
+
+    expect(session.token).toBe('abc123');
+    expect(session.isValid()).toBe(true);
+  });
+
+  it('should throw AuthError on invalid credentials', async () => {
+    const credentials = { username: 'user', password: 'wrong' };
+
+    mockAuthAPI.login.mockRejectedValue(new Error('401 Unauthorized'));
+
+    await expect(authenticate(credentials))
+      .rejects.toThrow(AuthError);
+  });
+});
+```
+
+## Testes de Integração
+
+### Teste de Fluxo Completo
+```javascript
+describe('Course Download Integration', () => {
+  let testCourse;
+  let outputDir;
+
+  beforeEach(() => {
+    outputDir = '/tmp/test-' + Date.now();
+    fs.mkdirSync(outputDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(outputDir, { recursive: true });
+  });
+
+  it('should download complete course', async () => {
+    const courseUrl = 'https://example.com/course/123';
+
+    // Usa API real ou mock server
+    const result = await downloadCourse(courseUrl, {
+      outputDir,
+      credentials: testCredentials
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.filesDownloaded).toBeGreaterThan(0);
+
+    // Verifica estrutura criada
+    const courseFolder = path.join(outputDir, 'Test Course');
+    expect(fs.existsSync(courseFolder)).toBe(true);
+
+    // Verifica arquivos baixados
+    const videos = glob.sync(path.join(courseFolder, '**/*.mp4'));
+    expect(videos.length).toBeGreaterThan(0);
+  }, 30000); // timeout maior para integração
+});
+```
+
+## Mocking e Test Doubles
+
+### Mock de APIs Externas
+```javascript
+// __mocks__/api-client.js
+class MockApiClient {
+  async getCourse(id) {
+    return {
+      id,
+      title: 'Mock Course',
+      modules: [/* ... */]
+    };
+  }
+
+  async getVideoUrl(videoId) {
+    return `https://mock-cdn.com/video/${videoId}.mp4`;
+  }
+}
+
+module.exports = MockApiClient;
+```
+
+### Mock de Filesystem
+```javascript
+jest.mock('fs/promises');
+
+describe('saveToFile', () => {
+  it('should write data to file', async () => {
+    const data = Buffer.from('test data');
+    const filePath = '/test/file.txt';
+
+    await saveToFile(data, filePath);
+
+    expect(fs.writeFile).toHaveBeenCalledWith(filePath, data);
+  });
+});
+```
+
+### Spy em Funções
+```javascript
+it('should log download progress', async () => {
+  const loggerSpy = jest.spyOn(logger, 'info');
+
+  await downloadResource('https://example.com/file', '/tmp/file');
+
+  expect(loggerSpy).toHaveBeenCalledWith(
+    expect.stringContaining('Downloaded:')
+  );
+
+  loggerSpy.mockRestore();
+});
+```
+
+## Testes de Edge Cases
+
+```javascript
+describe('Edge Cases', () => {
+  it('should handle empty course', async () => {
+    const emptyCourse = { title: 'Empty', modules: [] };
+
+    const result = await downloadCourse(emptyCourse, { outputDir: '/tmp' });
+
+    expect(result.filesDownloaded).toBe(0);
+    expect(result.success).toBe(true);
+  });
+
+  it('should handle very long filenames', () => {
+    const longName = 'a'.repeat(300);
+    const sanitized = sanitizeFilename(longName);
+
+    expect(sanitized.length).toBeLessThanOrEqual(255);
+  });
+
+  it('should handle unicode in filenames', () => {
+    const unicodeName = 'Aula sobre programação em 日本語';
+    const sanitized = sanitizeFilename(unicodeName);
+
+    expect(sanitized).toBeTruthy();
+    expect(() => fs.mkdirSync(`/tmp/${sanitized}`)).not.toThrow();
+  });
+
+  it('should handle disk full error', async () => {
+    fs.writeFile.mockRejectedValue(new Error('ENOSPC: no space left'));
+
+    await expect(downloadResource('https://example.com/file', '/tmp/file'))
+      .rejects.toThrow(/no space/i);
+  });
+});
+```
+
+## Cobertura de Testes
+
+### Metas
+- **Funções Críticas**: 100% (download, auth, organização)
+- **Funções de Negócio**: 80%+
+- **Utilities**: 70%+
+- **Overall**: 75%+
+
+### Verificar Cobertura
+```bash
+npm test -- --coverage
+```
+
+### Focar Em
+- ✅ Lógica de negócio
+- ✅ Tratamento de erros
+- ✅ Edge cases
+- ✅ Validações
+
+### Não Priorizar
+- ⚠️ Getters/setters simples
+- ⚠️ Código de terceiros
+- ⚠️ Configuração e bootstrap
+
+## Checklist de Teste
+
+Antes de considerar funcionalidade completa:
+- [ ] Testes para happy path
+- [ ] Testes para casos de erro
+- [ ] Testes para edge cases
+- [ ] Mocks de dependências externas
+- [ ] Testes não são flaky (passam consistentemente)
+- [ ] Testes rodam rápido (< 5s para unitários)
+- [ ] Coverage adequado para código crítico
+
+## Integração com PREVC
+
+Na **fase E (Execution)**:
+- Escrever testes junto com implementação (TDD opcional)
+
+Na **fase V (Validation)**:
+- Executar toda suite de testes
+- Verificar cobertura
+- Garantir que testes passam antes de aprovação

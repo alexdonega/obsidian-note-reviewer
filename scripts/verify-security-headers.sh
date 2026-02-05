@@ -7,7 +7,7 @@
 #
 # Usage:
 #   ./scripts/verify-security-headers.sh <url>
-#   ./scripts/verify-security-headers.sh https://plannotator.vercel.app
+#   ./scripts/verify-security-headers.sh https://obsidian-note-reviewer.vercel.app
 #
 set -e
 
@@ -19,7 +19,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default URL if not provided
-DEFAULT_URL="https://plannotator.vercel.app"
+DEFAULT_URL="https://obsidian-note-reviewer.vercel.app"
 
 if [ -z "$1" ]; then
     echo -e "${YELLOW}No URL provided, using default: ${DEFAULT_URL}${NC}"

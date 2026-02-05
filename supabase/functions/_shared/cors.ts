@@ -5,8 +5,8 @@
 
 // Security: Whitelist of allowed origins (no wildcards for production)
 const DEFAULT_ALLOWED_ORIGINS = [
-  'https://plannotator.ai',
-  'https://www.plannotator.ai',
+  'https://obsidian-note-reviewer.ai',
+  'https://www.obsidian-note-reviewer.ai',
   'https://r.alexdonega.com.br',
   'http://localhost:3000',
   'http://localhost:5173',

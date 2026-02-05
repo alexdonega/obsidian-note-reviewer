@@ -92,7 +92,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy to S3
-        run: aws s3 sync apps/marketing/dist/ s3://plannotator-marketing/ --delete
+        run: aws s3 sync apps/marketing/dist/ s3://obsreview-marketing/ --delete
 
       - name: Invalidate CloudFront
         run: |
@@ -125,7 +125,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy to S3
-        run: aws s3 sync apps/portal/dist/ s3://plannotator-portal/ --delete
+        run: aws s3 sync apps/portal/dist/ s3://obsreview-portal/ --delete
 
       - name: Invalidate CloudFront
         run: |

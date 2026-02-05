@@ -176,6 +176,31 @@ Após testar esta nota, você pode:
 - **Docs**: \`docs/OBSIDIAN_INTEGRATION.md\`
 - **Testes**: Execute \`bun test\` para ver cobertura
 
+## Teste de Ferramentas de Desenho
+
+A imagem abaixo pode ser usada para testar as novas ferramentas de desenho:
+
+![Diagrama de Arquitetura](https://via.placeholder.com/800x400/6366f1/ffffff?text=Diagrama+de+Arquitetura+-+Teste+de+Desenho)
+
+### Como testar o desenho sobre a imagem:
+
+1. **Navegação por Teclado**:
+   - Pressione \`j\` ou \`k\` para navegar entre os blocos
+   - Pressione \`Enter\` para focar no bloco da imagem
+   - Pressione \`Escape\` para limpar a seleção
+
+2. **Ferramentas de Desenho**:
+   - Passe o mouse sobre a imagem acima
+   - A toolbar de desenho aparecerá no topo
+   - Pressione \`1\` para **Caneta** - desenho à mão livre
+   - Pressione \`2\` para **Seta** - indicar direções
+   - Pressione \`3\` para **Círculo** - destacar áreas
+   - Escolha cores e tamanhos diferentes
+   - Use \`Ctrl+Z\` para desfazer
+
+3. **Exportar**:
+   - Clique no ícone de download para salvar a imagem anotada
+
 ---
 
 **Nota**: Esta é uma nota de exemplo criada especificamente para testar todas as funcionalidades do Obsidian Note Reviewer. Sinta-se livre para editá-la, anotá-la e salvá-la no seu vault!

@@ -34,8 +34,8 @@ Deno.test('getAllowedOrigins', async (t) => {
 
     const origins = getAllowedOrigins();
 
-    assertEquals(origins.includes('https://plannotator.ai'), true);
-    assertEquals(origins.includes('https://www.plannotator.ai'), true);
+    assertEquals(origins.includes('https://obsidian-note-reviewer.ai'), true);
+    assertEquals(origins.includes('https://www.obsidian-note-reviewer.ai'), true);
     assertEquals(origins.includes('https://r.alexdonega.com.br'), true);
     assertEquals(origins.includes('http://localhost:3000'), true);
     assertEquals(origins.includes('http://localhost:5173'), true);
@@ -49,7 +49,7 @@ Deno.test('getAllowedOrigins', async (t) => {
     assertEquals(origins.includes('https://custom.example.com'), true);
     assertEquals(origins.includes('https://another.example.com'), true);
     // Still includes default origins
-    assertEquals(origins.includes('https://plannotator.ai'), true);
+    assertEquals(origins.includes('https://obsidian-note-reviewer.ai'), true);
 
     // Cleanup
     Deno.env.delete('ALLOWED_ORIGINS');
@@ -61,7 +61,7 @@ Deno.test('getAllowedOrigins', async (t) => {
     const origins = getAllowedOrigins();
 
     // Should still have default origins
-    assertEquals(origins.includes('https://plannotator.ai'), true);
+    assertEquals(origins.includes('https://obsidian-note-reviewer.ai'), true);
     assertEquals(origins.length, 5); // Only default origins
 
     // Cleanup
@@ -85,8 +85,8 @@ Deno.test('isOriginAllowed', async (t) => {
   await t.step('returns true for allowed production origins', () => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
-    assertEquals(isOriginAllowed('https://plannotator.ai'), true);
-    assertEquals(isOriginAllowed('https://www.plannotator.ai'), true);
+    assertEquals(isOriginAllowed('https://obsidian-note-reviewer.ai'), true);
+    assertEquals(isOriginAllowed('https://www.obsidian-note-reviewer.ai'), true);
     assertEquals(isOriginAllowed('https://r.alexdonega.com.br'), true);
   });
 
@@ -127,10 +127,10 @@ Deno.test('getCorsHeaders', async (t) => {
   await t.step('returns allowed origin for valid request origin', () => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
-    const req = createMockRequest('https://plannotator.ai');
+    const req = createMockRequest('https://obsidian-note-reviewer.ai');
     const headers = getCorsHeaders(req);
 
-    assertEquals(headers['Access-Control-Allow-Origin'], 'https://plannotator.ai');
+    assertEquals(headers['Access-Control-Allow-Origin'], 'https://obsidian-note-reviewer.ai');
   });
 
   await t.step('returns first allowed origin for disallowed request origin', () => {
@@ -140,7 +140,7 @@ Deno.test('getCorsHeaders', async (t) => {
     const headers = getCorsHeaders(req);
 
     // Falls back to first allowed origin
-    assertEquals(headers['Access-Control-Allow-Origin'], 'https://plannotator.ai');
+    assertEquals(headers['Access-Control-Allow-Origin'], 'https://obsidian-note-reviewer.ai');
   });
 
   await t.step('returns first allowed origin for null request origin', () => {
@@ -149,7 +149,7 @@ Deno.test('getCorsHeaders', async (t) => {
     const req = createMockRequest(null);
     const headers = getCorsHeaders(req);
 
-    assertEquals(headers['Access-Control-Allow-Origin'], 'https://plannotator.ai');
+    assertEquals(headers['Access-Control-Allow-Origin'], 'https://obsidian-note-reviewer.ai');
   });
 
   await t.step('returns correct origin when using env var origins', () => {
@@ -167,10 +167,10 @@ Deno.test('getCorsHeaders', async (t) => {
   await t.step('includes required CORS headers', () => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
-    const req = createMockRequest('https://plannotator.ai');
+    const req = createMockRequest('https://obsidian-note-reviewer.ai');
     const headers = getCorsHeaders(req);
 
-    assertEquals(headers['Access-Control-Allow-Origin'], 'https://plannotator.ai');
+    assertEquals(headers['Access-Control-Allow-Origin'], 'https://obsidian-note-reviewer.ai');
     assertStringIncludes(headers['Access-Control-Allow-Headers'], 'authorization');
     assertStringIncludes(headers['Access-Control-Allow-Headers'], 'content-type');
     assertStringIncludes(headers['Access-Control-Allow-Methods'], 'GET');
@@ -194,7 +194,7 @@ Deno.test('handleCorsPreflightRequest', async (t) => {
   await t.step('returns response with status 204', async () => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
-    const req = createMockRequest('https://plannotator.ai');
+    const req = createMockRequest('https://obsidian-note-reviewer.ai');
     const response = handleCorsPreflightRequest(req);
 
     assertEquals(response.status, 204);
@@ -203,7 +203,7 @@ Deno.test('handleCorsPreflightRequest', async (t) => {
   await t.step('returns response with null body', async () => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
-    const req = createMockRequest('https://plannotator.ai');
+    const req = createMockRequest('https://obsidian-note-reviewer.ai');
     const response = handleCorsPreflightRequest(req);
 
     const body = await response.text();
@@ -213,10 +213,10 @@ Deno.test('handleCorsPreflightRequest', async (t) => {
   await t.step('returns response with validated CORS headers', () => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
-    const req = createMockRequest('https://plannotator.ai');
+    const req = createMockRequest('https://obsidian-note-reviewer.ai');
     const response = handleCorsPreflightRequest(req);
 
-    assertEquals(response.headers.get('Access-Control-Allow-Origin'), 'https://plannotator.ai');
+    assertEquals(response.headers.get('Access-Control-Allow-Origin'), 'https://obsidian-note-reviewer.ai');
     assertStringIncludes(response.headers.get('Access-Control-Allow-Headers') || '', 'authorization');
     assertStringIncludes(response.headers.get('Access-Control-Allow-Methods') || '', 'OPTIONS');
     assertEquals(response.headers.get('Access-Control-Allow-Credentials'), 'true');
@@ -229,7 +229,7 @@ Deno.test('handleCorsPreflightRequest', async (t) => {
     const response = handleCorsPreflightRequest(req);
 
     // Falls back to first allowed origin
-    assertEquals(response.headers.get('Access-Control-Allow-Origin'), 'https://plannotator.ai');
+    assertEquals(response.headers.get('Access-Control-Allow-Origin'), 'https://obsidian-note-reviewer.ai');
   });
 });
 
@@ -238,7 +238,7 @@ Deno.test('CORS security', async (t) => {
   await t.step('does not use wildcard origin', () => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
-    const req = createMockRequest('https://plannotator.ai');
+    const req = createMockRequest('https://obsidian-note-reviewer.ai');
     const headers = getCorsHeaders(req);
 
     // Should never be '*'
@@ -250,16 +250,16 @@ Deno.test('CORS security', async (t) => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
     // Subdomain that looks similar but isn't allowed
-    assertEquals(isOriginAllowed('https://evil.plannotator.ai'), false);
-    assertEquals(isOriginAllowed('https://plannotator.ai.evil.com'), false);
-    assertEquals(isOriginAllowed('https://fakeplannotator.ai'), false);
+    assertEquals(isOriginAllowed('https://evil.obsidian-note-reviewer.ai'), false);
+    assertEquals(isOriginAllowed('https://obsidian-note-reviewer.ai.evil.com'), false);
+    assertEquals(isOriginAllowed('https://fakeobsidian-note-reviewer.ai'), false);
   });
 
   await t.step('rejects origins with different protocols', () => {
     Deno.env.delete('ALLOWED_ORIGINS');
 
     // HTTP vs HTTPS
-    assertEquals(isOriginAllowed('http://plannotator.ai'), false); // Only https is allowed
+    assertEquals(isOriginAllowed('http://obsidian-note-reviewer.ai'), false); // Only https is allowed
     assertEquals(isOriginAllowed('https://localhost:3000'), false); // Only http is allowed for localhost
   });
 

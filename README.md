@@ -18,25 +18,25 @@ Interactive Plan Review for AI Coding Agents. Mark up and refine your plans usin
 
 ## Install for Claude Code
 
-**Install the `plannotator` command:**
+**Install the `obsidian-note-reviewer` command:**
 
 **macOS / Linux / WSL:**
 
 ```bash
-curl -fsSL https://plannotator.ai/install.sh | bash
+curl -fsSL https://obsidian-note-reviewer.ai/install.sh | bash
 ```
 
 **Windows PowerShell:**
 
 ```powershell
-irm https://plannotator.ai/install.ps1 | iex
+irm https://obsidian-note-reviewer.ai/install.ps1 | iex
 ```
 
 **Then in Claude Code:**
 
 ```
-/plugin marketplace add backnotprop/plannotator
-/plugin install plannotator@plannotator
+/plugin marketplace add backnotprop/obsidian-note-reviewer
+/plugin install obsidian-note-reviewer@obsidian-note-reviewer
 
 # IMPORTANT: Restart Claude Code after plugin install
 ```

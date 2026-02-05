@@ -13,6 +13,8 @@ import remarkGfm from 'remark-gfm';
 import mermaid from 'mermaid';
 import DOMPurify from 'dompurify';
 import { useCopyFeedback } from '../hooks/useCopyFeedback';
+import { ImageAnnotator } from './ImageAnnotator';
+import type { Stroke } from '../types/drawing';
 
 interface ViewerProps {
   blocks: Block[];
@@ -58,7 +60,10 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
   const [toolbarState, setToolbarState] = useState<{ element: HTMLElement; source: any } | null>(null);
   const [hoveredCodeBlock, setHoveredCodeBlock] = useState<{ block: Block; element: HTMLElement } | null>(null);
   const [isCodeBlockToolbarExiting, setIsCodeBlockToolbarExiting] = useState(false);
+  const [focusedBlockIndex, setFocusedBlockIndex] = useState<number | null>(null);
+  const [imageAnnotations, setImageAnnotations] = useState<Map<string, Stroke[]>>(new Map());
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const focusedBlockRef = useRef<HTMLDivElement>(null);
 
   // Keep refs in sync with props
   useEffect(() => {
@@ -68,6 +73,76 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
   useEffect(() => {
     onAddAnnotationRef.current = onAddAnnotation;
   }, [onAddAnnotation]);
+
+  // Keyboard navigation (j/k, arrows, Enter, Escape)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't interfere with inputs and textareas
+      if (e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement ||
+          e.target instanceof HTMLInputElement) {
+        return;
+      }
+
+      // Vim-style navigation: j/down for next, k/up for previous
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusedBlockIndex(prev => {
+          if (prev === null) return 0;
+          return Math.min(prev + 1, blocks.length - 1);
+        });
+      }
+      if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusedBlockIndex(prev => {
+          if (prev === null) return 0;
+          return Math.max(prev - 1, 0);
+        });
+      }
+
+      // Enter to focus on block
+      if (e.key === 'Enter' && focusedBlockIndex !== null) {
+        e.preventDefault();
+        const blockElement = document.querySelector(`[data-block-id="${blocks[focusedBlockIndex].id}"]`);
+        if (blockElement) {
+          blockElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Trigger edit mode if available
+          const editButton = blockElement.querySelector('button[title*="Editar"], button[title*="Edit"]');
+          if (editButton && mode === 'edit') {
+            (editButton as HTMLButtonElement).click();
+          }
+        }
+      }
+
+      // Escape to clear focus
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setFocusedBlockIndex(null);
+      }
+
+      // Number keys for quick navigation (1-9)
+      if (/^[1-9]$/.test(e.key)) {
+        const index = parseInt(e.key) - 1;
+        if (index < blocks.length) {
+          e.preventDefault();
+          setFocusedBlockIndex(index);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [blocks, focusedBlockIndex, mode]);
+
+  // Scroll focused block into view
+  useEffect(() => {
+    if (focusedBlockIndex !== null && focusedBlockIndex >= 0 && focusedBlockIndex < blocks.length) {
+      const blockElement = document.querySelector(`[data-block-id="${blocks[focusedBlockIndex].id}"]`);
+      if (blockElement) {
+        blockElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [focusedBlockIndex, blocks]);
 
   // Helper to create annotation from highlighter source
   const createAnnotationFromSource = (
@@ -514,46 +589,49 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
             </>
           )}
         </button>
-        {blocks.map(block => (
-          block.type === 'code' ? (
-            <CodeBlock
-              key={block.id}
-              block={block}
-              onHover={(element) => {
-                // Clear any pending leave timeout
-                if (hoverTimeoutRef.current) {
-                  clearTimeout(hoverTimeoutRef.current);
-                  hoverTimeoutRef.current = null;
-                }
-                // Cancel exit animation if re-entering
-                setIsCodeBlockToolbarExiting(false);
-                // Only show hover toolbar if no selection toolbar is active
-                if (!toolbarState) {
-                  setHoveredCodeBlock({ block, element });
-                }
-              }}
-              onLeave={() => {
-                // Delay then start exit animation
-                hoverTimeoutRef.current = setTimeout(() => {
-                  setIsCodeBlockToolbarExiting(true);
-                  // After exit animation, unmount
-                  setTimeout(() => {
-                    setHoveredCodeBlock(null);
-                    setIsCodeBlockToolbarExiting(false);
-                  }, 150);
-                }, 100);
-              }}
-              isHovered={hoveredCodeBlock?.block.id === block.id}
-            />
-          ) : (
-            <BlockRenderer
-              key={block.id}
-              block={block}
-              blocks={blocks}
-              onBlockChange={onBlockChange}
-              isEditMode={mode === 'edit'}
-            />
-          )
+        {blocks.map((block, index) => (
+          <div
+            key={block.id}
+            className={`rounded-lg transition-all ${focusedBlockIndex === index ? 'block-focused ring-2 ring-primary ring-offset-2' : ''}`}
+          >
+            {block.type === 'code' ? (
+              <CodeBlock
+                block={block}
+                onHover={(element) => {
+                  // Clear any pending leave timeout
+                  if (hoverTimeoutRef.current) {
+                    clearTimeout(hoverTimeoutRef.current);
+                    hoverTimeoutRef.current = null;
+                  }
+                  // Cancel exit animation if re-entering
+                  setIsCodeBlockToolbarExiting(false);
+                  // Only show hover toolbar if no selection toolbar is active
+                  if (!toolbarState) {
+                    setHoveredCodeBlock({ block, element });
+                  }
+                }}
+                onLeave={() => {
+                  // Delay then start exit animation
+                  hoverTimeoutRef.current = setTimeout(() => {
+                    setIsCodeBlockToolbarExiting(true);
+                    // After exit animation, unmount
+                    setTimeout(() => {
+                      setHoveredCodeBlock(null);
+                      setIsCodeBlockToolbarExiting(false);
+                    }, 150);
+                  }, 100);
+                }}
+                isHovered={hoveredCodeBlock?.block.id === block.id}
+              />
+            ) : (
+              <BlockRenderer
+                block={block}
+                blocks={blocks}
+                onBlockChange={onBlockChange}
+                isEditMode={mode === 'edit'}
+              />
+            )}
+          </div>
         ))}
 
         <Toolbar
@@ -593,7 +671,8 @@ export const Viewer = forwardRef<ViewerHandle, ViewerProps>(({
 });
 
 /**
- * Renders inline markdown: **bold**, *italic*, `code`, [links](url)
+ * Renders inline markdown: **bold**, *italic*, `code`, [links](url), ![images](url)
+ * Images are wrapped with ImageAnnotator for drawing tools
  */
 const InlineMarkdown: React.FC<{ text: string }> = ({ text }) => {
   const parts: React.ReactNode[] = [];
@@ -601,8 +680,22 @@ const InlineMarkdown: React.FC<{ text: string }> = ({ text }) => {
   let key = 0;
 
   while (remaining.length > 0) {
+    // Images: ![alt](url) - must check before links
+    let match = remaining.match(/^!\[([^\]]*)\]\(([^)]+)\)/);
+    if (match) {
+      const alt = match[1];
+      const src = match[2];
+      const imageId = `img-${key}-${src.slice(-20)}`; // ID único para a imagem
+
+      parts.push(
+        <AnnotatedImage key={key++} src={src} alt={alt} imageId={imageId} />
+      );
+      remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
     // Bold: **text**
-    let match = remaining.match(/^\*\*(.+?)\*\*/);
+    match = remaining.match(/^\*\*(.+?)\*\*/);
     if (match) {
       parts.push(<strong key={key++} className="font-semibold">{match[1]}</strong>);
       remaining = remaining.slice(match[0].length);
@@ -648,7 +741,7 @@ const InlineMarkdown: React.FC<{ text: string }> = ({ text }) => {
     }
 
     // Find next special character or consume one regular character
-    const nextSpecial = remaining.slice(1).search(/[\*`\[]/);
+    const nextSpecial = remaining.slice(1).search(/[\*`\[!]/);
     if (nextSpecial === -1) {
       parts.push(remaining);
       break;
@@ -659,6 +752,30 @@ const InlineMarkdown: React.FC<{ text: string }> = ({ text }) => {
   }
 
   return <>{parts}</>;
+};
+
+/**
+ * Componente wrapper para imagens com anotação
+ * Gerencia o estado de anotações por imagem
+ */
+const AnnotatedImage: React.FC<{
+  src: string;
+  alt: string;
+  imageId: string;
+}> = ({ src, alt, imageId }) => {
+  // Estado local para as anotações desta imagem específica
+  const [strokes, setStrokes] = useState<Stroke[]>([]);
+
+  return (
+    <span className="inline-block my-2">
+      <ImageAnnotator
+        src={src}
+        alt={alt}
+        onAnnotationsChange={setStrokes}
+        initialStrokes={strokes}
+      />
+    </span>
+  );
 };
 
 const parseTableContent = (content: string): { headers: string[]; rows: string[][] } => {
