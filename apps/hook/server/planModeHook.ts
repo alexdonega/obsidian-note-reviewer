@@ -13,6 +13,7 @@
  * - GET  /api/content - Returns plan content and context
  * - POST /api/approve - User approved the plan
  * - POST /api/deny - User requested changes with feedback
+ * - POST /api/send-annotations - Send annotations to Claude Code (CLAU-06)
  */
 
 import { $ } from "bun";
@@ -264,6 +265,74 @@ const server = Bun.serve({
         resolveDecision({ approved: false, feedback: "Changes requested" });
       }
       return Response.json({ ok: true }, { headers: getSecurityHeaders() });
+    }
+
+    // API: Send annotations to Claude Code (CLAU-06)
+    if (url.pathname === "/api/send-annotations" && req.method === "POST") {
+      try {
+        const body = await req.json() as {
+          prompt?: string;
+          annotations: {
+            summary: string;
+            annotations: unknown[];
+            totalCount: number;
+            metadata: {
+              exportDate: string;
+              types: Record<string, number>;
+              coverage?: string[];
+            };
+          };
+        };
+
+        // Validate structure
+        if (!body.annotations || !Array.isArray(body.annotations.annotations)) {
+          console.error("[PlanModeHook] Invalid annotations format");
+          return Response.json(
+            { ok: false, error: "Formato de anotações inválido" },
+            { status: 400, headers: getSecurityHeaders() }
+          );
+        }
+
+        const { annotations: exportData } = body;
+
+        // Log for debugging
+        console.error(`[PlanModeHook] Received ${exportData.totalCount} annotations`);
+        console.error("[PlanModeHook] Types breakdown:", exportData.metadata.types);
+        if (exportData.metadata.coverage) {
+          console.error("[PlanModeHook] Coverage:", exportData.metadata.coverage);
+        }
+
+        // Output to stdout as hookSpecificOutput for Claude Code
+        console.log(JSON.stringify({
+          hookSpecificOutput: {
+            hookEventName: "PermissionRequest",
+            result: "ANNOTATIONS_EXPORTED",
+            summary: exportData.summary,
+            totalCount: exportData.totalCount,
+            types: exportData.metadata.types,
+            coverage: exportData.metadata.coverage || [],
+            annotations: exportData.annotations,
+            prompt: body.prompt || "",
+          }
+        }));
+
+        // Schedule server shutdown after sending
+        setTimeout(() => {
+          console.error("[PlanModeHook] Shutting down after sending annotations");
+          server.stop();
+        }, 500);
+
+        return Response.json(
+          { ok: true, message: "Anotações enviadas com sucesso" },
+          { headers: getSecurityHeaders() }
+        );
+      } catch (error) {
+        console.error("[PlanModeHook] Error processing annotations:", error);
+        return Response.json(
+          { ok: false, error: error instanceof Error ? error.message : "Erro ao processar anotações" },
+          { status: 500, headers: getSecurityHeaders() }
+        );
+      }
     }
 
     // Serve embedded HTML for all other routes (SPA)
