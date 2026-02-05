@@ -5,6 +5,17 @@
  * for convenient importing in Portal app
  */
 
+export type {
+  SessionDebugInfo,
+} from '@obsidian-note-reviewer/security/auth/useSessionDebug'
+
+export {
+  useSessionDebug,
+  useSessionRefreshMonitor,
+  useSessionExpiryWarning,
+  useSessionPersistenceStatus,
+} from '@obsidian-note-reviewer/security/auth/useSessionDebug'
+
 export {
   AuthProvider,
   useAuth,
