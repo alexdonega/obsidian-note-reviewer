@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "bin": {
+    "obsreview-obsidian": "dist/obsidianHook.js"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build && cp dist/index.html dist/redline.html && bun build server/index.ts --outdir dist --target bun && bun build server/planModeHook.ts --outfile dist/planModeHook.js --target bun && bun build server/obsidianHook.ts --outfile dist/obsidianHook.js --target bun",
