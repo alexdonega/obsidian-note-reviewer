@@ -141,7 +141,7 @@ export function generateSummary(annotations: ClaudeAnnotation[]): string {
   const parts: string[] = [];
 
   if (countByType.edit > 0) {
-    parts.push(`${countByType.edit} edição${countByType.edit > 1 ? 'ões' : ''}`);
+    parts.push(`${countByType.edit} ediç${countByType.edit > 1 ? 'ões' : 'ão'}`);
   }
   if (countByType.deletion > 0) {
     parts.push(`${countByType.deletion} exclus${countByType.deletion > 1 ? 'ões' : 'ão'}`);
@@ -164,7 +164,7 @@ export function generateSummary(annotations: ClaudeAnnotation[]): string {
     return 'Nenhuma anotação';
   }
 
-  return `Total: ${annotations.length} anotação${annotations.length > 1 ? 'ões' : ''} - ${parts.join(', ')}`;
+  return `Total: ${annotations.length} anotaç${annotations.length > 1 ? 'ões' : 'ão'} - ${parts.join(', ')}`;
 }
 
 /**
@@ -245,11 +245,20 @@ export function formatForPrompt(exportData: ClaudeAnnotationExport): string {
     highlight: '🎨 Destaques',
   };
 
-  // Output each section
-  for (const [type, anns] of Object.entries(byType)) {
+  // Output each section in specific order
+  const typeOrder: ClaudeAnnotationType[] = [
+    'edit',
+    'deletion',
+    'comment_individual',
+    'comment_global',
+    'highlight',
+  ];
+
+  for (const type of typeOrder) {
+    const anns = byType[type];
     if (anns.length === 0) continue;
 
-    lines.push(`## ${typeLabels[type as ClaudeAnnotationType]}`);
+    lines.push(`## ${typeLabels[type]}`);
 
     for (const ann of anns) {
       lines.push(`- **Tipo:** ${ann.type}`);
