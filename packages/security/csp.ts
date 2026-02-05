@@ -190,13 +190,17 @@ export function getHookCSP(isDev = false): string {
 /**
  * Pre-configured CSP for the portal app
  *
- * Portal uses API proxy in development.
+ * Portal uses API proxy in development and Supabase for auth.
  */
 export function getPortalCSP(isDev = false): string {
   return getCSPHeader({
     isDev,
-    allowCDN: false,
+    allowCDN: true,
     allowGoogleFonts: true,
+    additionalConnectSources: [
+      'https://*.supabase.co',
+      'https://supabase.com',
+    ],
   });
 }
 

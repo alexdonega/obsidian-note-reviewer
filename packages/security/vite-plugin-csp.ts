@@ -175,12 +175,16 @@ export function viteCSPHook(): Plugin {
 /**
  * Pre-configured CSP plugin for the portal app
  *
- * Portal uses API proxy in development.
+ * Portal uses API proxy in development and Supabase for auth.
  */
-export function viteCSPPortal(): Plugin {
+export function viteCSPPortal(options?: { isDev?: boolean }): Plugin {
   return viteCSP({
     allowCDN: true,
     allowGoogleFonts: true,
+    additionalConnectSources: [
+      'https://*.supabase.co',
+      'https://supabase.com',
+    ],
   });
 }
 
