@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2025-02-04)
 
 **Core value:** Usuários podem revisar visualmente notas e planos, com integração perfeita com Claude Code e colaboração em tempo real.
-**Current focus:** Phase 1 - Authentication
+**Current focus:** Phase 2 - Annotation System
 
 ## Current Position
 
-Phase: 1 of 13 (Authentication)
-Plan: 5 of 6 in current phase
+Phase: 2 of 13 (Annotation System)
+Plan: 1 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-05 — Completed Plan 01-05: Welcome/onboarding page with avatar upload
+Last activity: 2026-02-05 — Completed Plan 02-01: Enhance Annotation System with Visual Markers
 
-Progress: [█████░░░░░░] 83%
+Progress: [███████░░░░] 42%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 7 min
-- Total execution time: 0.6 hours
+- Total execution time: 0.7 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01    | 5     | 6     | 7 min    |
+| 01    | 6     | 6     | 7 min    |
+| 02    | 1     | 5     | 3 min    |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (6 min), 01-02 (7 min), 01-03 (8 min), 01-04 (3 min), 01-05 (8 min)
+- Last 5 plans: 01-02 (7 min), 01-03 (8 min), 01-04 (3 min), 01-05 (8 min), 02-01 (3 min)
 - Trend: Fast execution, clean build
 
 *Updated after each plan completion*
@@ -83,6 +84,15 @@ Recent decisions affecting current work:
 - Avatar URL stored in user_metadata.avatar_url for quick access
 - Onboarding detection via metadata check (full_name presence)
 
+**From 02-01 (Enhance Annotation System with Visual Markers):**
+- Placed annotation components in packages/ui instead of separate annotation package (consistency with existing structure)
+- Extended Annotation interface with visual metadata (markerColor, markerPosition, isHighlighted, targetSelector)
+- Marker style determined by AnnotationType (badge, icon, underline, highlight)
+- AnnotationMarker component supports 4 visual styles for different annotation types
+- Element targeting via CSS selectors for reliable element identification
+- Overlay rendering with fixed positioning and z-index management
+- Selection-based annotation creation with useAnnotationTargeting hook
+
 ### Pending Todos
 
 None yet.
@@ -94,8 +104,13 @@ None yet.
 2. Name: `avatars`, make it Public
 3. Add RLS policy allowing users to upload to their own folder
 
+**Potential concerns from 02-01:**
+- Marker positioning may need fine-tuning for complex markdown layouts (nested lists, tables)
+- Cross-block selection handling implemented but may need testing with edge cases
+- Performance with many annotations should be monitored (may need virtualization)
+
 ## Session Continuity
 
-Last session: 2026-02-05 11:50
-Stopped at: Completed 01-05 - Welcome/onboarding page with avatar upload
+Last session: 2026-02-05 16:29
+Stopped at: Completed 02-01 - Enhance Annotation System with Visual Markers
 Resume file: None
