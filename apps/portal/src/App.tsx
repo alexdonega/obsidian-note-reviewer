@@ -4,6 +4,9 @@ import EditorApp from '@obsidian-note-reviewer/editor'
 import { LoginPage } from './pages/login'
 import { SignupPage } from './pages/signup'
 import { CallbackPage } from './pages/callback'
+import { ForgotPasswordPage } from './pages/forgot-password'
+import { ResetPasswordPage } from './pages/reset-password'
+import { WelcomePage } from './pages/welcome'
 
 /**
  * Protected Route Component
@@ -80,6 +83,15 @@ export function App() {
               </PublicRoute>
             }
           />
+          <Route
+            path="/auth/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPasswordPage />
+              </PublicRoute>
+            }
+          />
+          <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
           <Route path="/auth/callback" element={<CallbackPage />} />
 
           {/* Protected routes */}
@@ -95,12 +107,7 @@ export function App() {
             path="/welcome"
             element={
               <ProtectedRoute>
-                <div className="min-h-screen flex items-center justify-center">
-                  <div className="text-center space-y-4">
-                    <h1 className="text-2xl font-bold">Bem-vindo!</h1>
-                    <p className="text-muted-foreground">Sua conta foi criada com sucesso.</p>
-                  </div>
-                </div>
+                <WelcomePage />
               </ProtectedRoute>
             }
           />
