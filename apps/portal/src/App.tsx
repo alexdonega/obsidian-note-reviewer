@@ -1,12 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@obsidian-note-reviewer/security/auth'
 import EditorApp from '@obsidian-note-reviewer/editor'
+import { Layout } from './components/Layout'
 import { LoginPage } from './pages/login'
 import { SignupPage } from './pages/signup'
 import { CallbackPage } from './pages/callback'
 import { ForgotPasswordPage } from './pages/forgot-password'
 import { ResetPasswordPage } from './pages/reset-password'
 import { WelcomePage } from './pages/welcome'
+import { DashboardPage } from './pages/dashboard'
 
 /**
  * Protected Route Component
@@ -99,7 +101,19 @@ export function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <EditorApp />
+                <Layout>
+                  <DashboardPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/editor"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <EditorApp />
+                </Layout>
               </ProtectedRoute>
             }
           />
