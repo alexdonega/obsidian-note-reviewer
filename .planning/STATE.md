@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-04)
 ## Current Position
 
 Phase: 3 of 13 (Claude Code Integration)
-Plan: 2a of 5 in current phase
+Plan: 3a of 5 in current phase
 Status: In progress
-Last activity: 2026-02-05 — Completed Plan 03-02a: Plan Mode Hook Configuration and Handler
+Last activity: 2026-02-05 — Completed Plan 03-03a: Claude Code Export Types and Annotation Transformation
 
-Progress: [██████████░] 64%
+Progress: [██████████░] 68%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 7 min
-- Total execution time: 1.2 hours
+- Total execution time: 1.3 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████████░] 64%
 |-------|-------|-------|----------|
 | 01    | 6     | 6     | 7 min    |
 | 02    | 5     | 5     | 5 min    |
-| 03    | 2     | 2     | 10 min   |
+| 03    | 3     | 3     | 8 min    |
 
 **Recent Trend:**
-- Last 5 plans: 02-04 (2 min), 02-05 (8 min), 03-01a (10 min), 03-02a (9 min)
+- Last 5 plans: 02-05 (8 min), 03-01a (10 min), 03-02a (9 min), 03-03a (5 min)
 - Trend: Consistent execution
 
 *Updated after each plan completion*
@@ -210,8 +210,18 @@ None yet.
 - Command "obsreview-plan" needs to be registered in Claude Code's command registry
 - Next: Integrate annotation export format into planModeHook for CLAU-03
 
+**From 03-03a (Claude Code Export Types and Annotation Transformation):**
+- ClaudeAnnotationType enum with 5 values: edit, comment_global, comment_individual, deletion, highlight
+- transformAnnotation() maps all 5 AnnotationType values explicitly (no default/else cases)
+- INSERTION and REPLACEMENT both map to 'edit' type (Claude Code single edit type)
+- COMMENT uses text field for original selection, comment field for the comment
+- Portuguese localization for summaries (anotações, edições, exclusões)
+- formatForPrompt() produces markdown with emoji icons and Portuguese labels
+- 31 unit tests cover all annotation types, status preservation, and edge cases
+- Ready for integration into planModeHook for CLAU-03 requirement
+
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 03-02a - Plan Mode Hook Configuration and Handler
+Stopped at: Completed 03-03a - Claude Code Export Types and Annotation Transformation
 Resume file: None
