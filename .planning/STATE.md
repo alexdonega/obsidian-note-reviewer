@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-04)
 ## Current Position
 
 Phase: 3 of 13 (Claude Code Integration)
-Plan: 1a of 5 in current phase
+Plan: 2a of 5 in current phase
 Status: In progress
-Last activity: 2026-02-05 — Completed Plan 03-01a: Obsidian Hook Configuration and Handler
+Last activity: 2026-02-05 — Completed Plan 03-02a: Plan Mode Hook Configuration and Handler
 
-Progress: [██████████░] 63%
+Progress: [██████████░] 64%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 7 min
-- Total execution time: 1.1 hours
+- Total execution time: 1.2 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████████░] 63%
 |-------|-------|-------|----------|
 | 01    | 6     | 6     | 7 min    |
 | 02    | 5     | 5     | 5 min    |
-| 03    | 1     | 1     | 10 min   |
+| 03    | 2     | 2     | 10 min   |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (10 min), 02-03 (3 min), 02-04 (2 min), 02-05 (8 min), 03-01a (10 min)
+- Last 5 plans: 02-04 (2 min), 02-05 (8 min), 03-01a (10 min), 03-02a (9 min)
 - Trend: Consistent execution
 
 *Updated after each plan completion*
@@ -143,6 +143,16 @@ Recent decisions affecting current work:
 - Structured JSON output via hookSpecificOutput for Claude Code context
 - Path validation reused from apps/hook/server/pathValidation.ts for CWE-22 protection
 
+**From 03-02a (Plan Mode Hook Configuration and Handler):**
+- Separate claude-hooks.json from obsidian-hooks.json (different hook types: PermissionRequest vs PostToolUse)
+- PermissionRequest ExitPlanMode matcher triggers on plan mode activation in Claude Code
+- Command name "obsreview-plan" for plan mode hook handler
+- planModeHook.ts implements 237-line handler following existing index.ts patterns
+- Inactivity timeout implementation with 25-minute limit and 20-minute warning
+- Reads plan content from event.tool_input or falls back to file path reading
+- Serves embedded HTML from apps/hook/dist/index.html for reviewer UI
+- API endpoints: /api/content (plan data), /api/approve, /api/deny
+
 ### Pending Todos
 
 None yet.
@@ -193,10 +203,15 @@ None yet.
 - obsidianHook.js is ready to be registered as a Claude Code hook command
 - obsidian-hooks.json configuration needs to be loaded by Claude Code
 - Command "obsreview-obsidian" needs to be registered in Claude Code's command registry
-- Next: Register obsidianHook.js as Claude Code command and configure hook loading
+
+**From 03-02a:**
+- planModeHook.js is ready to be registered as a Claude Code hook command
+- claude-hooks.json configuration needs to be loaded by Claude Code
+- Command "obsreview-plan" needs to be registered in Claude Code's command registry
+- Next: Integrate annotation export format into planModeHook for CLAU-03
 
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 03-01a - Obsidian Hook Configuration and Handler
+Stopped at: Completed 03-02a - Plan Mode Hook Configuration and Handler
 Resume file: None
