@@ -526,3 +526,182 @@ describe('formatForPrompt', () => {
     expect(result).toContain('**Comentário:** "Overall document feedback"');
   });
 });
+
+describe('Integration: Real Annotation Objects', () => {
+  test('transforms all 5 annotation types with real Annotation objects', () => {
+    // Create one of each type using real Annotation creation pattern
+    const realAnnotations: Annotation[] = [
+      // DELETION
+      createAnnotation({
+        id: 'del-1',
+        createdA: Date.now(),
+        type: AnnotationType.DELETION,
+        originalText: 'This text should be removed',
+        author: 'user-1',
+        status: AnnotationStatus.OPEN,
+      }),
+      // INSERTION
+      createAnnotation({
+        id: 'ins-1',
+        createdA: Date.now(),
+        type: AnnotationType.INSERTION,
+        text: 'New text to insert',
+        originalText: '',
+        author: 'user-2',
+        status: AnnotationStatus.IN_PROGRESS,
+      }),
+      // REPLACEMENT
+      createAnnotation({
+        id: 'rep-1',
+        createdA: Date.now(),
+        type: AnnotationType.REPLACEMENT,
+        text: 'Better phrasing here',
+        originalText: 'Old phrasing',
+        author: 'user-1',
+        status: AnnotationStatus.RESOLVED,
+      }),
+      // COMMENT
+      createAnnotation({
+        id: 'com-1',
+        createdA: Date.now(),
+        type: AnnotationType.COMMENT,
+        text: 'This needs clarification',
+        originalText: 'ambiguous text section',
+        author: 'user-3',
+      }),
+      // GLOBAL_COMMENT
+      createAnnotation({
+        id: 'glob-1',
+        createdA: Date.now(),
+        type: AnnotationType.GLOBAL_COMMENT,
+        text: 'Overall document looks good but needs more details',
+        originalText: '',
+        author: 'user-1',
+        status: AnnotationStatus.OPEN,
+      }),
+    ];
+
+    // Export using exportForClaude
+    const result = exportForClaude(realAnnotations);
+
+    // Verify ClaudeAnnotationExport structure
+    expect(result).toHaveProperty('summary');
+    expect(result).toHaveProperty('annotations');
+    expect(result).toHaveProperty('totalCount');
+    expect(result).toHaveProperty('metadata');
+
+    // Verify all 5 types are present in annotations array
+    expect(result.annotations).toHaveLength(5);
+    const types = result.annotations.map((a) => a.type);
+    expect(types).toContain('deletion');
+    expect(types).toContain('edit'); // Both INSERTION and REPLACEMENT map to 'edit'
+    expect(types).toContain('comment_individual');
+    expect(types).toContain('comment_global');
+
+    // Verify totalCount matches input
+    expect(result.totalCount).toBe(5);
+
+    // Verify status is preserved for annotations that have it
+    const deletionResult = result.annotations.find((a) => a.type === 'deletion');
+    expect(deletionResult?.status).toBe(ClaudeAnnotationStatus.OPEN);
+
+    const insertionResult = result.annotations.find((a) => a.type === 'edit' && a.text === 'New text to insert');
+    expect(insertionResult?.status).toBe(ClaudeAnnotationStatus.IN_PROGRESS);
+
+    const replacementResult = result.annotations.find((a) => a.type === 'edit' && a.originalText === 'Old phrasing');
+    expect(replacementResult?.status).toBe(ClaudeAnnotationStatus.RESOLVED);
+
+    const globalCommentResult = result.annotations.find((a) => a.type === 'comment_global');
+    expect(globalCommentResult?.status).toBe(ClaudeAnnotationStatus.OPEN);
+
+    // Verify author is preserved
+    expect(result.annotations[0].author).toBe('user-1');
+    expect(result.annotations[1].author).toBe('user-2');
+    expect(result.annotations[3].author).toBe('user-3');
+
+    // Verify JSON structure is valid (can be stringified and parsed)
+    const jsonString = JSON.stringify(result);
+    expect(jsonString).toBeTruthy();
+    const parsed = JSON.parse(jsonString) as ClaudeAnnotationExport;
+    expect(parsed.annotations).toHaveLength(5);
+
+    // Verify metadata includes export date and type counts
+    expect(result.metadata.exportDate).toBeTruthy();
+    expect(result.metadata.types).toEqual({
+      edit: 2, // INSERTION + REPLACEMENT
+      comment_global: 1,
+      comment_individual: 1,
+      deletion: 1,
+      highlight: 0,
+    });
+  });
+
+  test('formatForPrompt produces readable Portuguese output', () => {
+    const realAnnotations: Annotation[] = [
+      createAnnotation({
+        id: 'edit-1',
+        createdA: Date.now(),
+        type: AnnotationType.REPLACEMENT,
+        text: 'melhor texto',
+        originalText: 'texto antigo',
+        author: 'maria',
+        status: AnnotationStatus.OPEN,
+      }),
+      createAnnotation({
+        id: 'del-1',
+        createdA: Date.now(),
+        type: AnnotationType.DELETION,
+        originalText: 'remover isto',
+        author: 'joao',
+        status: AnnotationStatus.IN_PROGRESS,
+      }),
+      createAnnotation({
+        id: 'com-1',
+        createdA: Date.now(),
+        type: AnnotationType.COMMENT,
+        text: 'Explicar melhor este conceito',
+        originalText: 'conceito confuso',
+        author: 'ana',
+        status: AnnotationStatus.RESOLVED,
+      }),
+    ];
+
+    const exportData = exportForClaude(realAnnotations);
+    const formatted = formatForPrompt(exportData);
+
+    // Verify Portuguese header and metadata
+    expect(formatted).toContain('# Anotações para Revisão');
+    expect(formatted).toContain('Total:');
+    expect(formatted).toContain('anotaç'); // Contains 'anotações' or 'anotação'
+    expect(formatted).toContain('Exportado em:');
+
+    // Verify Portuguese type labels with emojis
+    expect(formatted).toContain('📝 Edições');
+    expect(formatted).toContain('🗑️ Exclusões');
+    expect(formatted).toContain('💭 Comentários Individuais');
+
+    // Verify Portuguese status labels
+    expect(formatted).toContain('Aberto');
+    expect(formatted).toContain('Em Progresso');
+    expect(formatted).toContain('Resolvido');
+
+    // Verify field labels are in Portuguese
+    expect(formatted).toContain('**Tipo:**');
+    expect(formatted).toContain('**Status:**');
+    expect(formatted).toContain('**Autor:**');
+    expect(formatted).toContain('**Original:**');
+    expect(formatted).toContain('**Texto:**');
+    expect(formatted).toContain('**Comentário:**');
+
+    // Verify author names are included
+    expect(formatted).toContain('maria');
+    expect(formatted).toContain('joao');
+    expect(formatted).toContain('ana');
+
+    // Verify content is included
+    expect(formatted).toContain('melhor texto');
+    expect(formatted).toContain('texto antigo');
+    expect(formatted).toContain('remover isto');
+    expect(formatted).toContain('Explicar melhor este conceito');
+  });
+});
