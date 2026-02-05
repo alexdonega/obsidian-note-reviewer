@@ -77,14 +77,18 @@ Plans:
   3. Annotations are sent back to Claude Code in structured format (edições, comentários globais/individuais, exclusões, marcações)
   4. Automatic prompt formats revisions for Claude Code with editable field for customization
   5. All annotation types are included in feedback: edits, global comments, individual comments, deletions, highlights
-**Plans**: TBD
+**Plans**: 7 plans in 5 waves
 
 Plans:
-- [ ] 03-01: Implement PostToolUse hook to trigger reviewer on Obsidian note creation
-- [ ] 03-02: Implement plan mode hook to trigger reviewer from Claude Code
-- [ ] 03-03: Build structured annotation export format for Claude Code
-- [ ] 03-04: Create automatic prompt template with editable customization field
-- [ ] 03-05: Ensure all annotation types (edits, comments, deletions, highlights) are captured and sent
+- [ ] 03-01a: Create Obsidian hook configuration and handler for automatic plan review
+- [ ] 03-01b: Complete CLI registration and inactivity timeout for Obsidian hook
+- [ ] 03-02a: Create plan mode hook configuration and handler for automatic review
+- [ ] 03-02b: Complete CLI registration and hook priority logic for plan mode
+- [ ] 03-03a: Build Claude Code export types and annotation transformation logic
+- [ ] 03-03b: Integrate Claude export into annotation store
+- [ ] 03-04a: Create automatic prompt template with editable customization field
+- [ ] 03-04b: Integrate PromptEditor into review page and add send functionality
+- [ ] 03-05: Ensure all annotation types are captured and sent to Claude Code (E2E testing)
 
 ### Phase 4: Advanced AI
 **Goal**: AI proactively suggests annotations and understands Obsidian vault context for intelligent feedback
