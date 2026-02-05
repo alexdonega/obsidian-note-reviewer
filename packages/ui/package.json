@@ -9,12 +9,14 @@
     "./types": "./types.ts"
   },
   "dependencies": {
+    "diff": "^8.0.3",
     "highlight.js": "^11.11.1",
     "isomorphic-dompurify": "^2.22.0",
     "lucide-react": "^0.460.0",
     "mermaid": "^11.12.2",
     "perfect-freehand": "^1.2.2",
     "react": "^19.2.3",
+    "react-diff-viewer-continued": "^4.1.0",
     "react-dom": "^19.2.3",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",

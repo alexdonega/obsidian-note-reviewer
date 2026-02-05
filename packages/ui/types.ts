@@ -99,3 +99,14 @@ export interface Mention {
   display: string;
   avatar?: string;
 }
+
+// Version history types - exported from types/version.ts
+export type {
+  DocumentVersion,
+  VersionDiff,
+  VersionChange,
+  CreateVersionRequest,
+  VersionListResponse,
+  VersionComparison,
+} from './types/version';
+export type { VersionChangeType } from './types/version';
