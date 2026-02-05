@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@obsidian-note-reviewer/security/auth'
 
 export function SignupForm() {
@@ -153,9 +153,9 @@ export function SignupForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         Já tem conta?{' '}
-        <a href="/auth/login" className="text-primary hover:underline">
+        <Link to="/auth/login" className="text-primary hover:underline">
           Faça login
-        </a>
+        </Link>
       </p>
     </form>
   )

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@obsidian-note-reviewer/security/auth'
 
 export function LoginForm() {
@@ -114,12 +114,12 @@ export function LoginForm() {
         </div>
 
         <div className="flex items-center justify-between">
-          <a
-            href="/auth/forgot-password"
+          <Link
+            to="/auth/forgot-password"
             className="text-sm text-muted-foreground hover:underline hover:text-foreground"
           >
             Esqueceu sua senha?
-          </a>
+          </Link>
         </div>
 
         <button
@@ -133,9 +133,9 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         Não tem conta?{' '}
-        <a href="/auth/signup" className="text-primary hover:underline">
+        <Link to="/auth/signup" className="text-primary hover:underline">
           Cadastre-se
-        </a>
+        </Link>
       </p>
     </form>
   )

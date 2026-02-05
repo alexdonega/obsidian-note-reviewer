@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@obsidian-note-reviewer/security/supabase'
 import { AuthLayout } from '../components/auth/AuthLayout'
 
@@ -106,9 +106,9 @@ export function ForgotPasswordPage() {
 
         <p className="text-center text-sm text-muted-foreground">
           Lembrou sua senha?{' '}
-          <a href="/auth/login" className="text-primary hover:underline">
+          <Link to="/auth/login" className="text-primary hover:underline">
             Faça login
-          </a>
+          </Link>
         </p>
       </form>
     </AuthLayout>
