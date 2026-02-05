@@ -18,7 +18,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Authentication** - Multi-user foundation for all collaborative features
 - [x] **Phase 2: Annotation System** - Core visual review and markdown rendering capabilities ✓
-- [ ] **Phase 3: Claude Code Integration** - Key differentiator: seamless AI-assisted review workflow
+- [x] **Phase 3: Claude Code Integration** - Key differentiator: seamless AI-assisted review workflow ✓
+- [ ] **Phase 4: Advanced AI** - Proactive suggestions and vault context understanding
 - [ ] **Phase 4: Advanced AI** - AI-suggested annotations, vault context understanding, summarization
 - [ ] **Phase 5: Real-Time Collaboration** - Multi-user presence, cursors, and sharing capabilities
 - [ ] **Phase 6: Multi-Document Review** - Tabbed interface for reviewing multiple plans simultaneously
@@ -98,12 +99,12 @@ Plans:
   1. AI suggests annotations proactively by identifying potential issues in plans/docs
   2. AI understands Obsidian vault context including backlinks and graph relationships
   3. AI generates executive summaries from annotated documents that respect annotation context
-**Plans**: TBD
+**Plans**: 3 plans in 3 waves (35 min + 25 min + 25 min = 85 min total)
 
 Plans:
-- [ ] 04-01: Implement AI-suggested annotations using LLM analysis
-- [ ] 04-02: Build Obsidian vault context understanding (backlinks, graph, dataview)
-- [ ] 04-03: Create AI-powered summarization that incorporates annotated content
+- [ ] 04-01: Implement AI-suggested annotations using LLM analysis (35 min)
+- [ ] 04-02: Build Obsidian vault context understanding (backlinks, graph, dataview) (25 min)
+- [ ] 04-03: Create AI-powered summarization that incorporates annotated content (25 min)
 
 ### Phase 5: Real-Time Collaboration
 **Goal**: Multiple users can collaborate on reviews with presence indicators and shared access
