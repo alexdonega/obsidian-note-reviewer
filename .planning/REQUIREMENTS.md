@@ -17,13 +17,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Anotações e Revisão
 
-- [ ] **ANNO-01**: User pode adicionar anotações visuais em elementos específicos do markdown
-- [ ] **ANNO-02**: User pode criar threads de comentários com @mentions
-- [ ] **ANNO-03**: User pode responder a comentários existentes
-- [ ] **ANNO-04**: User pode definir status das anotações (open/in-progress/resolved)
-- [ ] **ANNO-05**: User pode ver histórico de versões do documento
-- [ ] **ANNO-06**: User pode restaurar versões anteriores do documento
-- [ ] **ANNO-07**: Markdown rendering suporta sintaxe padrão com code blocks e imagens
+- [x] **ANNO-01**: User pode adicionar anotações visuais em elementos específicos do markdown ✓
+- [x] **ANNO-02**: User pode criar threads de comentários com @mentions ✓
+- [x] **ANNO-03**: User pode responder a comentários existentes ✓
+- [x] **ANNO-04**: User pode definir status das anotações (open/in-progress/resolved) ✓
+- [x] **ANNO-05**: User pode ver histórico de versões do documento ✓
+- [x] **ANNO-06**: User pode restaurar versões anteriores do documento ✓
+- [x] **ANNO-07**: Markdown rendering suporta sintaxe padrão com code blocks e imagens ✓
 
 ### Claude Code Integration
 
@@ -148,13 +148,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-03 | Phase 1 | Pending |
 | AUTH-04 | Phase 1 | Pending |
 | AUTH-05 | Phase 1 | Pending |
-| ANNO-01 | Phase 2 | Pending |
-| ANNO-02 | Phase 2 | Pending |
-| ANNO-03 | Phase 2 | Pending |
-| ANNO-04 | Phase 2 | Pending |
-| ANNO-05 | Phase 2 | Pending |
-| ANNO-06 | Phase 2 | Pending |
-| ANNO-07 | Phase 2 | Pending |
+| ANNO-01 | Phase 2 | Complete |
+| ANNO-02 | Phase 2 | Complete |
+| ANNO-03 | Phase 2 | Complete |
+| ANNO-04 | Phase 2 | Complete |
+| ANNO-05 | Phase 2 | Complete |
+| ANNO-06 | Phase 2 | Complete |
+| ANNO-07 | Phase 2 | Complete |
 | CLAU-01 | Phase 3 | Pending |
 | CLAU-02 | Phase 3 | Pending |
 | CLAU-03 | Phase 3 | Pending |

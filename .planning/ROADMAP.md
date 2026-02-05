@@ -17,7 +17,7 @@ Build a visual markdown review tool with seamless Claude Code integration and re
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Authentication** - Multi-user foundation for all collaborative features
-- [ ] **Phase 2: Annotation System** - Core visual review and markdown rendering capabilities
+- [x] **Phase 2: Annotation System** - Core visual review and markdown rendering capabilities ✓
 - [ ] **Phase 3: Claude Code Integration** - Key differentiator: seamless AI-assisted review workflow
 - [ ] **Phase 4: Advanced AI** - AI-suggested annotations, vault context understanding, summarization
 - [ ] **Phase 5: Real-Time Collaboration** - Multi-user presence, cursors, and sharing capabilities
@@ -61,11 +61,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: Enhance existing annotation system with visual markers and element targeting
-- [ ] 02-02: Build threaded comment system with @mentions and replies
-- [ ] 02-03: Implement status tracking workflow (open/in-progress/resolved)
-- [ ] 02-04: Create version history with diff viewing and restore capability
-- [ ] 02-05: Verify markdown rendering supports standard syntax, code blocks, and images
+- [x] 02-01: Enhance existing annotation system with visual markers and element targeting ✓
+- [x] 02-02: Build threaded comment system with @mentions and replies ✓
+- [x] 02-03: Implement status tracking workflow (open/in-progress/resolved) ✓
+- [x] 02-04: Create version history with diff viewing and restore capability ✓
+- [x] 02-05: Verify markdown rendering supports standard syntax, code blocks, and images ✓
 
 ### Phase 3: Claude Code Integration
 **Goal**: Claude Code workflow seamlessly integrates with visual reviewer for AI-assisted plan review
