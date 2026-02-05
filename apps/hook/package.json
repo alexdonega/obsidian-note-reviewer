@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp dist/index.html dist/redline.html",
+    "build": "vite build && cp dist/index.html dist/redline.html && bun build server/index.ts --outdir dist --target bun && bun build server/planModeHook.ts --outfile dist/planModeHook.js --target bun && bun build server/obsidianHook.ts --outfile dist/obsidianHook.js --target bun",
     "serve": "bun run server/index.ts"
   },
   "dependencies": {
@@ -18,10 +18,11 @@
     "@tailwindcss/vite": "^4.1.18"
   },
   "devDependencies": {
+    "@types/bun": "^1.3.8",
+    "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
+    "typescript": "^5.9.3",
     "vite": "^6.2.0",
-    "vite-plugin-singlefile": "^2.0.3",
-    "@types/node": "^22.14.0"
+    "vite-plugin-singlefile": "^2.0.3"
   }
 }
