@@ -252,6 +252,38 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
     }
   }, [])
 
+  // Refresh session on window focus (when user returns to tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      // Only refresh if we have a session
+      if (state.session && !state.loading) {
+        handleRefreshSession().catch((error) => {
+          // Silent fail - don't show error to user on focus refresh
+          console.warn('Session refresh on focus failed:', error.message)
+        })
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [state.session, state.loading, handleRefreshSession])
+
+  // Set up periodic session refresh (every 15 minutes)
+  useEffect(() => {
+    if (!state.session) {
+      return
+    }
+
+    // Refresh every 15 minutes (Supabase tokens last 1 hour by default)
+    const interval = setInterval(() => {
+      handleRefreshSession().catch((error) => {
+        console.warn('Periodic session refresh failed:', error.message)
+      })
+    }, 15 * 60 * 1000)
+
+    return () => clearInterval(interval)
+  }, [state.session, handleRefreshSession])
+
   const value: AuthContextValue = {
     ...state,
     signInWithOAuth: handleSignInWithOAuth,
