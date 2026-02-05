@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-02-04)
 
 **Core value:** Usuários podem revisar visualmente notas e planos, com integração perfeita com Claude Code e colaboração em tempo real.
-**Current focus:** Phase 2 - Annotation System
+**Current focus:** Phase 3 - Claude Code Integration
 
 ## Current Position
 
-Phase: 2 of 13 (Annotation System)
-Plan: 5 of 5 in current phase
-Status: Phase complete
-Last activity: 2026-02-05 — Completed Plan 02-05: Verify Markdown Rendering Supports Standard Syntax
+Phase: 3 of 13 (Claude Code Integration)
+Plan: 1a of 5 in current phase
+Status: In progress
+Last activity: 2026-02-05 — Completed Plan 03-01a: Obsidian Hook Configuration and Handler
 
-Progress: [██████████] 60%
+Progress: [██████████░] 63%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 6 min
-- Total execution time: 1.0 hours
+- Total plans completed: 10
+- Average duration: 7 min
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██████████] 60%
 |-------|-------|-------|----------|
 | 01    | 6     | 6     | 7 min    |
 | 02    | 5     | 5     | 5 min    |
+| 03    | 1     | 1     | 10 min   |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (9 min), 02-02 (10 min), 02-03 (3 min), 02-04 (2 min), 02-05 (8 min)
+- Last 5 plans: 02-02 (10 min), 02-03 (3 min), 02-04 (2 min), 02-05 (8 min), 03-01a (10 min)
 - Trend: Consistent execution
 
 *Updated after each plan completion*
@@ -132,6 +133,16 @@ Recent decisions affecting current work:
 - Default security: strict sanitization, links open in new tab with rel="noopener noreferrer"
 - Image rendering with alt text fallback and error handling
 
+**From 03-01a (Obsidian Hook Configuration and Handler):**
+- Use bun build --target bun for server files (not Vite) to avoid HTML import circular dependency
+- Plan directory detection via configurable OBSIDIAN_PLAN_DIRS env var (default: .obsidian/plans/, Plans/, plan/)
+- 25-minute timeout with warning at 20 minutes (stays within Claude Code's 30-minute hook timeout)
+- PostToolUse Write hook event parsing from stdin with JSON validation
+- Ephemeral Bun.serve server on random port (1024-65535) with automatic browser opening
+- Platform-specific browser opening: win32 (cmd /c start), darwin (open), linux (xdg-open)
+- Structured JSON output via hookSpecificOutput for Claude Code context
+- Path validation reused from apps/hook/server/pathValidation.ts for CWE-22 protection
+
 ### Pending Todos
 
 None yet.
@@ -178,8 +189,14 @@ None yet.
 - Real-time subscriptions for version updates - future enhancement (Supabase realtime)
 - Auto-save workflow needs to be defined (interval, on blur, explicit save button)
 
+**From 03-01a:**
+- obsidianHook.js is ready to be registered as a Claude Code hook command
+- obsidian-hooks.json configuration needs to be loaded by Claude Code
+- Command "obsreview-obsidian" needs to be registered in Claude Code's command registry
+- Next: Register obsidianHook.js as Claude Code command and configure hook loading
+
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 02-04 - Create Version History with Diff Viewing
+Stopped at: Completed 03-01a - Obsidian Hook Configuration and Handler
 Resume file: None
