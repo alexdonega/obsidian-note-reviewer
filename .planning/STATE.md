@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2025-02-04)
 ## Current Position
 
 Phase: 2 of 13 (Annotation System)
-Plan: 1 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-05 — Completed Plan 02-01: Enhance Annotation System with Visual Markers
+Last activity: 2026-02-05 — Completed Plan 02-03: Implement Status Tracking Workflow
 
-Progress: [███████░░░░] 42%
+Progress: [█████████░░] 47%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 7 min
-- Total execution time: 0.7 hours
+- Total plans completed: 7
+- Average duration: 6 min
+- Total execution time: 0.8 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01    | 6     | 6     | 7 min    |
-| 02    | 1     | 5     | 3 min    |
+| 02    | 2     | 5     | 3 min    |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (7 min), 01-03 (8 min), 01-04 (3 min), 01-05 (8 min), 02-01 (3 min)
+- Last 5 plans: 01-02 (7 min), 01-03 (8 min), 01-04 (3 min), 01-05 (8 min), 02-03 (3 min)
 - Trend: Fast execution, clean build
 
 *Updated after each plan completion*
@@ -93,6 +93,15 @@ Recent decisions affecting current work:
 - Overlay rendering with fixed positioning and z-index management
 - Selection-based annotation creation with useAnnotationTargeting hook
 
+**From 02-03 (Implement Status Tracking Workflow):**
+- Any collaborator can change annotation status (not just author) - collaborative decision model
+- Status stored in annotation metadata field for Supabase compatibility without schema migration
+- Optimistic updates for better UX with async Supabase persistence
+- Both sync and async status update methods for different use cases
+- Three-state workflow: OPEN → IN_PROGRESS → RESOLVED with ability to reopen
+- Portuguese labels for status display (Aberto, Em Progresso, Resolvido)
+- Confirmation dialog for RESOLVED status to prevent accidental resolution
+
 ### Pending Todos
 
 None yet.
@@ -109,8 +118,14 @@ None yet.
 - Cross-block selection handling implemented but may need testing with edge cases
 - Performance with many annotations should be monitored (may need virtualization)
 
+**From 02-03:**
+- Plan 02-02 (Threaded Comments) has not been completed yet, but status tracking (02-03) is independent
+- Status tracking stores data in metadata JSONB field to avoid database migration
+- AnnotationPanel needs integration with StatusBadge component (future task)
+- Notification system (Phase 5) can use status changes for triggers
+
 ## Session Continuity
 
-Last session: 2026-02-05 16:29
-Stopped at: Completed 02-01 - Enhance Annotation System with Visual Markers
+Last session: 2026-02-05 16:36
+Stopped at: Completed 02-03 - Implement Status Tracking Workflow
 Resume file: None
