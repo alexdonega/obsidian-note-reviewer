@@ -32,6 +32,11 @@ export interface Annotation {
     parentIndex: number;
     textOffset: number;
   };
+  // Visual marker metadata
+  markerColor?: string; // Computed from annotation type for visual display
+  markerPosition?: { top: number; left: number }; // For marker placement on the page
+  isHighlighted?: boolean; // For hover/focus state
+  targetSelector?: string; // CSS selector for element targeting
 }
 
 export interface Block {
