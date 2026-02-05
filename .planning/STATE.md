@@ -112,6 +112,16 @@ Recent decisions affecting current work:
 - Portuguese labels for status display (Aberto, Em Progresso, Resolvido)
 - Confirmation dialog for RESOLVED status to prevent accidental resolution
 
+**From 02-04 (Create Version History with Diff Viewing):**
+- Document version history system using react-diff-viewer-continued for side-by-side comparison
+- Supabase document_versions table with soft delete and 50-version retention policy
+- Zustand store (useVersionStore) with createVersion, getVersionsForDocument, restoreVersion, compareVersions actions
+- VersionHistory component with timeline, pagination (20 per page), compare modal, restore dialog
+- DiffViewer component with word-level diff, custom dark/light themes, size warning for >10k lines
+- diffGenerator utilities for line-by-line diff generation with normalization
+- Portuguese localization for timestamps using date-fns with pt-BR locale
+- Database types added to supabase.ts for document_versions table
+
 **From 02-05 (Verify Markdown Rendering Supports Standard Syntax):**
 - MarkdownRenderer component using react-markdown with rehype-sanitize for security
 - react-syntax-highlighter with vscDarkPlus theme for code blocks
@@ -132,6 +142,12 @@ None yet.
 1. Go to Supabase Dashboard → Storage → New bucket
 2. Name: `avatars`, make it Public
 3. Add RLS policy allowing users to upload to their own folder
+
+**Action required:** User must create document_versions table in Supabase for version history:
+1. Run SQL from .planning/phases/02-annotation-system/02-04-SUMMARY.md
+2. Creates table with: id, document_id, content, created_by, change_description, annotation_ids, version_number, metadata, deleted, created_at
+3. Adds indexes on document_id, created_at, deleted for performance
+4. Enables RLS with policies for viewing/creating versions within organization
 
 **Potential concerns from 02-01:**
 - Marker positioning may need fine-tuning for complex markdown layouts (nested lists, tables)
@@ -155,8 +171,15 @@ None yet.
 - Test cases defined but automated test runner not yet created (manual verification for now)
 - Markdown test cases can be integrated into Vitest test suite when needed
 
+**From 02-04:**
+- VersionHistory component ready for integration into AnnotationPanel or editor toolbar
+- createVersion() should be called after significant document edits (trigger on save button)
+- Database setup required: document_versions table must be created in Supabase
+- Real-time subscriptions for version updates - future enhancement (Supabase realtime)
+- Auto-save workflow needs to be defined (interval, on blur, explicit save button)
+
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 02-05 - Verify Markdown Rendering Supports Standard Syntax
+Stopped at: Completed 02-04 - Create Version History with Diff Viewing
 Resume file: None
