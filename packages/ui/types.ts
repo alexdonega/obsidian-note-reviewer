@@ -69,3 +69,33 @@ export interface DiffResult {
   modified: string;
   diffText: string;
 }
+
+// Comment system types
+export interface Comment {
+  id: string;
+  threadId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  content: string;
+  mentions: string[]; // Array of user IDs mentioned in the comment
+  createdAt: number;
+  updatedAt?: number;
+  parentId?: string; // For nested replies
+}
+
+export interface CommentThread {
+  id: string;
+  annotationId: string;
+  comments: Comment[];
+  status: AnnotationStatus;
+  createdAt: number;
+  updatedAt: number;
+  createdBy: string;
+}
+
+export interface Mention {
+  id: string;
+  display: string;
+  avatar?: string;
+}
