@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2025-02-04)
 ## Current Position
 
 Phase: 1 of 13 (Authentication)
-Plan: 3 of 6 in current phase
+Plan: 4 of 6 in current phase
 Status: In progress
-Last activity: 2026-02-05 — Completed Plan 01-03: Auth UI with split-screen layout and OAuth buttons
+Last activity: 2026-02-05 — Completed Plan 01-04: Password reset and enhanced OAuth callback with new user detection
 
-Progress: [███░░░░░░░░] 50%
+Progress: [████░░░░░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 7 min
-- Total execution time: 0.3 hours
+- Total plans completed: 4
+- Average duration: 6 min
+- Total execution time: 0.4 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01    | 3     | 6     | 7 min    |
+| 01    | 4     | 6     | 6 min    |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (6 min), 01-02 (7 min), 01-03 (8 min)
+- Last 5 plans: 01-01 (6 min), 01-02 (7 min), 01-03 (8 min), 01-04 (3 min)
 - Trend: Fast execution, clean build
 
 *Updated after each plan completion*
@@ -65,6 +65,15 @@ Recent decisions affecting current work:
 - PublicRoute wrapper redirects authenticated users to /dashboard
 - Inline error display (not toast notifications) for simpler SPA UX
 
+**From 01-04 (Password Reset and Enhanced OAuth):**
+- New vs returning user detection via created_at timestamp (< 5 seconds = new user)
+- New users after OAuth redirect to /welcome, returning users to /dashboard
+- Dynamic origin for redirect URLs (window.location.origin) to avoid hardcoding issues
+- Password reset uses two-page flow: forgot-password → reset-password
+- Token validation runs on mount with loading state
+- All auth forms use react-router-dom Link for client-side navigation
+- Password minimum 6 characters enforced on reset page
+
 ### Pending Todos
 
 None yet.
@@ -75,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 02:23
-Stopped at: Completed 01-03 - Auth UI with split-screen layout and OAuth buttons
+Last session: 2026-02-05 11:45
+Stopped at: Completed 01-04 - Password reset and enhanced OAuth callback
 Resume file: None
